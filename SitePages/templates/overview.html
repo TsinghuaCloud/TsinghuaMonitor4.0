@@ -1,0 +1,186 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+    {% include '_basic_static_css.html' %}
+</head>
+<body>
+{% block content %}
+    <div id="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            {% include "_topbar.html" %}
+            <div class="navbar-default sidebar" role="navigation">
+            {% block sidebar %}
+                {% include '_sidebar.html' %}
+            {% endblock %}
+            </div>
+        </nav>
+
+        <div id="page-wrapper" style="min-height: 219px;">
+            <!-- Alarm Summary -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                        <p class="col-lg-11">警报摘要 | Alarm Summary</p>
+                        <button type="button" class="btn btn-primary">创建警报</button>
+                    </h3>
+                </div>
+                <div>
+                    <p class="col-lg-11 col-lg-push-1">您目前共有 2 个指标正在报警。</p>
+                </div>
+                <!-- /.col-lg-12 -->
+                <div class="row placeholders center-block">
+                    <div class="col-lg-3 col-md-3 col-lg-push-1">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-exclamation-circle fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">2</div>
+                                        <div>报警中</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#">
+                                <div class="panel-footer">
+                                    <span class="pull-left">查看详情</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-lg-push-1">
+                        <div class="panel panel-yellow">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-info-circle fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">5</div>
+                                        <div>数据不足</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#">
+                                <div class="panel-footer">
+                                    <span class="pull-left">查看详情</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-lg-push-1">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-check-circle fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">12</div>
+                                        <div>正常</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#">
+                                <div class="panel-footer">
+                                    <span class="pull-left">查看详情</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- END Alarm Summary -->
+
+            <!-- Meter Summary -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                        <p class="col-lg-11">指标摘要 | Meter Summary</p>
+                        <button type="button" class="btn btn-primary">查看指标</button>
+                    </h3>
+                </div>
+                <div>
+                    <p class="col-lg-11 col-lg-push-1">您目前共有 27 个可监控指标。</p>
+                </div>
+                <div>
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-3 col-lg-push-1">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="输入指标名称">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">搜索</button>
+                            </span>
+                        </div><!-- /input-group -->
+                    </div><!-- /.col-lg-6 -->
+                </div>
+            </div>
+            <!-- END Meter Summary -->
+
+            <!-- Analysis Summary -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                        <p class="col-lg-11">分析摘要 | Analysis Summary</p>
+                        <button type="button" class="btn btn-primary">分析详情</button>
+                    </h3>
+                </div>
+                <div class="col-lg-10 col-lg-push-1">
+                    <div class="panel panel-default">
+                        <!-- Default panel contents -->
+                        <div class="panel-heading">主机列表</div>
+                        <!-- Table -->
+                        <table class="table">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>主机名称</th>
+                                    <th>详细信息</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td>Computer 220</td>
+                                    <td>正常</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">2</th>
+                                    <td>Computer 221</td>
+                                    <td>正常</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- END Analysis Summary -->
+        </div>
+        <!-- END page-wrapper -->
+    </div>
+    <!-- END container -->
+{% endblock %}
+<div id="footer">
+</div>
+{% include '_basic_js.html' %}
+</body>
+</html>
+
