@@ -1,0 +1,47 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+    {% include '_basic_static_css.html' %}
+</head>
+<body>
+    <div id="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            {% include "_topbar.html" %}
+            <div class="navbar-default sidebar" role="navigation">
+            {% block sidebar %}
+                {% include '_sidebar.html' %}
+            {% endblock %}
+            </div>
+        </nav>
+
+        <div id="page-wrapper" style="min-height: 219px;">
+            <!-- Alarm Summary -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="page-header">
+                        <p class="col-lg-11">测试页面 | Test Page</p>
+                        <button type="button" class="btn btn-primary">测试按钮</button>
+                    </h2>
+                </div>
+                <div>
+                    <p class="col-lg-11 col-lg-push-1">测试项目</p>
+                </div>
+            </div>
+            <!-- END Alarm Summary -->
+
+
+        </div>
+        <!-- END page-wrapper -->
+    </div>
+    <!-- END container -->
+<div id="footer">
+</div>
+{% include '_basic_js.html' %}
+</body>
+</html>
+

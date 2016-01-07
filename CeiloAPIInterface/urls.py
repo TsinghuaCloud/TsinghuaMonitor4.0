@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 import views
-
 urlpatterns = [
-    url(r'^get-token/$', views.get_token, name='Token'),
-    url(r'^meter-list/$', views.get_meters, name='Meter List'),
-    url(r'^alarm-list/$', views.get_alarms, name='Alarm List'),
-    url(r'^resource-list/$', views.get_resources, name='Resource List'),
+    url('^get-token/$', views.get_token, name='Token'),
+    url('^meter-list/$', views.get_meters, name='Meter List'),
+    url('^alarm-list/$', views.get_alarms, name='Alarm List'),
+    url('^resource-list/$', views.get_resources, name='Resource List')
 ]
+
