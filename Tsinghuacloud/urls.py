@@ -16,13 +16,13 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from SitePages import views as SiteViews
-from ceilomain import urls as ceilometer_api_interface
+from ApiLayer import urls as ceilometer_api_interface
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(ceilometer_api_interface)),
     url(r'^test/$', SiteViews.test_page, name="Test Page"),
     url(r'^overview/$', SiteViews.overview, name="Overview Page"),
-    url(r'meters/$', SiteViews.meters_page, name="Meter Page"),
-    url(r'', SiteViews.overview, name="Overview Page"),
+    url(r'^meters/$', SiteViews.meters_page, name="Meter Page"),
+    url(r'^$', SiteViews.overview, name="Overview Page"),
 ]
