@@ -26,6 +26,7 @@ def get_token(request, token_type=None):
     else:
         return HttpResponse(json.dumps(token), content_type='application/json')
 
+
 def get_meters(request):
     # Deal wth parameters
     limit = 10 if 'length' not in request.GET else request.GET['length']
@@ -34,6 +35,8 @@ def get_meters(request):
     # TODO(pwwp):
     # Enhance error handling for token and result
 
+    # TODO(pwwp):
+    # Apply token management method instead of requesting one each time
     token = get_token(request, token_type='token')['token']
     request.session['token'] = token
     result = ceilometer_api.get_meters(token, limit, skip)
@@ -46,6 +49,7 @@ def get_meters(request):
         return HttpResponse(json.dumps(result), content_type='application/json')
     else:
         return HttpResponse(json.dumps(result), content_type='application/json')
+
 
 def _update_total_meters_count(request):
     '''
@@ -62,18 +66,66 @@ def _update_total_meters_count(request):
             return
 
     request.session['refreshed_time'] = time.time()
-    meter_list = ceilometer_api.get_meters(request.session['token'],limit=0, skip=0)['data']
+    meter_list = ceilometer_api.get_meters(request.session['token'], limit=0, skip=0)['data']
     request.session['total_meters_count'] = len(meter_list)
     return request.session['total_meters_count']
 
+
 def get_samples(request):
-    meter_list = []
-    pass
+    ''' Get samples of every meter through ceilometer_api
+    In a correctly constructed request, all arrays are treated as meters, while
+    all independent values are treated as url parameters.
+    Example:
+        /api/meters/get-samples?limit=10&cpu_util[]=computer001&cpu_util[]=computer002
+                                &cpu[]=computer001&skip=2
+    Resolved as:
+        url_parameters = {'limit': 10, 'skip': 2}
+        meters = {'cpu_util': ['computer001', 'computer002'], 'cpu':['computer001']}
+    :param request:
+    :return:
+    '''
+    # TODO(pwwp):
+    # Apply token management method instead of requesting one each time
+    token = get_token(request, token_type='token')['token']
+    url_handle = _qdict_to_dict(request.GET)
+    meters = {}
+    kwargs = {}
+    result = []
+    for k in url_handle.iterkeys():
+        if type(url_handle[k]) is list:
+          meters[k] = url_handle[k]
+        else:
+          kwargs[k] = url_handle[k]
+    for meter_name, resource_ids  in meters.iteritems():
+        for i in range(len(resource_ids)):
+            resource_id = resource_ids[i]
+            result.append({'meter_name': meter_name,
+                           'resource_id': resource_id,
+                           'data': ceilometer_api.get_samples(token, meter_name,
+                                                               resource_id=resource_id,
+                                                               **kwargs)
+                           }
+            )
+    return HttpResponse(json.dumps({'data': result}), content_type='application/json')
+
 
 def get_alarms(request):
     result = ceilometer_api.get_alarms(request.session['token'])
-
     pass
+
 
 def get_resources(request):
     pass
+
+
+def _qdict_to_dict(qdict):
+    '''Convert a Django QueryDict to a Python dict.
+    Referenced from: http://stackoverflow.com/questions/13349573/how-to-change-a-django-querydict-to-python-dict
+    Single-value fields are put in directly, add for multi-value fields, a list
+    of all values is stored at the field's key.
+
+    :param qdict: <QueryDict>
+    :return: (Dict) python dict
+    '''
+    return {k[:-2] if k[len(k)-2:] == '[]' else k: v if k[len(k)-2:] == '[]' else v[0]
+            for k, v in qdict.lists()}

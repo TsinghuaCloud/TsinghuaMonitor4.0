@@ -36,6 +36,15 @@ $(document).ready(function () {
                 }
             },
             {
+                "targets": [4],
+                "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    //$(nTd).html("<input type='checkbox' onclick='" + oData.meter_id + "'>");
+                    if(sData in meter_name_list){
+                        $(nTd).html(meter_name_list[sData]);
+                    }
+                }
+            },
+            {
                 "targets": [5],
                 "width": "15%"
 //                    "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
@@ -44,6 +53,7 @@ $(document).ready(function () {
 //                        "<button type='button' class='btn btn-xs btn-empty fa fa-trash-o'></button>");
 //                    }
             }
+
         ],
         "order": [[1, "desc"]],
         responsive: true,
@@ -112,6 +122,13 @@ function update_meter_list(row){
             selected_meter_list[row_data['name']] = [row_data['resource_id']]
         }
     }
+    update_chart();
+}
+
+function update_chart(){
+    var chart_data = $.get('/api/meters/meter-samples',selected_meter_list ,function(data){
+        console.log( "Data Loaded: " + data['data'] );
+    });
 }
 
 var chartData = generateChartData();

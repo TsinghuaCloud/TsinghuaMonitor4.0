@@ -18,7 +18,7 @@ import views
 urlpatterns = [
     url('^authentication/get-token$', views.get_token, name='Token'),
     url('^meters/meter-list$', views.get_meters, name='Meter List'),
-    url('^meters/sample-list$', views.get_meters, name='Sample List'),
+    url('^meters/meter-samples$', views.get_samples, name='Sample List'),
     url('^alarms/alarm-list/$', views.get_alarms, name='Alarm List'),
     url('^resources/resource-list/$', views.get_resources, name='Resource List')
 ]

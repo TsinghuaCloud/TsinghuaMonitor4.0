@@ -42,14 +42,13 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
     :param url_parameters: (JSON Object)
     :param body: (JSON Object)
     :return: (JSON Object) Data fetched from ceilometer api
-
     '''
-    extra_url = url_para_to_url(**url_parameters)
+    extra_url = _url_para_to_url(**url_parameters)
     conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, settings.CEILOMETER_PORT))
     req_header = header
-    print req_header
     req_body = None if body is None else json.dumps(body)
     conn.request(method, '/v2/' + base_url + extra_url, headers=req_header, body=req_body)
+    print  '/v2/' + base_url + extra_url
     response = conn.getresponse()
     if response.status != 200:
         error = {}
@@ -67,37 +66,86 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
 def get_meters(token, limit=None, skip=None):
     '''
     Get meter list from ceilometer api
-    :param token:
+    :param token: (string) token issued by Keystone
     :param limit: (int) number of items to get
-    :param skip: (int) start fetching from the (skip)th item
     :return:
     '''
     request_header = {}
     request_header['X-Auth-Token'] = token
     request_header['Content-Type'] = 'application/json'
-    url_parameters = {}
+    _url_parameters = {}
     if limit is not None:
-        url_parameters['limit'] = limit
+        _url_parameters['limit'] = limit
     if skip is not None:
-        url_parameters['skip'] = skip
+        _url_parameters['skip'] = skip
     request_body = {}
-    return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=url_parameters)
+    return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=_url_parameters)
 
-def kwargs_to_query(**kwargs):
-    q = []
-    q.append({'field': k, 'value': v}
-             for k, v in kwargs.iteritems())
-
-def url_para_to_url(**kwargs):
+def get_samples(token, meter_name, **kwargs):
     '''
-    Convert query parameters into url string
-    :param kwargs: (Dict) query criteria, e.g. limit, skip, resource_id, etc.
-    :return: url: (String) converted
+    Get samples of a selected meter
+    :param token: (string) token issued by Keystone
+    :param meter_name: (string)
+    :param kwargs: (Dict) Query criteria,
+                    e.g. ['meter_name': <meter_name>, 'resource_id': <resource_id>]
+    :return:
+    '''
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_connection('meters/' + meter_name,
+                                 method='GET',
+                                 header=request_header,
+                                 url_parameters=url_para_obj)['data']
+
+def _kwargs_to_url_parameter_object(**kwargs):
+    '''
+    Convert kwargs into q (list(Query))
+    :param kwargs:
+    :return: (Dict) Filter rules for the data to be returned
+    Example:
+        kwargs = {'resource_id': 'computer001'}
+    '''
+    url_parameters_object = {}
+    if kwargs.get('limit'):
+        url_parameters_object['limit'] = kwargs.pop('limit')
+    if kwargs.get('skip'):
+        url_parameters_object['skip'] = kwargs.pop('skip')
+    q = []
+    for k, v in kwargs.iteritems():
+        q.append({'field': k, 'value': v})
+    url_parameters_object['q'] = q
+    print q
+    return url_parameters_object
+
+def _url_para_to_url(**kwargs):
+    '''
+    Convert query parameters into url string,
+    limit & skip are directly written into url_parameters.
+    Other parameters are reformatted into {'field': <key>, 'value': <value>}
+    :param kwargs: (Dict) query criteria, e.g. limit, skip, resource_id, meter_name etc.
+    :return: url: (String) converted url
     '''
     if not kwargs:
         return ''
     else:
-        para_url = ''.join(('{}={}&'.format(key, val)
-                        for key, val in kwargs.iteritems()))
-        all_url = '?' + para_url
-        return all_url[:-1]
+        complete_url = ''
+        if kwargs.get('limit'):
+            complete_url = complete_url + 'limit=' + kwargs.pop('limit') + '&'
+        if kwargs.get('skip'):
+            complete_url = complete_url + 'skip=' + kwargs.pop('skip') + '&'
+        if kwargs.get('q'):
+            q = kwargs.pop('q')
+            for item in q:
+                complete_url = complete_url + 'q.field=%s&q.value=%s&'%(item['field'], item['value'])
+        complete_url = '?' + complete_url
+        print complete_url
+        return complete_url[:-1]
+
+        # all_url = ''
+        # if kwargs.get('limit'):
+        #     all_url
+        # para_url = ''.join(('{}={}&'.()
+        #                 for key, val in kwargs.iteritems()))
+        # all_url = '?' + para_url
