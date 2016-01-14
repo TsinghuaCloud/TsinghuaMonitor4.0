@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.conf import settings
 from django.http import HttpRequest
 from django.http import HttpResponse
 import json
@@ -15,6 +16,10 @@ def get_token(request, token_type=None):
     # tenant_name = request.GET['tenant_name']
     # username = request.GET['username']
     # password = request.GET['password']
+    tenant_name = settings.OPENSTACK_TENANT_NAME
+    username = settings.OPENSTACK_USERNAME_NAME
+    password = settings.OPENSTACK_PASSWORD
+
     token = None
     if not (tenant_name and username and password):
         token = {'status': 'error',
@@ -99,12 +104,13 @@ def get_samples(request):
     for meter_name, resource_ids  in meters.iteritems():
         for i in range(len(resource_ids)):
             resource_id = resource_ids[i]
-            result.append({'meter_name': meter_name,
-                           'resource_id': resource_id,
-                           'data': ceilometer_api.get_samples(token, meter_name,
-                                                               resource_id=resource_id,
-                                                               **kwargs)
-                           }
+            result.append({
+                'meter_name': meter_name,
+                'resource_id': resource_id,
+                'data': ceilometer_api.get_samples(token, meter_name,
+                                                    resource_id=resource_id,
+                                                    **kwargs)
+                }
             )
     return HttpResponse(json.dumps({'data': result}), content_type='application/json')
 
