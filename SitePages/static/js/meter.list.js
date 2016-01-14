@@ -32,7 +32,7 @@ $(document).ready(function () {
                 "width": "5%",
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     //$(nTd).html("<input type='checkbox' onclick='" + oData.meter_id + "'>");
-                    $(nTd).html("<input type='checkbox' onclick='update_meter_list(" + iRow + ")'>");
+                    $(nTd).html("<input type='checkbox' onclick='updateMeterList(" + iRow + ")'>");
                 }
             },
             {
@@ -58,7 +58,7 @@ $(document).ready(function () {
         "order": [[1, "desc"]],
         responsive: true,
         "createdRow": function ( row, data, index ) {
-            if (check_meter_list(data)) {
+            if (checkMeterList(data)) {
                 $('td', row).eq(0).children()[0].checked = true;
             }
         }
@@ -77,7 +77,7 @@ var selected_meter_list = {};
  * }
  */
 
-function check_meter_list(data){
+function checkMeterList(data){
     /*
     Check if the requested meter is in selected_meter_list.
     Return true if in, [false] if not.
@@ -95,7 +95,7 @@ function check_meter_list(data){
     return false;
 }
 
-function update_meter_list(row){
+function updateMeterList(row){
     /*
     If requested meter in select row is in selected_meter_list,
     add this meter into selected_meter_list,
@@ -104,7 +104,7 @@ function update_meter_list(row){
             in the meter_name array, and removes them all.
      */
     var row_data = datatable_handle.data()[row];
-    if(check_meter_list(row_data)){
+    if(checkMeterList(row_data)){
         var index = (selected_meter_list[row_data['name']]).indexOf(row_data['resource_id']);
         while (index > -1) {
             (selected_meter_list[row_data['name']]).splice(index, 1);
@@ -122,37 +122,132 @@ function update_meter_list(row){
             selected_meter_list[row_data['name']] = [row_data['resource_id']]
         }
     }
-    update_chart();
+    updateChart();
 }
 
-function update_chart(){
-    var chart_data = $.get('/api/meters/meter-samples',selected_meter_list ,function(data){
-        console.log( "Data Loaded: " + data['data'] );
+function updateChart(){
+    /*
+     *
+     */
+
+    // Convert data requested from meter-samples api to amchart data
+    var chart_data_handle;
+    chart_data_handle = $.get('/api/meters/meter-samples', selected_meter_list, function (data) {
+        var chart_data = data['data'];
+
+        // Get series' names
+        var chart_data_object = {};
+        var chart_series_count = chart_data.length;
+        var meter_samples, sample, date_string, chart_dataset_list=[];
+        for (var i = 0; i < chart_series_count; i++) {
+            meter_samples = chart_data[i]['data'];
+            var meter_display_name = (chart_data[i])['meter_name'] + '@' + chart_data[i]['resource_id'];
+            chart_dataset_list.push(meter_display_name);
+            for (var j = 0; j < meter_samples.length; j++) {
+                sample = meter_samples[j];
+                var new_date = new Date(sample['timestamp']);
+                date_string = new_date.getTime().toString();
+                if (date_string in chart_data_object) {
+                    chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
+                } else {
+                    chart_data_object[new_date] = {};
+                    chart_data_object[new_date]['date'] = getFormattedDate(new_date);
+                    chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
+                }
+            }
+        }
+
+        // Prepare styles and chart settings for meter chart
+        chart.graphs = [];
+        chart.valueAxes = [];
+        for (var k = 0; k < chart_dataset_list.length; k++){
+            // CREATE GRAPH INSTANCE
+            var valueAxis = new AmCharts.ValueAxis();
+            valueAxis.id = chart_dataset_list[k] + 'axis';
+            valueAxis.axisThickness = 2;
+            valueAxis.axisAlpha = 1;
+            valueAxis.gridAlpha = 0;
+            valueAxis.position = (k % 2) ? 'left': 'right';
+            valueAxis.offset = Math.floor(k/2) * 50;
+
+            var graph = new AmCharts.AmGraph();
+
+            // SETTINGS
+            graph.title = chart_dataset_list[k];
+            graph.valueField = chart_dataset_list[k];
+            graph.valueAxis = chart_dataset_list[k] + 'axis';
+            graph.balloonText = "[[value]]";
+
+            graph.type = "line";
+            graph.lineThickness = 2;
+            graph.fillAlphas = 0;
+            console.info(valueAxis.axisColor);
+            console.info(graph.lineColor);
+
+            valueAxis.axisColor = graph.lineColor;
+            // ATTACH TO CHART INSTANCE
+            chart.valueAxes.push(valueAxis);
+            chart.addGraph(graph);
+        }
+
+        // Add data into dataprovider
+        chartData = [];
+        for (var key in chart_data_object) {
+            if (chart_data_object.hasOwnProperty(key)) {
+              chartData.push(chart_data_object[key]);
+            }
+        }
+        chart.dataProvider = chartData.sort(compareDate);
+        chart.validateData();
+        chart.validateNow();
+        for (var i = 0; i < chart_dataset_list.length; i++){
+            chart.valueAxes[i].axisColor = chart.graphs[i].lineColorR;
+        };
+        chart.validateNow();
+
     });
 }
+function getFormattedDate(dt)
+{
+    var yyyy = dt.getFullYear().toString();
+   var MM = (dt.getMonth()+1).toString();
+   var dd  = dt.getDate().toString();
+   var hh = dt.getHours().toString();
+   var mm = dt.getMinutes().toString();
+   var ss = dt.getSeconds().toString();
 
-var chartData = generateChartData();
+   //Returns your formatted result
+  return yyyy + '-' + (MM[1]?MM:"0"+MM[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + 'T' + (hh[1]?hh:"0"+hh[0]) + ':' + (mm[1]?mm:"0"+mm[0]) + ':' + (ss[1]?ss:"0"+ss[0])+'Z';
+}
+
+function compareDate(a,b) {
+  if (a.date < b.date)
+    return -1;
+  else if (a.date > b.date)
+    return 1;
+  else
+    return 0;
+}
+
+var chartData=sampleData();
 
 var chart = AmCharts.makeChart("meter-chart", {
+    "legend": {
+        "useGraphSettings": true
+    },
     "type": "serial",
     "theme": "light",
-    "marginRight": 20,
-    "autoMarginOffset": 20,
-    "marginTop": 7,
     "dataProvider": chartData,
     "valueAxes": [{
-        "axisAlpha": 0.2,
-        "dashLength": 1,
-        "position": "left"
+        'title': 'value'
     }],
     "mouseWheelZoomEnabled": true,
     "chartScrollbar": {
         "autoGridCount": true,
-        "graph": "g1",
         "scrollbarHeight": 20
     },
     "chartCursor": {
-       "limitToGraph":"g1"
+       "cursorPosition": "mouse"
     },
     "graphs": [{
         "lineColor": "#FF6600",
@@ -160,31 +255,15 @@ var chart = AmCharts.makeChart("meter-chart", {
         "bulletBorderThickness": 1,
         "hideBulletsCount": 30,
         "title": "red line",
-        "valueField": "visits",
-        "fillAlphas": 0
-    }, {
-        "lineColor": "#FCD202",
-        "bullet": "square",
-        "bulletBorderThickness": 1,
-        "hideBulletsCount": 30,
-        "title": "yellow line",
-        "valueField": "hits",
-        "fillAlphas": 0
-    }, {
-        "lineColor": "#B0DE09",
-        "bullet": "triangleUp",
-        "bulletBorderThickness": 1,
-        "hideBulletsCount": 30,
-        "title": "green line",
         "valueField": "views",
         "fillAlphas": 0
     }],
     "categoryField": "date",
-    "categoryAxis": {
-        "parseDates": true,
-        "axisColor": "#DADADA",
-        "minorGridEnabled": true
-    },
+    "dataDateFormat": "YYYY-MM-DD HH:NN",
+	"categoryAxis": {
+		"minPeriod": "mm",
+		"parseDates": true
+	},
     "export": {
         "enabled": true,
         "position": "bottom-right"
@@ -200,28 +279,15 @@ function zoomChart() {
     chart.zoomToIndexes(chartData.length - 40, chartData.length - 1);
 }
 
-function generateChartData() {
-    var chartData = [];
-    var firstDate = new Date();
-    firstDate.setDate(firstDate.getDate() - 100);
-
-    for (var i = 0; i < 100; i++) {
-        // we create date objects here. In your data, you can have date strings
-        // and then set format of your dates using chart.dataDateFormat property,
-        // however when possible, use date objects, as this will speed up chart rendering.
-        var newDate = new Date(firstDate);
-        newDate.setDate(newDate.getDate() + i);
-
-        var visits = Math.round(Math.random() * 40) + 100;
-        var hits = Math.round(Math.random() * 80) + 500;
-        var views = Math.round(Math.random() * 6000);
-
-        chartData.push({
-            date: newDate,
-            visits: visits,
-            hits: hits,
-            views: views
-        });
-    }
+function sampleData() {
+    chartData=JSON.parse('[' +
+    '{"date":"2016-01-13T23:34:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-14T23:24:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-15T22:54:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-16T22:24:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-17T22:04:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-18T21:44:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-19T20:54:13.499Z","views":0.08830797984264792},' +
+    '{"date":"2016-01-20T20:44:13.499Z","views":0.08830797984264792}]');
     return chartData;
 }
