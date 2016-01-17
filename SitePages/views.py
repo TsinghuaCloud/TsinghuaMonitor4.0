@@ -18,3 +18,6 @@ def test_page(request):
     request.session['token'] = ceilometer_api.get_token(request, 'token')
 
     return render(request, 'test-page.html')
+
+def resource_page(request):
+    return render(request, 'resource.html', {'title': 'resource-list'})

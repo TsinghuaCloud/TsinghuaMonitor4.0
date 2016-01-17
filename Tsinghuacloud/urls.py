@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^test/$', SiteViews.test_page, name="Test Page"),
     url(r'^overview/$', SiteViews.overview, name="Overview Page"),
     url(r'^monitor/meters/$', SiteViews.meters_page, name="Meter Page"),
+    url(r'^resource/', SiteViews.resource_page, name="resource Page"),
     url(r'^$', SiteViews.overview, name="Overview Page"),
 ]
