@@ -15,6 +15,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '0xu25b&kv!!u-=+b#r2hwnm3$=ur=us(j-%ht8&%16mt&6hmi8'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -34,8 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'SitePages',
-    'djangobower',
+    'SitePages'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -109,6 +110,10 @@ STATIC_FINDERS = {
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 # Project related
-OPENSTACK_CONTROLLER_IP = "127.0.0.1"
+OPENSTACK_TENANT_NAME = 'admin'
+OPENSTACK_USERNAME_NAME = 'admin'
+OPENSTACK_PASSWORD = 'cloud'
+
+OPENSTACK_CONTROLLER_IP = "166.111.143.220"
 CEILOMETER_PORT = 8777
 KEYSTONE_PORT = 35357
