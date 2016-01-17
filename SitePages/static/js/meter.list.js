@@ -15,6 +15,7 @@ $(document).ready(function () {
     }
     });
     datatable_handle = $('#meter-table').DataTable({
+        dom: '<"toolbar">lrtip',
         processing: true,
         serverSide: true,
         ajax: {
@@ -22,6 +23,17 @@ $(document).ready(function () {
             "contentType": "application/json",
             "type": "POST",
             "data": function (d) {
+                var query_value = document.getElementById("search-value").value.trim();
+                var query_criteria = document.getElementById("search-criteria").value;
+                if(query_value != ""){
+                    d.q = [];
+                    d.q[0] = {};
+                    d.q[0].field= query_criteria;
+                    d.q[0].value = query_value;
+                }
+                // ------------- Query object test ------------
+
+                // --------- End of Query object test ---------s
                 return JSON.stringify(d);
             }
         },
@@ -80,16 +92,8 @@ $(document).ready(function () {
             }
         }
     });
-    //var ctx = $("#meter-chart").get(0).getContext("2d");
-    // This will get the first returned node in the jQuery collection.
-    //var myNewChart = new Chart(ctx);
-    $('#searchinput').css('display','inline');
-    $('#searchinput').css('width','auto');
-    var copy= $('#copy').clone(true);
-   // console.info( $('.dataTables_length').size())
-    $('#meter-table_filter').parent().append(copy);
-    $('#meter-table_filter').remove();
-    $('#copy').remove();
+    var search_html= document.getElementById('datatables-searchbox').innerHTML;
+    $("div.toolbar").html(search_html);
 });
 
 var selected_meter_list = {};
@@ -100,6 +104,15 @@ var selected_meter_list = {};
  *     <name>: [resource_id, resource_id...],
  * }
  */
+
+function reloadTableData(){
+    datatable_handle.ajax.reload();
+}
+
+function clearSearchCriteria(){
+    document.getElementById("search-value").value = '';
+    datatable_handle.ajax.reload();
+}
 
 function checkMeterList(data){
     /*
@@ -253,7 +266,7 @@ function compareDate(a,b) {
     return 0;
 }
 
-var chartData=sampleData();
+var chartData={};
 
 var chart = AmCharts.makeChart("meter-chart", {
     "legend": {
@@ -301,17 +314,4 @@ zoomChart();
 function zoomChart() {
     // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
     chart.zoomToIndexes(chartData.length - 40, chartData.length - 1);
-}
-
-function sampleData() {
-    chartData=JSON.parse('[' +
-    '{"date":"2016-01-13T23:34:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-14T23:24:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-15T22:54:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-16T22:24:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-17T22:04:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-18T21:44:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-19T20:54:13.499Z","views":0.08830797984264792},' +
-    '{"date":"2016-01-20T20:44:13.499Z","views":0.08830797984264792}]');
-    return chartData;
 }

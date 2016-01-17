@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.conf import settings
+
 from django.views.decorators.csrf import csrf_protect
 from django.http import HttpRequest
 from django.http import HttpResponse
 import json
 import time
 import api_interface as ceilometer_api
+import classdef
 
 
 def get_token(request, token_type=None):
@@ -35,6 +37,11 @@ def get_token(request, token_type=None):
 
 @csrf_protect
 def get_meters(request):
+    '''
+
+    :param request:
+    :return:
+    '''
     # TODO(pwwp):
     # Enhance error handling for token and result
 
@@ -45,11 +52,9 @@ def get_meters(request):
     arrays = {}
     kwargs = {}
     if request.method == 'GET':
-        print 'In api/meters GET'
         arrays, kwargs = _request_GET_to_dict(request.GET)
         # Deal with special parameters in
         kwargs = _rename_parameters(kwargs)
-        print kwargs
     elif request.method == 'POST':
         # POST method at /api/meter-list is triggered by datatables.
         # So I just deal with some special parameters in this POST request.
@@ -57,10 +62,17 @@ def get_meters(request):
         kwargs['limit'] = 0 if 'length' not in args else args['length']
         kwargs['skip'] = 0 if 'start' not in args else args['start']
 
-    print kwargs
+        try:
+            if 'q' in args:
+                for query_item in args['q']:
+                    kwargs[query_item['field']] = query_item['value']
+        except KeyError:
+            print 'Illegal query object in meter-list'
+            print 'Query_object: ' + json.dumps(args['q'])
+
     result = ceilometer_api.get_meters(token, **kwargs)
 
-    _update_total_meters_count(request)
+    _update_total_meters_count(request, kwargs)
 
     if result['status'] == 'success':
         result['recordsTotal'] = request.session['total_meters_count']
@@ -70,24 +82,34 @@ def get_meters(request):
         return HttpResponse(json.dumps(result), content_type='application/json')
 
 
-def _update_total_meters_count(request):
+def _update_total_meters_count(request, criteria):
     '''
     Temporarily stores total_meters_count into session for speeding up queries
-    Result expires after 1000 seconds.
-    :param request:
+    Result expires after 1000 seconds or filter criteria has changed.
+    :param request: Django request object
+            criteria:
     :return: (int) total meters' count
     '''
+    if 'limit' in criteria:
+        criteria.pop('limit')
+    if 'skip' in criteria:
+        criteria.pop('skip')
+    print criteria
     if request.session.has_key('total_meters_count'):
         refreshed_time = request.session['refreshed_time']
         delta = time.time() - refreshed_time
-        if delta < 1000:
+        print request.session['criteria_hash']
+        if delta < 1000 and request.session['criteria_hash'] == criteria:
             return
 
+    print 'cache miss'
     request.session['refreshed_time'] = time.time()
-    meter_list = ceilometer_api.get_meters(request.session['token'], limit=0, skip=0)['data']
+    request.session['criteria_hash'] = criteria
+
+    # TODO: Error handling for hashing meter_list
+    meter_list = ceilometer_api.get_meters(request.session['token'], **criteria)['data']
     request.session['total_meters_count'] = len(meter_list)
     return request.session['total_meters_count']
-
 
 def get_samples(request):
     ''' Get samples of every meter through ceilometer_api
@@ -151,6 +173,7 @@ def _request_GET_to_dict(qdict):
             arrays[k] = url_handle[k]
         else:
             url_variables[k] = url_handle[k]
+    print arrays, url_variables
     return arrays, url_variables
 
 

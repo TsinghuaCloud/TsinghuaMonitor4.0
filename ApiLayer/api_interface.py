@@ -49,7 +49,6 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
     req_header = header
     req_body = None if body is None else json.dumps(body)
     conn.request(method, '/v2/' + base_url + extra_url, headers=req_header, body=req_body)
-    print  '/v2/' + base_url + extra_url
     response = conn.getresponse()
     if response.status != 200:
         error = {}
@@ -64,23 +63,18 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
         data['data'] = json.loads(response.read())
         return data
 
-def get_meters(token, limit=None, skip=None):
+def get_meters(token, **kwargs):
     '''
     Get meter list from ceilometer api
     :param token: (string) token issued by Keystone
-    :param limit: (int) number of items to get
+    :param kwargs: (Dict) filter criteria
     :return:
     '''
     request_header = {}
     request_header['X-Auth-Token'] = token
     request_header['Content-Type'] = 'application/json'
-    _url_parameters = {}
-    if limit is not None:
-        _url_parameters['limit'] = limit
-    if skip is not None:
-        _url_parameters['skip'] = skip
-    request_body = {}
-    return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=_url_parameters)
+    url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=url_para_obj)
 
 def get_samples(token, meter_name, **kwargs):
     '''
@@ -109,15 +103,14 @@ def _kwargs_to_url_parameter_object(**kwargs):
         kwargs = {'resource_id': 'computer001'}
     '''
     url_parameters_object = {}
-    if kwargs.get('limit'):
+    if 'limit' in kwargs.iterkeys():
         url_parameters_object['limit'] = kwargs.pop('limit')
-    if kwargs.get('skip'):
+    if 'skip' in kwargs.iterkeys():
         url_parameters_object['skip'] = kwargs.pop('skip')
     q = []
     for k, v in kwargs.iteritems():
         q.append({'field': k, 'value': v})
     url_parameters_object['q'] = q
-    print q
     return url_parameters_object
 
 def _url_para_to_url(**kwargs):
@@ -142,7 +135,6 @@ def _url_para_to_url(**kwargs):
                 complete_url = complete_url + 'q.field=%s&q.value=%s&'\
                                               %(item['field'],  item['value'])
         complete_url = '?' + complete_url
-        print complete_url
         return complete_url[:-1]
 
         # all_url = ''

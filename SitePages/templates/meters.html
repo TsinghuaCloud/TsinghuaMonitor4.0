@@ -9,18 +9,25 @@
     <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
 
     <!-- DataTables CSS -->
-    <link href="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css' %}"
+          rel="stylesheet">
 
     <!-- DataTables Responsive CSS -->
-    <link href="{% static 'sb-admin/bower_components/datatables-responsive/css/dataTables.responsive.css' %}" rel="stylesheet">
+    <link href="{% static 'sb-admin/bower_components/datatables-responsive/css/dataTables.responsive.css' %}"
+          rel="stylesheet">
 
     <style type="text/css">
-        .btn-space{
+        .btn-space {
             margin-top: 4px;
         }
-        .btn-empty{
+
+        .btn-empty {
             background-color: transparent;
             color: #854bb6;
+        }
+
+        .toolbar {
+            float: right;
         }
     </style>
 
@@ -44,100 +51,106 @@
             <input type="hidden" id="csrfmiddlewaretoken" value="{{ csrf_token }}">
         </div>
         <div class="row">
-                <div class="col-lg-12">
-                    <h2 class="page-header">
-                        <p class="col-lg-10">指标列表 | Meter List</p>
-                        <button type="button" class="btn btn-primary">这个按钮没用</button>
-                    </h2>
-                </div>
-                <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <!-- Default panel contents -->
-                        <div class="panel-heading">指标列表</div>
-                        <div class="panel-body">
-                            <p>您当前共有 27 个指标</p>
-                            <!-- Table -->
-                           <div class="dataTable_wrapper">
-
- <span id="copy"><div class="dataTables_length" id="meter-table_length"><label>Search:<select style="width:100px" name="meter-table_length" aria-controls="meter-table" class="form-control input-sm">
- <option value="1">实例ID</option>
- <option value="2">实例名称</option>
- <option value="3">指标名称</option>
-</select> 
- <input  id="searchinput"  type="search" class="form-control input-sm" placeholder="" aria-controls="meter-table"></label></div></span>
-
-                                <table class="table table-striped table-hover" id="meter-table">
-                                    <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>ID</th>
-                                        <th>实例ID</th>
-                                        <th>实例名称</th>
-                                        <th>指标名称</th>
-                                        <th>类型</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            </div>
+            <div class="col-lg-12">
+                <h2 class="page-header">
+                    <p class="col-lg-10">指标列表 | Meter List</p>
+                    <button type="button" class="btn btn-primary">这个按钮没用</button>
+                </h2>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">指标列表</div>
+                    <div class="panel-body">
+                        <p>您当前共有 27 个指标</p>
+                        <!-- Table -->
+                        <div class="dataTable_wrapper">
+                            <table class="table table-striped table-hover" id="meter-table">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>ID</th>
+                                    <th>实例ID</th>
+                                    <th>实例名称</th>
+                                    <th>指标名称</th>
+                                    <th>类型</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <!-- END Table -->
                 </div>
-                <!-- END Panel -->
+                <!-- END Table -->
             </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <!-- Default panel contents -->
-                        <div class="panel-heading">指标详情: Meter Name</div>
-                        <div class="panel-body">
-                            <div class="col-lg-12">
-                                <form class="form-inline" role="form">
-                                    <div class="form-group">
-                                        <label>开始时间</label>
-                                        <input type="date" class="form-control" id="start-time" placeholder="Click to Set">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>结束时间</label>
-                                            <input type="date" class="form-control" id="end-time" placeholder="Click to Set">
-                                    </div>
-                                    <div class="form-group">
-                                            <button type="submit" class="btn btn-default">Submit</button>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="col-lg-12">
-                                <div id="meter-chart" style="width: 100%; height: 600px"></div>
-                            </div>
+            <!-- END Panel -->
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">指标详情: Meter Name</div>
+                    <div class="panel-body">
+                        <div class="col-lg-12">
+                            <form class="form-inline" role="form">
+                                <div class="form-group">
+                                    <label>开始时间</label>
+                                    <input type="date" class="form-control" id="start-time" placeholder="Click to Set">
+                                </div>
+                                <div class="form-group">
+                                    <label>结束时间</label>
+                                    <input type="date" class="form-control" id="end-time" placeholder="Click to Set">
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-default">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-lg-12">
+                            <div id="meter-chart" style="width: 100%; height: 600px"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- END Meter Page -->
+    </div>
+    <!-- END Meter Page -->
 </div>
 
+<div hidden="hidden">
+    <div id="datatables-searchbox">
+        <label>Search:
+            <select class="form-control input-sm" id="search-criteria">
+                <option value="resource_id">实例ID</option>
+                <!--<option value="resource_name">实例名称</option>
+                <option value="meter_name">指标名称</option>-->
+            </select>
+            <input  class="form-control input-sm" id="search-value">
+            <button type="button" class="btn btn-primary btn-sm" onclick="reloadTableData()">确定</button>
+            <button type="button" class="btn btn-primary-outline btn-sm" onclick="clearSearchCriteria()">清空</button>
+        </label>
+    </div>
+</div>
 
 <div id="footer">
 </div>
 {% include '_basic_js.html' %}
-    <!-- DataTables JS -->
-    <script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
+<!-- DataTables JS -->
+<script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
 
-    <!-- DataTables Bootstrap JS -->
-    <script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
-    <!-- AmChart JS -->
-    <script src="{% static 'amcharts/amcharts.js' %}"></script>
-    <script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
+<!-- DataTables Bootstrap JS -->
+<script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
+<!-- AmChart JS -->
+<script src="{% static 'amcharts/amcharts.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
 
-    <!-- AmChart JS Serial Chart-->
-    <script src="{% static 'amcharts/serial.js' %}"></script>
-    <script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
-    <!-- Meter-list specified js -->
-    <script src="{% static 'js/meter.name.list.js' %}"></script>
-    <script src="{% static 'js/meter.list.js' %}"></script>
+<!-- AmChart JS Serial Chart-->
+<script src="{% static 'amcharts/serial.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
+<!-- Meter-list specified js -->
+<script src="{% static 'js/meter.name.list.js' %}"></script>
+<script src="{% static 'js/meter.list.js' %}"></script>
 
 </body>
 </html>
