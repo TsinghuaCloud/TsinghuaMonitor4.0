@@ -5,6 +5,7 @@ import urllib2
 from django.conf import settings
 
 def get_alarms(request):
+    print 'test_commit'
     pass
 
 def get_token(tenant_name=None, username=None, password=None):
