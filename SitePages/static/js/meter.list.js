@@ -83,6 +83,13 @@ $(document).ready(function () {
     //var ctx = $("#meter-chart").get(0).getContext("2d");
     // This will get the first returned node in the jQuery collection.
     //var myNewChart = new Chart(ctx);
+    $('#searchinput').css('display','inline');
+    $('#searchinput').css('width','auto');
+    var copy= $('#copy').clone(true);
+   // console.info( $('.dataTables_length').size())
+    $('#meter-table_filter').parent().append(copy);
+    $('#meter-table_filter').remove();
+    $('#copy').remove();
 });
 
 var selected_meter_list = {};
