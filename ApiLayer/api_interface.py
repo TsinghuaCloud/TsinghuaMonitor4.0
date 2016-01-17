@@ -132,13 +132,14 @@ def _url_para_to_url(**kwargs):
     else:
         complete_url = ''
         if kwargs.get('limit'):
-            complete_url = complete_url + 'limit=' + kwargs.pop('limit') + '&'
+            complete_url = complete_url + 'limit=' + str(kwargs.pop('limit')) + '&'
         if kwargs.get('skip'):
-            complete_url = complete_url + 'skip=' + kwargs.pop('skip') + '&'
+            complete_url = complete_url + 'skip=' +str(kwargs.pop('skip')) + '&'
         if kwargs.get('q'):
             q = kwargs.pop('q')
             for item in q:
-                complete_url = complete_url + 'q.field=%s&q.value=%s&'%(item['field'], item['value'])
+                complete_url = complete_url + 'q.field=%s&q.value=%s&'\
+                                              %(item['field'],  item['value'])
         complete_url = '?' + complete_url
         print complete_url
         return complete_url[:-1]

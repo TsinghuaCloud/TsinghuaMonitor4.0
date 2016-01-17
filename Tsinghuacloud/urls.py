@@ -23,6 +23,6 @@ urlpatterns = [
     url(r'^api/', include(ceilometer_api_interface)),
     url(r'^test/$', SiteViews.test_page, name="Test Page"),
     url(r'^overview/$', SiteViews.overview, name="Overview Page"),
-    url(r'^meters/$', SiteViews.meters_page, name="Meter Page"),
+    url(r'^monitor/meters/$', SiteViews.meters_page, name="Meter Page"),
     url(r'^$', SiteViews.overview, name="Overview Page"),
 ]

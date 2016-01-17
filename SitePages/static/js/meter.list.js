@@ -1,13 +1,30 @@
 /**
  * Created by pwwpcheng on 2015/12/30.
  */
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
 
 $(document).ready(function () {
+    $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", document.getElementById("csrfmiddlewaretoken").value);
+        }
+    }
+    });
     datatable_handle = $('#meter-table').DataTable({
         processing: true,
         serverSide: true,
-        //pagingType: "input",
-        ajax: "http://" + window.location.host + "/api/meters/meter-list",
+        ajax: {
+            "url": "http://" + window.location.host + "/api/meters/meter-list",
+            "contentType": "application/json",
+            "type": "POST",
+            "data": function (d) {
+                return JSON.stringify(d);
+            }
+        },
         "columns": [
             {"data": "unit"},
             {"data": "meter_id"},
@@ -23,7 +40,7 @@ $(document).ready(function () {
                 "searchable": false
             },
             {
-                "targets": [0,1,2,3,4,5],
+                "targets": [0, 1, 2, 3, 4, 5],
                 "sortable": false
             },
             {
@@ -39,7 +56,7 @@ $(document).ready(function () {
                 "targets": [4],
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     //$(nTd).html("<input type='checkbox' onclick='" + oData.meter_id + "'>");
-                    if(sData in meter_name_list){
+                    if (sData in meter_name_list) {
                         $(nTd).html(meter_name_list[sData]);
                     }
                 }
@@ -57,7 +74,7 @@ $(document).ready(function () {
         ],
         "order": [[1, "desc"]],
         responsive: true,
-        "createdRow": function ( row, data, index ) {
+        "createdRow": function (row, data, index) {
             if (checkMeterList(data)) {
                 $('td', row).eq(0).children()[0].checked = true;
             }

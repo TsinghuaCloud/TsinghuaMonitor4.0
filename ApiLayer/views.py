@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.conf import settings
+from django.views.decorators.csrf import csrf_protect
 from django.http import HttpRequest
 from django.http import HttpResponse
 import json
 import time
 import api_interface as ceilometer_api
+
 
 def get_token(request, token_type=None):
     '''
@@ -31,12 +33,8 @@ def get_token(request, token_type=None):
     else:
         return HttpResponse(json.dumps(token), content_type='application/json')
 
-
+@csrf_protect
 def get_meters(request):
-    # Deal wth parameters
-    limit = 10 if 'length' not in request.GET else request.GET['length']
-    skip = 0 if 'start' not in request.GET else request.GET['start']
-
     # TODO(pwwp):
     # Enhance error handling for token and result
 
@@ -44,7 +42,23 @@ def get_meters(request):
     # Apply token management method instead of requesting one each time
     token = get_token(request, token_type='token')['token']
     request.session['token'] = token
-    result = ceilometer_api.get_meters(token, limit, skip)
+    arrays = {}
+    kwargs = {}
+    if request.method == 'GET':
+        print 'In api/meters GET'
+        arrays, kwargs = _request_GET_to_dict(request.GET)
+        # Deal with special parameters in
+        kwargs = _rename_parameters(kwargs)
+        print kwargs
+    elif request.method == 'POST':
+        # POST method at /api/meter-list is triggered by datatables.
+        # So I just deal with some special parameters in this POST request.
+        args = json.loads(request.body)
+        kwargs['limit'] = 0 if 'length' not in args else args['length']
+        kwargs['skip'] = 0 if 'start' not in args else args['start']
+
+    print kwargs
+    result = ceilometer_api.get_meters(token, **kwargs)
 
     _update_total_meters_count(request)
 
@@ -59,7 +73,7 @@ def get_meters(request):
 def _update_total_meters_count(request):
     '''
     Temporarily stores total_meters_count into session for speeding up queries
-    Result expires after 180 seconds.
+    Result expires after 1000 seconds.
     :param request:
     :return: (int) total meters' count
     '''
@@ -67,7 +81,6 @@ def _update_total_meters_count(request):
         refreshed_time = request.session['refreshed_time']
         delta = time.time() - refreshed_time
         if delta < 1000:
-            print 'cache hit on _update_meters_count'
             return
 
     request.session['refreshed_time'] = time.time()
@@ -92,26 +105,18 @@ def get_samples(request):
     # TODO(pwwp):
     # Apply token management method instead of requesting one each time
     token = get_token(request, token_type='token')['token']
-    url_handle = _qdict_to_dict(request.GET)
-    meters = {}
-    kwargs = {}
+    meters, kwargs = _request_GET_to_dict(request.GET)
     result = []
-    for k in url_handle.iterkeys():
-        if type(url_handle[k]) is list:
-          meters[k] = url_handle[k]
-        else:
-          kwargs[k] = url_handle[k]
-    for meter_name, resource_ids  in meters.iteritems():
+    for meter_name, resource_ids in meters.iteritems():
         for i in range(len(resource_ids)):
             resource_id = resource_ids[i]
             result.append({
                 'meter_name': meter_name,
                 'resource_id': resource_id,
                 'data': ceilometer_api.get_samples(token, meter_name,
-                                                    resource_id=resource_id,
-                                                    **kwargs)
-                }
-            )
+                                                   resource_id=resource_id,
+                                                   **kwargs)
+            })
     return HttpResponse(json.dumps({'data': result}), content_type='application/json')
 
 
@@ -123,6 +128,31 @@ def get_alarms(request):
 def get_resources(request):
     pass
 
+def _rename_parameters(args_dict):
+    assert isinstance(args_dict, dict)
+    if 'length' in args_dict:
+        args_dict['limit'] = args_dict.pop('length')
+    if 'start' in args_dict:
+        args_dict['skip'] = args_dict.pop('start')
+    return args_dict
+
+def _request_GET_to_dict(qdict):
+    '''
+    Convert url parameters to seperate arrays and url variables
+    :param qdict: (QueryDict) QueryDict element such as request.GET
+    :return: (Dict)array: array elements in qdict
+              (Dict)url_variables: other url parameters
+    '''
+    url_handle = _qdict_to_dict(qdict)
+    arrays = {}
+    url_variables = {}
+    for k in url_handle.iterkeys():
+        if type(url_handle[k]) is list:
+            arrays[k] = url_handle[k]
+        else:
+            url_variables[k] = url_handle[k]
+    return arrays, url_variables
+
 
 def _qdict_to_dict(qdict):
     '''Convert a Django QueryDict to a Python dict.
@@ -133,5 +163,5 @@ def _qdict_to_dict(qdict):
     :param qdict: <QueryDict>
     :return: (Dict) python dict
     '''
-    return {k[:-2] if k[len(k)-2:] == '[]' else k: v if k[len(k)-2:] == '[]' else v[0]
+    return {k[:-2] if k[len(k) - 2:] == '[]' else k: v if k[len(k) - 2:] == '[]' else v[0]
             for k, v in qdict.lists()}
