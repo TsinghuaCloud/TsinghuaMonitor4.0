@@ -152,33 +152,33 @@
             var chartData = [
                              {
                                  "category": "已使用",
-                                 "value": 300
+                                 "value": {{resourceOverview.memory_mb_used}}
                              },
                              {
                                  "category": "未使用",
-                                 "value": 204
+                                 "value": {{resourceOverview.memory_mb}}-{{resourceOverview.memory_mb_used}}
                              },
                             
                          ];
             var chartData2 = [
                              {
                                  "category": "已使用",
-                                 "value": 306
+                                 "value":{{resourceOverview.local_gb_used}}
                              },
                              {
                                  "category": "未使用",
-                                 "value": 244
+                                 "value": {{resourceOverview.local_gb}}-{{resourceOverview.local_gb_used}}
                              },
                             
                          ];
             var chartData3 = [
                              {
                                  "category": "已使用",
-                                 "value": 378
+                                 "value": {{resourceOverview.vcpus_used}}
                              },
                              {
                                  "category": "未使用",
-                                 "value": 567
+                                 "value": {{resourceOverview.vcpus}}-{{resourceOverview.vcpus_used}}
                              },
                             
                          ];
@@ -188,7 +188,7 @@
                 chart = new AmCharts.AmPieChart();
 
                 // title of the chart
-                chart.addTitle("内存", 26);
+                chart.addTitle("内存(MB)", 26);
 
                 chart.dataProvider = chartData;
                 chart.titleField = "category";
@@ -206,7 +206,7 @@
                 chart2 = new AmCharts.AmPieChart();
 
                 // title of the chart
-                chart2.addTitle("磁盘", 26);
+                chart2.addTitle("磁盘(GB)", 26);
 
                 chart2.dataProvider = chartData2;
                 chart2.titleField = "category";

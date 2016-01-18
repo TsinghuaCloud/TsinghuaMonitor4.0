@@ -20,4 +20,5 @@ def resource_page(request):
     token = ceilometer_api.get_token(request, token_type='token')['token']
     request.session['token'] = token
     PminfoDetail=ceilometer_api.get_PmInfo(token)
-    return render(request, 'resource.html', {'title': 'resource-list','Pminfo':PminfoDetail})
+    resourceOverview=ceilometer_api.get_allPmStatistics(token)
+    return render(request, 'resource.html', {'title': 'resource-list','Pminfo':PminfoDetail,'resourceOverview':resourceOverview['data']['hypervisor_statistics']})
