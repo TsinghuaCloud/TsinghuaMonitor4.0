@@ -12,9 +12,6 @@ def meters_page(request):
     return render(request, 'meters.html', {'title': 'Meter-list'})
 
 def test_page(request):
-    request.session['username'] = 'admin'
-    request.session['password'] = 'cloud'
-    request.session['tenant_name'] = 'admin'
     request.session['token'] = ceilometer_api.get_token(request, 'token')
 
     return render(request, 'test-page.html')
