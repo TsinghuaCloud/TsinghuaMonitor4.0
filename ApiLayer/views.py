@@ -34,6 +34,53 @@ def get_token(request, token_type=None):
         return token
     else:
         return HttpResponse(json.dumps(token), content_type='application/json')
+    
+def get_allPmStatistics(token):
+    '''
+    Get samples of a selected meter
+    :param token: (string) token issued by Keystone
+    :param meter_name: (string)
+    :param kwargs: (Dict) Query criteria,
+                    e.g. ['meter_name': <meter_name>, 'resource_id': <resource_id>]
+    :return:
+    '''
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    #url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
+
+def get_PmInfo(token):
+    '''
+    Get samples of a selected meter
+    :param token: (string) token issued by Keystone
+    :param meter_name: (string)
+    :param kwargs: (Dict) Query criteria,
+                    e.g. ['meter_name': <meter_name>, 'resource_id': <resource_id>]
+    :return:
+    '''
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    #url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    allInfo=[]
+    serverList=ceilometer_api.nova_connection('/os-hypervisors', method='GET', header=request_header)
+    for single in  serverList['data']['hypervisors'] :
+        id=single['id']
+        info=ceilometer_api.nova_connection('/os-hypervisors/'+str(id), method='GET', header=request_header)['data']['hypervisor']
+        singleInfo={}
+        singleInfo['id']=id
+        singleInfo['name']=single['hypervisor_hostname']
+        singleInfo['vcpus_used']=info['vcpus_used']
+        singleInfo['local_gb_used']=info['local_gb_used']
+        singleInfo['memory_mb']=info['memory_mb']
+        singleInfo['vcpus']=info['vcpus']
+        singleInfo['memory_mb_used']=info['memory_mb_used']
+        singleInfo['local_gb']=info['local_gb']
+        allInfo.append(singleInfo)
+    return allInfo
+        
+
 
 @csrf_protect
 def get_meters(request):

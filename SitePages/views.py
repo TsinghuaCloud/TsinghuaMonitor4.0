@@ -17,4 +17,7 @@ def test_page(request):
     return render(request, 'test-page.html')
 
 def resource_page(request):
-    return render(request, 'resource.html', {'title': 'resource-list'})
+    token = ceilometer_api.get_token(request, token_type='token')['token']
+    request.session['token'] = token
+    PminfoDetail=ceilometer_api.get_PmInfo(token)
+    return render(request, 'resource.html', {'title': 'resource-list','Pminfo':PminfoDetail})

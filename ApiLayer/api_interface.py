@@ -63,6 +63,39 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
         data['data'] = json.loads(response.read())
         return data
 
+def nova_connection(base_url, method, header, url_parameters=None, body=None):
+    '''
+    :param url: (string)
+    :param method: (string) [POST | GET | PUT | DELETE ]
+    :param header: (JSON Object) headers for request
+    :param url_parameters: (JSON Object)
+    :param body: (JSON Object)
+    :return: (JSON Object) Data fetched from ceilometer api
+    '''
+    extra_url=''
+    if url_parameters != None:
+        extra_url = _url_para_to_url(**url_parameters)
+    conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, settings.NOVA_PORT))
+    req_header = header
+    req_body = None if body is None else json.dumps(body)
+    conn.request(method, '/v2/'+settings.ADMIN_TENANT_ID + base_url + extra_url, headers=req_header, body=req_body)
+    response = conn.getresponse()
+    if response.status != 200:
+        error = {}
+        error['status'] = 'failed'
+        error['code'] = response.status
+        error['msg'] = response.reason
+        error['data'] = ''
+        return error
+    else:
+        data = {}
+        data['status'] = 'success'
+        data['data'] = json.loads(response.read())
+        return data
+
+
+
+
 def get_meters(token, **kwargs):
     '''
     Get meter list from ceilometer api
@@ -93,6 +126,7 @@ def get_samples(token, meter_name, **kwargs):
                                  method='GET',
                                  header=request_header,
                                  url_parameters=url_para_obj)['data']
+
 
 def _kwargs_to_url_parameter_object(**kwargs):
     '''
