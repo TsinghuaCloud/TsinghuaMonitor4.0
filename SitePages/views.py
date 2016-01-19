@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 import json, httplib
 from ApiLayer import views as ceilometer_api
-
+from ApiLayer import api_interface
 # Create your views here.
 def overview(request):
     return render(request, 'overview.html')
@@ -17,6 +17,9 @@ def test_page(request):
     return render(request, 'test-page.html')
 
 def resource_page(request):
+    #token = api_interface.get_V3token()['token']
+   
+    #print tokenv3
     token = ceilometer_api.get_token(request, token_type='token')['token']
     request.session['token'] = token
     PminfoDetail=ceilometer_api.get_PmInfo(token)
