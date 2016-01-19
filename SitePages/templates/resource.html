@@ -5,7 +5,7 @@
 <head>
     <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
-    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+    <title>{% block title %}{% endblock %} {{title}}- TsinghuaCloud</title>
     {% include '_basic_static_css.html' %}
      <link rel="stylesheet" href="style.css" type="text/css">
         <script src="{% static 'amcharts/amcharts.js' %}" type="text/javascript"></script>
@@ -14,6 +14,7 @@
         
 </head>
 <body>
+{{allVMList}}
 {% block content %}
     <div id="container">
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
@@ -57,25 +58,25 @@
                         <table class="table">
                                 <thead>
                                 <tr>
-                                    <th style="text-align:center">编号</th>
+                                    <th style="text-align:center">ID</th>
                                     <th style="text-align:center"> 主机名称</th>
-                                    <th style="text-align:center">内存</th>
-                                    <th style="text-align:center">磁盘</th>
+                                    <th style="text-align:center">内存(MB)</th>
+                                    <th style="text-align:center">磁盘(GB)</th>
+                                     <th style="text-align:center">虚拟核数</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <th style="text-align:center" scope="row">1</th>
-                                    <td style="text-align:center">Computer 220</td>
-                                    <td style="text-align:center">10000/20000</td>
-                                     <td style="text-align:center">20000/30000</td>
+                                {% for info in Pminfo %}  
+                                 <tr>
+                                    <th style="text-align:center" scope="row">{{info.id}}</th>
+                                    <td style="text-align:center">{{info.name}}</td>
+                                    <td style="text-align:center">{{info.memory_mb_used}}/{{info.memory_mb}}</td>
+                                    <td style="text-align:center">{{info.local_gb_used}}/{{info.local_gb}}</td>
+                                    <td style="text-align:center">{{info.vcpus_used}}/{{info.vcpus}}</td>
                                 </tr>
-                                <tr>
-                                    <th style="text-align:center" scope="row">2</th>
-                                    <td style="text-align:center">Computer 221</td>
-                                   <td style="text-align:center">10000/20000</td>
-                                     <td style="text-align:center">20000/30000</td>
-                                </tr>
+                                {% endfor %}  
+                               
+                               
                                 </tbody>
                             </table>
                        
@@ -108,26 +109,24 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                            {% for  key,value in PMs.items %}
+                                
                                 <tr>
                                     
-                                    <td width="50%" rowspan="2" style="text-align:center">Computer 220</td>
-                                    <td style="text-align:center" width="50%">vm220-1</td>
+                                    <td width="50%" rowspan="{{value.len}}" style="text-align:center">{{key}}</td>
+                                    
+                                    
+                                    <td style="text-align:center" width="50%">{{value.first}}</td>
                                 </tr>
+                                {%for single in value.left%}
                                 <tr>
                                     
                                     
-                                    <td style="text-align:center">vm220-2</td>
+                                    <td style="text-align:center">{{single}}</td>
                                 </tr>
-                                <tr>
-                                    
-                                    <td  style="text-align:center" rowspan="2">Computer 221</td>
-                                    <td style="text-align:center">vm221-1</td>
-                                </tr>
-                                <tr>
-                                    
-                                   
-                                    <td style="text-align:center">vm221-2</td>
-                                </tr>
+                                {% endfor %}  
+                                {% endfor %}  
+                              
                                 </tbody>
                             </table>
                         
@@ -151,33 +150,33 @@
             var chartData = [
                              {
                                  "category": "已使用",
-                                 "value": 300
+                                 "value": {{resourceOverview.memory_mb_used}}
                              },
                              {
                                  "category": "未使用",
-                                 "value": 204
+                                 "value": {{resourceOverview.memory_mb}}-{{resourceOverview.memory_mb_used}}
                              },
                             
                          ];
             var chartData2 = [
                              {
                                  "category": "已使用",
-                                 "value": 306
+                                 "value":{{resourceOverview.local_gb_used}}
                              },
                              {
                                  "category": "未使用",
-                                 "value": 244
+                                 "value": {{resourceOverview.local_gb}}-{{resourceOverview.local_gb_used}}
                              },
                             
                          ];
             var chartData3 = [
                              {
                                  "category": "已使用",
-                                 "value": 378
+                                 "value": {{resourceOverview.vcpus_used}}
                              },
                              {
                                  "category": "未使用",
-                                 "value": 567
+                                 "value": {{resourceOverview.vcpus}}-{{resourceOverview.vcpus_used}}
                              },
                             
                          ];
@@ -187,7 +186,7 @@
                 chart = new AmCharts.AmPieChart();
 
                 // title of the chart
-                chart.addTitle("内存", 26);
+                chart.addTitle("内存(MB)", 26);
 
                 chart.dataProvider = chartData;
                 chart.titleField = "category";
@@ -205,7 +204,7 @@
                 chart2 = new AmCharts.AmPieChart();
 
                 // title of the chart
-                chart2.addTitle("磁盘", 26);
+                chart2.addTitle("磁盘(GB)", 26);
 
                 chart2.dataProvider = chartData2;
                 chart2.titleField = "category";

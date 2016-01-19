@@ -34,6 +34,63 @@ def get_token(request, token_type=None):
         return token
     else:
         return HttpResponse(json.dumps(token), content_type='application/json')
+    
+def get_allPmStatistics(token):
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    #url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
+
+def get_allVMList(token):
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    PM_vmInfo={}
+    '''
+    url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    tenantList=ceilometer_api.keystone_connection('tenants', method='GET', header=request_header)
+    print tenantList
+    
+    for tenantIdinfo in tenantList['data']['tenants']:
+    '''
+    serverList=ceilometer_api.nova_connection('/servers/detail', method='GET', header=request_header)
+        #print tenantIdinfo['name']
+        #print serverList
+    if serverList['status']=="success":
+        for single in serverList['data']['servers']:
+            PM_name=single['OS-EXT-SRV-ATTR:host']
+            VM_name=single['name']
+            if PM_vmInfo.has_key(PM_name)==False:
+                PM_vmInfo[PM_name]=[]
+            PM_vmInfo[PM_name].append(VM_name)
+    return PM_vmInfo
+
+def get_PmInfo(token):
+
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    #url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    allInfo=[]
+    serverList=ceilometer_api.nova_connection('/os-hypervisors', method='GET', header=request_header)
+    print serverList
+    for single in  serverList['data']['hypervisors'] :
+        id=single['id']
+        info=ceilometer_api.nova_connection('/os-hypervisors/'+str(id), method='GET', header=request_header)['data']['hypervisor']
+        singleInfo={}
+        singleInfo['id']=id
+        singleInfo['name']=single['hypervisor_hostname']
+        singleInfo['vcpus_used']=info['vcpus_used']
+        singleInfo['local_gb_used']=info['local_gb_used']
+        singleInfo['memory_mb']=info['memory_mb']
+        singleInfo['vcpus']=info['vcpus']
+        singleInfo['memory_mb_used']=info['memory_mb_used']
+        singleInfo['local_gb']=info['local_gb']
+        allInfo.append(singleInfo)
+    return allInfo
+        
+
 
 @csrf_protect
 def get_meters(request):
