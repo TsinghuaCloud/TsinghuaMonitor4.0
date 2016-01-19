@@ -4,9 +4,11 @@ import urllib2
 
 from django.conf import settings
 
-def get_alarms(request):
-    print 'test_commit'
-    pass
+def get_alarms(token, **kwargs):
+    request_header = {'X-Auth-Token': token,
+                      'Content-Type': 'application/json'}
+    url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_connection('alarms', method='GET', header=request_header, url_parameters=url_para_obj)
 
 def get_token(tenant_name=None, username=None, password=None):
     '''
@@ -76,6 +78,9 @@ def get_meters(token, **kwargs):
     url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=url_para_obj)
 
+def get_resources(token, **kwargs):
+    pass
+
 def get_samples(token, meter_name, **kwargs):
     '''
     Get samples of a selected meter
@@ -93,6 +98,38 @@ def get_samples(token, meter_name, **kwargs):
                                  method='GET',
                                  header=request_header,
                                  url_parameters=url_para_obj)['data']
+
+def post_alarm(token, **kwargs):
+    # Pack related kwargs into alarm_dictionary
+    new_alarm = {}
+    request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+
+    # Mandatory arguments for packing a new alarm
+    try:
+        new_alarm['name'] = kwargs['name']
+        new_alarm['meter_name'] = kwargs['meter_name']
+        new_alarm['threshold'] = kwargs['threshold']
+    except KeyError, e:
+        return {'status': 'error',
+                'msg': 'Key: ' + str(e) + ' not provided!'}
+
+    # Pack other optional arguments
+    new_alarm['alarm_actions'] = kwargs.get('alarm_actions', [])
+    new_alarm['ok_actions'] = kwargs.get('ok_actions', [])
+    new_alarm['insufficient_data_actions'] = kwargs.get('insufficient_data_actions', [])
+    new_alarm['type'] = kwargs.get('type', 'threshold')
+    new_alarm['period'] = kwargs.get('evaluation_period', 60)
+    new_alarm['query'] = kwargs.get('q', {})
+    new_alarm['repeat_actions'] = kwargs.get('repeat_actions', 'False')
+    new_alarm['severity'] = kwargs.get('severity', 'low')
+    new_alarm['enabled'] = kwargs.get('enabled', 'True')
+    new_alarm['statistic'] = kwargs.get('statistic', 'avg')
+    new_alarm['comparison_operator'] = kwargs.get('comparison_operator', 'ge')
+
+    return ceilometer_connection(base_url='alarms',
+                                 method='POST',
+                                 header=request_header,
+                                 body=new_alarm)['data']
 
 def _kwargs_to_url_parameter_object(**kwargs):
     '''

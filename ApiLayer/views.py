@@ -94,15 +94,12 @@ def _update_total_meters_count(request, criteria):
         criteria.pop('limit')
     if 'skip' in criteria:
         criteria.pop('skip')
-    print criteria
     if request.session.has_key('total_meters_count'):
         refreshed_time = request.session['refreshed_time']
         delta = time.time() - refreshed_time
-        print request.session['criteria_hash']
         if delta < 1000 and request.session['criteria_hash'] == criteria:
             return
 
-    print 'cache miss'
     request.session['refreshed_time'] = time.time()
     request.session['criteria_hash'] = criteria
 
@@ -143,8 +140,9 @@ def get_samples(request):
 
 
 def get_alarms(request):
-    result = ceilometer_api.get_alarms(request.session['token'])
-    pass
+    arrays, filters = _request_GET_to_dict(request.GET)
+    result = ceilometer_api.get_alarms(request.session['token'], **filters)
+    return HttpResponse(json.dumps({'data': result}), content_type='application/json')
 
 
 def get_resources(request):
@@ -188,3 +186,9 @@ def _qdict_to_dict(qdict):
     '''
     return {k[:-2] if k[len(k) - 2:] == '[]' else k: v if k[len(k) - 2:] == '[]' else v[0]
             for k, v in qdict.lists()}
+
+def _report_error(error_type, error_msg):
+    return {'status': 'error',
+            'error_type': error_type,
+            'error_msg': error_msg
+            }
