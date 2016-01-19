@@ -36,29 +36,34 @@ def get_token(request, token_type=None):
         return HttpResponse(json.dumps(token), content_type='application/json')
     
 def get_allPmStatistics(token):
-    '''
-    Get samples of a selected meter
-    :param token: (string) token issued by Keystone
-    :param meter_name: (string)
-    :param kwargs: (Dict) Query criteria,
-                    e.g. ['meter_name': <meter_name>, 'resource_id': <resource_id>]
-    :return:
-    '''
     request_header = {}
     request_header['X-Auth-Token'] = token
     request_header['Content-Type'] = 'application/json'
     #url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
 
+def get_allVMList(token):
+    request_header = {}
+    request_header['X-Auth-Token'] = token
+    request_header['Content-Type'] = 'application/json'
+    #url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    tenantList=ceilometer_api.keystone_connection('tenants', method='GET', header=request_header)
+    PM_vmInfo={}
+    for tenantIdinfo in tenantList['data']['tenants']:
+        serverList=ceilometer_api.nova_connection('/servers/detail', method='GET', header=request_header,tenantId=tenantIdinfo['id'])
+        print tenantIdinfo['name']
+        print serverList
+        if serverList['status']=="success":
+            for single in serverList['data']['servers']:
+                PM_name=single['OS-EXT-SRV-ATTR:host']
+                VM_name=single['name']
+                if PM_vmInfo.has_key(PM_name)==False:
+                    PM_vmInfo[PM_name]=[]
+                PM_vmInfo[PM_name].append(VM_name)
+    return PM_vmInfo
+
 def get_PmInfo(token):
-    '''
-    Get samples of a selected meter
-    :param token: (string) token issued by Keystone
-    :param meter_name: (string)
-    :param kwargs: (Dict) Query criteria,
-                    e.g. ['meter_name': <meter_name>, 'resource_id': <resource_id>]
-    :return:
-    '''
+
     request_header = {}
     request_header['X-Auth-Token'] = token
     request_header['Content-Type'] = 'application/json'

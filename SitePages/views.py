@@ -21,4 +21,12 @@ def resource_page(request):
     request.session['token'] = token
     PminfoDetail=ceilometer_api.get_PmInfo(token)
     resourceOverview=ceilometer_api.get_allPmStatistics(token)
-    return render(request, 'resource.html', {'title': 'resource-list','Pminfo':PminfoDetail,'resourceOverview':resourceOverview['data']['hypervisor_statistics']})
+    allVMList=ceilometer_api.get_allVMList(token)
+    PMs={}
+    for key in allVMList:
+        temp={}
+        temp['len']=len(allVMList[key])
+        temp['left']=allVMList[key][1:]
+        temp['first']=allVMList[key][0]
+        PMs[key]=temp
+    return render(request, 'resource.html', {'title': 'resource-list','PMs':PMs,'Pminfo':PminfoDetail,'resourceOverview':resourceOverview['data']['hypervisor_statistics']})
