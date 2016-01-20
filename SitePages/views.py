@@ -33,3 +33,6 @@ def resource_page(request):
         temp['first']=allVMList[key][0]
         PMs[key]=temp
     return render(request, 'resource.html', {'title': 'resource-list','PMs':PMs,'Pminfo':PminfoDetail,'resourceOverview':resourceOverview['data']['hypervisor_statistics']})
+
+def createAlarm_page(request):
+    return render(request,'createAlarm.html',{'title': 'Create-alarm'})
