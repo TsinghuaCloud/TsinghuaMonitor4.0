@@ -1,0 +1,10 @@
+$(function(){
+  $('#PMinput').click(function{
+                      $('PM-table').show();
+                      $('VM-table').hidden();
+                      });
+  $('#VMinput').click(function{
+                      $('VMM-table').show();
+                      $('PM-table').hidden();
+                      });
+})
