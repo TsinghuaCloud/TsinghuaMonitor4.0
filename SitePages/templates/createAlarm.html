@@ -40,15 +40,16 @@
                     
                         <form>
                         主机类型：
-                         <input id＝"VMinput" type="radio" name="主机类型" value="VM" checked> 虚拟机
+                         <input id="VMinput" type="radio" name="主机类型" value="VM" checked> 虚拟机
                          <input id="PMinput" type="radio" name="主机类型" value="PM"> 物理机<br><br>
                         <!-- PM -->
                         <div class="row">
                         <div class="col-lg-11">
+                        <span id="PM-table">
                         <p>请从列表中选择您需要设置警报的主机：</p>
                         <div class="panel panel-default" style="width:40%">
                         
-                        <table class="table table-striped table-hover" id="PM-table" >
+                        <table class="table table-striped table-hover" id="" >
                             <thead>
                                 <tr>
                                     <th style="text-align:center"></th>
@@ -74,6 +75,7 @@
 
                             </tbody>
                         </table>
+                        </span>
                         </div>
                         </div>
                         </div>
@@ -82,11 +84,12 @@
                         <!-- VM -->
                         <div class="row">
                             <div class="col-lg-11">
+                            <span id="VM-table">
                                 <p>请从列表中选择您需要设置警报的实例：</p>
                                 
                                 <div class="panel panel-default" style="width:60%">
                                     
-                                    <table class="table table-striped table-hover" id="VM-table" >
+                                    <table class="table table-striped table-hover" id="" >
                                         <thead>
                                             <tr>
                                                 <th style="text-align:center"></th>
@@ -116,6 +119,7 @@
                                             
                                         </tbody>
                                     </table>
+                                    </span>
                                 </div>
                         
                             </div>

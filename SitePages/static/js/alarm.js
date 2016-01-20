@@ -1,10 +1,14 @@
 $(function(){
-  $('#PMinput').click(function{
-                      $('PM-table').show();
-                      $('VM-table').hidden();
-                      });
-  $('#VMinput').click(function{
-                      $('VMM-table').show();
-                      $('PM-table').hidden();
-                      });
-})
+	$('#PM-table').hide();
+    $('#VM-table').show();
+	$('#VMinput').click(function(){
+		//console.info("VMinput");
+		$('#PM-table').hide();
+        $('#VM-table').show();
+	});
+	$('#PMinput').click(function(){
+		//console.info("PMinput");
+		$('#VM-table').hide();
+        $('#PM-table').show();
+	});
+});
