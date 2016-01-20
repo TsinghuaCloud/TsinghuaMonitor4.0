@@ -224,8 +224,10 @@ def get_alarms(request):
 
 
 def get_resources(request):
-    pass
-
+    arrays, filters = _request_GET_to_dict(request.GET)
+    filters = _sanitize_filter(filters, query_capabilities.resource_list_capabilities)
+    result = ceilometer_api.get_resources(request.session['token'], **filters)
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 def _rename_parameters(args_dict):
     '''

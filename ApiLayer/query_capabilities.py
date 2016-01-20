@@ -9,6 +9,7 @@ alarm_list_capabilities = ['name', 'user_id', 'project_id', 'meter_name', 'enabl
 meter_list_capabilities = ['user_id', 'project_id', 'meter_id', 'source',
                            'limit', 'skip']
 
+resource_list_capabilities = ['user_id', 'project_id', 'limit', 'skip']
 
 
 

@@ -204,6 +204,7 @@ function updateChart(){
             valueAxis.axisThickness = 2;
             valueAxis.axisAlpha = 1;
             valueAxis.gridAlpha = 0;
+            valueAxis.minimum = 0;
             valueAxis.position = (k % 2) ? 'left': 'right';
             valueAxis.offset = Math.floor(k/2) * 50;
 

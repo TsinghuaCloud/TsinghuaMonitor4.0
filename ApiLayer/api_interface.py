@@ -72,14 +72,14 @@ def get_meters(token, **kwargs):
     :param kwargs: (Dict) filter criteria
     :return:
     '''
-    request_header = {}
-    request_header['X-Auth-Token'] = token
-    request_header['Content-Type'] = 'application/json'
+    request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
     url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=url_para_obj)
 
 def get_resources(token, **kwargs):
-    pass
+    request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+    url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_connection('resources', method='GET', header=request_header, url_parameters=url_para_obj)
 
 def get_samples(token, meter_name, **kwargs):
     '''
