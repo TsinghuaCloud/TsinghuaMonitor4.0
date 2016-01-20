@@ -180,3 +180,50 @@ def _url_para_to_url(**kwargs):
         # para_url = ''.join(('{}={}&'.()
         #                 for key, val in kwargs.iteritems()))
         # all_url = '?' + para_url
+
+def nova_connection(base_url, method, header,tenantId=None, url_parameters=None, body=None):
+    extra_url=''
+    if url_parameters != None:
+        extra_url = _url_para_to_url(**url_parameters)
+    if tenantId == None:
+        tenantId=settings.ADMIN_TENANT_ID
+    conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, settings.NOVA_PORT))
+    req_header = header
+    req_body = None if body is None else json.dumps(body)
+    conn.request(method, '/v2/'+tenantId + base_url + extra_url, headers=req_header, body=req_body)
+    response = conn.getresponse()
+    if response.status != 200:
+        error = {}
+        error['status'] = 'failed'
+        error['code'] = response.status
+        error['msg'] = response.reason
+        error['data'] = ''
+        return error
+    else:
+        data = {}
+        data['status'] = 'success'
+        data['data'] = json.loads(response.read())
+        return data
+ 
+def keystone_connection(base_url, method, header, url_parameters=None, body=None):
+    extra_url=''
+    if url_parameters != None:
+        extra_url = _url_para_to_url(**url_parameters)
+    conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, settings.KEYSTONE_PORT))
+    req_header = header
+    req_body = None if body is None else json.dumps(body)
+    conn.request(method, '/v2.0/'+ base_url + extra_url, headers=req_header, body=req_body)
+    response = conn.getresponse()
+    if response.status != 200:
+        error = {}
+        error = {}
+        error['status'] = 'failed'
+        error['code'] = response.status
+        error['msg'] = response.reason
+        error['data'] = ''
+        return error
+    else:
+        data = {}
+        data['status'] = 'success'
+        data['data'] = json.loads(response.read())
+        return data
