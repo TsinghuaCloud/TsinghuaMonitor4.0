@@ -77,7 +77,7 @@ def get_PmInfo(token):
     # url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     allInfo = []
     serverList = ceilometer_api.nova_connection('/os-hypervisors', method='GET', header=request_header)
-    print serverList
+    #print serverList
     for single in serverList['data']['hypervisors']:
         id = single['id']
         info = \
