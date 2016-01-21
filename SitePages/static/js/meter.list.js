@@ -43,16 +43,17 @@ $(document).ready(function () {
             {"data": "resource_id"},
             {"data": "resource_name"},
             {"data": "name"},
-            {"data": "type"}
+            {"data": "type"},
+            {"data": "unit"}
         ],
         "columnDefs": [
             {
-                "targets": [1],
+                "targets": [1, 6],
                 "visible": false,
                 "searchable": false
             },
             {
-                "targets": [0, 1, 2, 3, 4, 5],
+                "targets": [0, 1, 2, 3, 4, 5, 6],
                 "sortable": false
             },
             {

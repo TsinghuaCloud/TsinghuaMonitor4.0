@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 
 import api_interface as ceilometer_api
-import query_capabilities
+import capabilities
 
 def get_token(request, token_type=None):
     '''
@@ -135,7 +135,7 @@ def get_meters(request):
         except KeyError, e:
             return _report_error('KeyError', e)
 
-    filters = _sanitize_filter(filters, query_capabilities.meter_list_capabilities)
+    filters = _sanitize_filter(filters, capabilities.meter_list_capabilities)
     result = ceilometer_api.get_meters(token, **filters)
 
     _update_total_meters_count(request, filters)
@@ -218,14 +218,14 @@ def get_alarms(request):
     :return:
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = _sanitize_filter(filters, query_capabilities.alarm_list_capabilities)
+    filters = _sanitize_filter(filters, capabilities.alarm_list_capabilities)
     result = ceilometer_api.get_alarms(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 def get_resources(request):
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = _sanitize_filter(filters, query_capabilities.resource_list_capabilities)
+    filters = _sanitize_filter(filters, capabilities.resource_list_capabilities)
     result = ceilometer_api.get_resources(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
