@@ -60,7 +60,7 @@
                                 <tr>
                                     <th style="text-align:center">ID</th>
                                     <th style="text-align:center"> 主机名称</th>
-                                    <th style="text-align:center">内存(MB)</th>
+                                    <th style="text-align:center">内存(GB)</th>
                                     <th style="text-align:center">磁盘(GB)</th>
                                      <th style="text-align:center">虚拟核数</th>
                                 </tr>
@@ -154,7 +154,7 @@
                              },
                              {
                                  "category": "未使用",
-                                 "value": {{resourceOverview.memory_mb}}-{{resourceOverview.memory_mb_used}}
+                                 "value": {{resourceOverview.memory_mb_left}}
                              },
                             
                          ];
@@ -186,7 +186,7 @@
                 chart = new AmCharts.AmPieChart();
 
                 // title of the chart
-                chart.addTitle("内存(MB)", 26);
+                chart.addTitle("内存(GB)", 26);
 
                 chart.dataProvider = chartData;
                 chart.titleField = "category";
