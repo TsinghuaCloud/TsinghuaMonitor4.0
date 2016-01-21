@@ -96,6 +96,10 @@ def get_PmInfo(token):
     return allInfo
 
 
+def post_alarms(request):
+
+    pass
+
 @csrf_protect
 def get_meters(request):
     '''

@@ -55,18 +55,22 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
     req_body = None if body is None else json.dumps(body)
     conn.request(method, '/v2/' + base_url + extra_url, headers=req_header, body=req_body)
     print '/v2/' + base_url + extra_url
-    response = conn.getresponse()
-    if response.status != 200:
-        error = {'status': 'failed',
-                 'code': response.status,
-                 'msg': response.reason,
-                 'data': ''}
-        return error
-    else:
-        data = {'status': 'success',
-                'data': json.loads(response.read())}
-        return data
-
+    try:
+        response = conn.getresponse()
+        if response.status != 200:
+            error = {'status': 'failed',
+                     'code': response.status,
+                     'msg': response.reason,
+                     'data': ''}
+            return error
+        else:
+            data = {'status': 'success',
+                    'data': json.loads(response.read())}
+            return data
+    except httplib.HTTPException, e:
+        return {'status': 'failed',
+                'error_message': e.message
+                }
 
 def get_meters(token, **kwargs):
     '''
@@ -98,6 +102,7 @@ def get_samples(token, meter_name, **kwargs):
     request_header = {}
     request_header['X-Auth-Token'] = token
     request_header['Content-Type'] = 'application/json'
+    kwargs['limit'] = 500
     url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_connection('meters/' + meter_name,
                                  method='GET',
@@ -186,7 +191,7 @@ def _url_para_to_url(**kwargs):
         # if kwargs.get('limit'):
         # all_url
         # para_url = ''.join(('{}={}&'.()
-        #                 for key, val in kwargs.iteritems()))
+        # for key, val in kwargs.iteritems()))
         # all_url = '?' + para_url
 
 
@@ -210,6 +215,7 @@ def nova_connection(base_url, method, header, tenant_id=None, url_parameters=Non
     else:
         data = {'status': 'success', 'data': json.loads(response.read())}
         return data
+
 
 def keystone_connection(base_url, method, header, url_parameters=None, body=None):
     extra_url = ''

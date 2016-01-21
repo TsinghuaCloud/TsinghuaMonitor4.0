@@ -43,17 +43,16 @@ $(document).ready(function () {
             {"data": "resource_id"},
             {"data": "resource_name"},
             {"data": "name"},
-            {"data": "type"},
-            {"data": "unit"}
+            {"data": "type"}
         ],
         "columnDefs": [
             {
-                "targets": [1, 6],
+                "targets": [1],
                 "visible": false,
                 "searchable": false
             },
             {
-                "targets": [0, 1, 2, 3, 4, 5, 6],
+                "targets": [0, 1, 2, 3, 4, 5],
                 "sortable": false
             },
             {
@@ -205,7 +204,6 @@ function updateChart(){
             valueAxis.axisThickness = 2;
             valueAxis.axisAlpha = 1;
             valueAxis.gridAlpha = 0;
-            valueAxis.minimum = 0;
             valueAxis.position = (k % 2) ? 'left': 'right';
             valueAxis.offset = Math.floor(k/2) * 50;
 
@@ -220,8 +218,6 @@ function updateChart(){
             graph.type = "line";
             graph.lineThickness = 2;
             graph.fillAlphas = 0;
-            console.info(valueAxis.axisColor);
-            console.info(graph.lineColor);
 
             valueAxis.axisColor = graph.lineColor;
             // ATTACH TO CHART INSTANCE
@@ -239,11 +235,10 @@ function updateChart(){
         chart.dataProvider = chartData.sort(compareDate);
         chart.validateData();
         chart.validateNow();
-        for (var i = 0; i < chart_dataset_list.length; i++){
-            chart.valueAxes[i].axisColor = chart.graphs[i].lineColorR;
-        };
+        for (var m = 0; m < chart_dataset_list.length; m++){
+            chart.valueAxes[m].axisColor = chart.graphs[m].lineColorR;
+        }
         chart.validateNow();
-
     });
 }
 function getFormattedDate(dt)
@@ -298,9 +293,9 @@ var chart = AmCharts.makeChart("meter-chart", {
         "fillAlphas": 0
     }],
     "categoryField": "date",
-    "dataDateFormat": "YYYY-MM-DD HH:NN",
+    "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
 	"categoryAxis": {
-		"minPeriod": "mm",
+		"minPeriod": "ss",
 		"parseDates": true
 	},
     "export": {
