@@ -25,6 +25,6 @@ urlpatterns = [
     url(r'^overview/$', SiteViews.overview, name="Overview Page"),
     url(r'^monitor/meters/$', SiteViews.meters_page, name="Meter Page"),
     url(r'^resource/', SiteViews.resource_page, name="resource Page"),
+    url(r'^alarms/createAlarm/$', SiteViews.createAlarm_page, name="createAlarm Page"),
     url(r'^$', SiteViews.overview, name="Overview Page"),
-    url(r'^createAlarm', SiteViews.createAlarm_page, name="createAlarm Page")
 ]
