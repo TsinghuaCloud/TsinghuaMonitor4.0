@@ -1,0 +1,232 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+    {% include '_basic_static_css.html' %}
+     <link rel="stylesheet" href="style.css" type="text/css">
+        <script src="{% static 'amcharts/amcharts.js' %}" type="text/javascript"></script>
+        <script src="{% static 'amcharts/pie.js' %} " type="text/javascript"></script>
+        <style>
+        #aside {
+        line-height:35px;
+        background-color:white;
+        height:300px;
+        width:450px;
+        float:right;
+        padding:25px;
+        }
+        #section {
+            width:500px;
+            background-color:white;
+            float:left;
+            padding:10px;
+        }
+        </style>
+        
+</head>
+<body>
+{% block content %}
+    <div id="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            {% include "_topbar.html" %}
+            <div class="navbar-default sidebar" role="navigation">
+            {% block sidebar %}
+                {% include '_sidebar.html' %}
+            {% endblock %}
+            </div>
+        </nav>
+
+        <div id="page-wrapper" style="min-height: 219px;">
+            <!-- Create Alarm -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                        <p class="col-lg-11">创建警报 | Create Alarms</p>
+                        <div class="row">
+                    </h3>
+                </div>
+            </div>
+            <ul class="nav nav-tabs">
+                <li role="presentation" ><a href="/createAlarm/selectMeter">1.选择指标</a></li>
+                <li role="presentation" class="active"><a href="/createAlarm/create">2.创建警报</a></li>
+            </ul>
+            <div class="row">
+                <p> <br> </p>
+            </div>
+        <!-- form -->
+                    
+                        <form>
+                        <p class="col-lg-11">请参考底部图示设定警报阈值。</p>
+                        
+                        
+                        <!-- 图示 -->
+                       
+                       <div id="aside">
+                           <form>
+                              
+                           <label  class="col-sm-3 control-label">每当</label>
+                           <p>CPU利用率</p>
+                           
+                           
+                           <ul class="list-inline">
+                               <label  class="col-sm-3 control-label">是</label>
+                               
+                               <li>
+                                   <select class="form-control input-sm" style="width:100%" >
+                                       <option>>=</option>
+                                       <option><=</option>
+                                           <option>></option>
+                                           <option><</option>
+                                               <option>=</option>
+                                               </select>
+                                   
+
+                               </li>
+                               <li><input class="form-control input-sm" style="width:50%" placeholder="阈值"></li>
+                               
+                           </ul>
+                           
+                           <ul class="list-inline">
+                               
+                               <label  class="col-sm-3 control-label">对于</label>
+                               
+                               <li>
+                                   <input class="form-control input-sm" style="width:89%" placeholder="连续周期数">
+                                   
+                               </li>
+                               <li>个连续周期</li>
+                              
+                           </ul>
+                           
+                           
+                           <ul class="list-inline">
+                               <label  class="col-sm-3 control-label">周期长度</label>
+                               <li>
+                                   <select class="form-control input-sm" style="width:100%" >
+                                       <option>1分钟</option>
+                                       <option>10分钟</option>
+                                       <option>30分钟</option>
+                                       <option>1小时</option>
+                                       <option>12小时</option>
+                                       <option>24小时</option>
+                                   </select>
+                               </li>
+                           </ul>
+                           
+                           
+                           <ul class="list-inline">
+                               <label  class="col-sm-3 control-label">统计数据</label>
+                               <li><select class="form-control input-sm" style="width:100%" >
+                                   <option>平均值</option>
+                                   <option>最高值</option>
+                                   <option>最低值</option>
+                               </select>
+                               </li>
+                           </ul>
+                           
+                           </form>
+                       </div>
+                       
+                       <div id="section">
+                        <div id="chartdiv" style="width: 100%; height: 300px"></div>
+                       </div>
+                       
+                       <div class="row">
+                           <div class="col-lg-12">
+                               <h3 class="page-header">
+                                   <p class="col-lg-11">操作</p>
+                                   <div class="row">
+                                       </h3>
+                              
+                               <ul class="list-inline">
+                                   <li>定义当您的警报状态发生变化时，要执行的操作。</li>
+                                   <li><a class="btn btn-default" href="#" role="button">＋通知</a></li>
+                               </ul>
+                               
+                               <div class="panel panel-default" style="width: 60%; height: 140px">
+                                   <div class="panel-heading" style="width: 100%; height: 35px">通知</div>
+                                   <div class="panel-body">
+                                       
+                                       <ul class="list-inline">
+                                           <label  class="col-sm-3 control-label">每当此警报为</label>
+                                           <li>
+                                               <select class="form-control input-sm" style="width:200%" >
+                                                   <option>状态为“报警”</option>
+                                                   <option>状态为“数据不足”</option>
+                                               </select>
+                                           </li>
+                                       </ul>
+                                       
+                                       <div class="row">
+                                           <ul class="list-inline">
+                                               <div class="col-md-3">
+                                                   
+                                                   
+                                                   <label  class="col-sm-12 control-label">发送邮件至</label>
+                                                    </div>
+                                               <div class="col-md-6">
+                                                   <li>
+                                                       <input class="form-control input-sm" style="width:100%" placeholder="电子邮箱地址">
+                                                           </li>
+                                                   
+                                               </div>
+                                               
+                                               <div class="col-md-3">
+                                                   <li>
+                                                       <button type="button" class="btn btn-link">删除</button>
+                                                   </li>
+                                               </div>
+                                               
+                                           </ul>
+                                       </div>
+                                      
+                                   </div>
+                                   
+                               </div>
+                               <div class="row">
+                                   <div class="col-lg-6">
+                                       <a class="btn btn-primary" href="/createAlarm/selectMeter" role="button">上一步</a>
+                                   </div>
+                                   <div class="col-lg-4">
+                                       <a class="btn btn-primary" href="/createAlarm/create" role="button">保存</a>
+                                   </div>
+                               </div>
+
+                            </div>
+                           </div>
+                       </div>
+        
+    </form>
+                        
+                        
+    <!-- END form -->
+{% endblock %}
+
+<div id="footer">
+</div>
+{% include '_basic_js.html' %}
+<!-- DataTables JS -->
+<script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
+
+<!-- DataTables Bootstrap JS -->
+<script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
+<!-- Table JS  -->
+
+<script src="{% static 'js/alarm.list.js' %}"></script>
+
+<!-- AmChart JS -->
+<script src="{% static 'amcharts/amcharts.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
+
+<!-- AmChart JS Serial Chart-->
+<script src="{% static 'amcharts/serial.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
+
+
+</body>
+</html>
+

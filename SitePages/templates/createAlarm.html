@@ -24,8 +24,13 @@
             {% endblock %}
             </div>
         </nav>
+        
+
+
 
         <div id="page-wrapper" style="min-height: 219px;">
+            
+            
             <!-- Create Alarm -->
             <div class="row">
                 <div class="col-lg-12">
@@ -36,6 +41,13 @@
                 </div>
             </div>
             
+            <ul class="nav nav-tabs">
+                <li role="presentation" class="active"><a href="/createAlarm/selectMeter">1.选择指标</a></li>
+                <li role="presentation"><a href="/createAlarm/create">2.创建警报</a></li>
+            </ul>
+           <div class="row">
+               <p> <br> </p>
+           </div>
         <!-- form -->
                     
                         <form>
@@ -43,13 +55,18 @@
                          <input id="VMinput" type="radio" name="主机类型" value="VM" checked> 虚拟机
                          <input id="PMinput" type="radio" name="主机类型" value="PM"> 物理机<br><br>
                         <!-- PM -->
-                        <div class="row">
-                        <div class="col-lg-11">
                         <span id="PM-table">
-                        <p>请从列表中选择您需要设置警报的主机：</p>
-                        <div class="panel panel-default" style="width:40%">
+                        <div class="panel panel-default" style="width:80%">
+                            <!-- Default panel contents -->
+                            <div class="panel-heading">主机列表</div>
+                            <div class="panel-body">
+                                <div class="col-lg-12">
                         
-                        <table class="table table-striped table-hover" id="" >
+                        <p>请从列表中选择您需要设置警报的主机：</p>
+                        
+                        <p></p>
+                        <div class="dataTable_wrapper">
+                        <table class="table table-striped table-hover" id="PM-Table" style="width:100%">
                             <thead>
                                 <tr>
                                     <th style="text-align:center"></th>
@@ -75,21 +92,27 @@
 
                             </tbody>
                         </table>
+                        </div>
+                        </div>
+                        </div>
+                        </div>
                         </span>
-                        </div>
-                        </div>
-                        </div>
                         <!-- PM  END-->
                         
                         <!-- VM -->
-                        <div class="row">
-                            <div class="col-lg-11">
-                            <span id="VM-table">
+                        <span id="VM-table">
+                        <div class="panel panel-default" style="width:80%">
+                            <!-- Default panel contents -->
+                            
+                            <div class="panel-heading" style="width: 100%; height: 35px">实例列表</div>
+                            <div class="panel-body">
+                                <div class="col-lg-12">
+                            
                                 <p>请从列表中选择您需要设置警报的实例：</p>
                                 
-                                <div class="panel panel-default" style="width:60%">
-                                    
-                                    <table class="table table-striped table-hover" id="" >
+                                    <p></p>
+                                    <div class="dataTable_wrapper">
+                                    <table class="table table-striped table-hover" id="VM-Table" style="width:100%" >
                                         <thead>
                                             <tr>
                                                 <th style="text-align:center"></th>
@@ -119,18 +142,25 @@
                                             
                                         </tbody>
                                     </table>
-                                    </span>
+                                    
                                 </div>
+                               </div>
+                             </div>
+                         </div>
                         
-                            </div>
-                        </div>
+                        </span>
+    
+    
+    
                         <!-- VM END-->
-                        <div class="row">
-                            <div class="col-lg-10">
-                            <p>请选择指标名称：</p>
-                            <div class="panel panel-default" style="width:60%">
-                                
-                                <table class="table table-striped table-hover" id="PM-table" >
+                        <div class="panel panel-default" style="width:80%">
+                        <div class="panel-heading" style="width: 100%; height: 35px">指标列表</div>
+                        <div class="panel-body">
+                            <div class="col-lg-12">
+                            <p>请选择指标以设定警报：</p>
+                            
+                                <div class="dataTable_wrapper">
+                                <table class="table table-striped table-hover" id="Meter-Table" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th style="text-align:center"></th>
@@ -157,14 +187,31 @@
                                         
                                     </tbody>
                                 </table>
-                            </div>
-
-
+                                </div>
+                                </div>
+                            
                             </div>
                         </div>
                         
                         
                         </form>
+                        
+                        <div class="panel panel-default" style="width:80%">
+                        <div class="panel-heading" style="width: 100%; height: 35px">指标图示</div>
+                        <div class="panel-body">
+                            
+                            <div id="chartdiv" style="width: 100%; height: 300px"></div>
+                        </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-8">
+                            </div>
+                            <div class="col-lg-4">
+                            <a class="btn btn-primary" href="/createAlarm/create" role="button">下一步</a>
+                            </div>
+                        </div>
+   
    
     <!-- END form -->
 {% endblock %}
@@ -172,9 +219,24 @@
 <div id="footer">
 </div>
 {% include '_basic_js.html' %}
+<!-- DataTables JS -->
+<script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
 
-<script src="{% static 'js/alarm.js' %}"></script></body>
+<!-- DataTables Bootstrap JS -->
+<script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
+<!-- Table JS  -->
+<script src="{% static 'js/alarm.js' %}"></script>
+<script src="{% static 'js/alarm.list.js' %}"></script>
+
+<!-- AmChart JS -->
+<script src="{% static 'amcharts/amcharts.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
+
+<!-- AmChart JS Serial Chart-->
+<script src="{% static 'amcharts/serial.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
 
 
+</body>
 </html>
 
