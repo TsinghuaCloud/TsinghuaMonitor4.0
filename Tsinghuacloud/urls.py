@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from SitePages import views as SiteViews
 from ApiLayer import urls as ceilometer_api_interface
+from AlarmNotification import views as AlarmNotice
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -28,5 +29,6 @@ urlpatterns = [
     url(r'^netTopo/', SiteViews.netTopo_page, name="netTopo Page"),
     url(r'^alarms/createAlarm/$', SiteViews.createAlarm_page, name="createAlarm Page"),
     url(r'^health/', SiteViews.overview, name="Overview Page"),
+    url(r'^alarm-notice/$', AlarmNotice.notice_by_mail, name="createAlarm Page"),
     url(r'^$', SiteViews.overview, name="Overview Page"),
 ]

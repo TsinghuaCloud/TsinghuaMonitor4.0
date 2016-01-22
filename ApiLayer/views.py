@@ -95,10 +95,25 @@ def get_PmInfo(token):
         allInfo.append(singleInfo)
     return allInfo
 
-
+@csrf_protect
 def post_alarms(request):
-
-    pass
+    '''
+    Post new alarms through ceilometer API.
+    Notice: This api is protected by csrf_protect. 'X-csrf-token' should be added to request headers .
+    :param request:
+    :return: (JSON) Result of posting new alarm.
+                     Return state: 'success' or 'error'
+    '''
+    token = get_token(request, token_type='token')['token']
+    request.session['token'] = token
+    if request.method == 'POST':
+        kwargs = _sanitize_arguments(_request_GET_to_dict(request.POST, False),
+                                     capabilities.post_alarm_capabilities)
+        return ceilometer_api.post_alarm(token, **kwargs)
+    else:
+        return HttpResponse(json.dumps({'status': 'error',
+                                        'error_msg': 'Request method should be POST.'}),
+                            content_type='application/json')
 
 @csrf_protect
 def get_meters(request):
@@ -139,7 +154,7 @@ def get_meters(request):
         except KeyError, e:
             return _report_error('KeyError', e)
 
-    filters = _sanitize_filter(filters, capabilities.meter_list_capabilities)
+    filters = _sanitize_arguments(filters, capabilities.meter_list_capabilities)
     result = ceilometer_api.get_meters(token, **filters)
 
     _update_total_meters_count(request, filters)
@@ -222,14 +237,14 @@ def get_alarms(request):
     :return:
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = _sanitize_filter(filters, capabilities.alarm_list_capabilities)
+    filters = _sanitize_arguments(filters, capabilities.alarm_list_capabilities)
     result = ceilometer_api.get_alarms(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 def get_resources(request):
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = _sanitize_filter(filters, capabilities.resource_list_capabilities)
+    filters = _sanitize_arguments(filters, capabilities.resource_list_capabilities)
     result = ceilometer_api.get_resources(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
@@ -248,12 +263,13 @@ def _rename_parameters(args_dict):
     return dict
 
 
-def _request_GET_to_dict(qdict):
+def _request_GET_to_dict(qdict, seperate_args_and_list=True):
     '''
     Convert url parameters to seperate arrays and url variables
     :param qdict: (QueryDict) QueryDict element such as request.GET
-    :return: (Dict)array: array elements in qdict
-              (Dict)url_variables: other url parameters
+    :return: (Dict) array: array elements in qdict
+              (Dict) url_variables: other url parameters
+          or: (Dict) array: all arguments and lists in request URL
     '''
     url_handle = _qdict_to_dict(qdict)
     arrays = {}
@@ -263,6 +279,9 @@ def _request_GET_to_dict(qdict):
             arrays[k] = url_handle[k]
         else:
             url_variables[k] = url_handle[k]
+
+    if not seperate_args_and_list:
+        return arrays.update(url_variables)
     return arrays, url_variables
 
 
@@ -291,6 +310,6 @@ def _report_error(error_type, error_msg):
                   }
     return HttpResponse(json.dumps(error_json), content_type='application/json')
 
-def _sanitize_filter(filter, capabilities):
+def _sanitize_arguments(filter, capabilities):
     f = copy.copy(filter)
     return {k: v for k, v in f.iteritems() if k in capabilities}
