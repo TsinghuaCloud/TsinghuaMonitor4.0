@@ -1,0 +1,48 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} {{title}}- TsinghuaCloud</title>
+    {% include '_basic_static_css.html' %}
+     <link rel="stylesheet" href="style.css" type="text/css">
+
+        
+</head>
+<body>
+
+{% block content %}
+ 
+    <div id="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            {% include "_topbar.html" %}
+            <div class="navbar-default sidebar" role="navigation">
+            {% block sidebar %}
+                {% include '_sidebar.html' %}
+            {% endblock %}
+            </div>
+        </nav>
+
+        <div id="page-wrapper" style="min-height: 219px;">
+          <canvas width="850" height="550" id="canvas"></canvas>	
+        </div>
+        <!-- END page-wrapper -->
+    </div>
+    <!-- END container -->
+{% endblock %}
+<div id="footer">
+</div>
+{% include '_basic_js.html' %}
+ <script src="{% static 'js/jtopo-0.4.8-min.js' %}"></script>
+<script src="{% static 'js/toolbar.js' %}"></script>
+<script src="{% static 'js/jquery.snippet.min.js' %}"></script>
+<script src="{% static 'js/netTopo.js' %}"></script>
+<script id='code'>				
+		
+	</script>
+</body>
+
+</html>
+

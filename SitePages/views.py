@@ -41,3 +41,7 @@ def resource_page(request):
 
 def createAlarm_page(request):
     return render(request,'createAlarm.html',{'title': 'Create-alarm'})
+
+def netTopo_page(request):
+    return render(request,'netTopo.html',{'title': 'Create-alarm'})
+
