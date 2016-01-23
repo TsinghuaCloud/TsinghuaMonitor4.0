@@ -16,7 +16,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0xu25b&kv!!u-=+b#r2hwnm3$=ur=us(j-%ht8&%16mt&6hmi8'
+SECRET_KEY = ''
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -110,12 +110,27 @@ STATIC_FINDERS = {
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 # Project related
-OPENSTACK_TENANT_NAME = 'admin'
-OPENSTACK_USERNAME_NAME = 'admin'
-OPENSTACK_PASSWORD = 'cloud'
+OPENSTACK_TENANT_NAME = ''
+OPENSTACK_USERNAME_NAME = ''
+OPENSTACK_PASSWORD = ''
 
-OPENSTACK_CONTROLLER_IP = "166.111.143.220"
+OPENSTACK_CONTROLLER_IP = ""
 CEILOMETER_PORT = 8777
 NOVA_PORT = 8774
-ADMIN_TENANT_ID = "56fc364c204043b98a438122568fbf14"
+ADMIN_TENANT_ID = ""
 KEYSTONE_PORT = 35357
+
+# ------- Email related -----------
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Host for sending e-mail.
+EMAIL_HOST = 'smtp.163.com'
+
+# Port for sending e-mail.
+EMAIL_PORT = 25
+
+# Optional SMTP authentication information for EMAIL_HOST.
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = True
+#EMAIL_SUBJECT_PREFIX = u'[TsinghuaMonitor]'

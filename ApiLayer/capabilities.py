@@ -10,7 +10,7 @@ meter_list_capabilities = ['user_id', 'project_id', 'meter_id', 'source', 'resou
                            'limit', 'skip', 'resource_id_match', 'resource_name_match']
 
 resource_list_capabilities = ['user_id', 'project_id', 'limit', 'skip', 'resource_id_match',
-                              'resource_name_match']
+                              'resource_name_match', 'meter_name_match']
 
 post_alarm_capabilities = ['comparison_operator', 'description', 'enabled', 'periods',
                            'meter_name', 'name', 'project_id', 'query', 'severity',

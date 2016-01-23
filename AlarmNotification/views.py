@@ -1,34 +1,84 @@
 import copy
 import json
+import smtplib
 
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.core.mail import send_mail, BadHeaderError
+from django.core.mail import EmailMessage
+from django.views.decorators.csrf import csrf_exempt
 
 ALARM_NOTIFICATION_BODY_PARAS = ['alarm_name', 'alarm_id', 'severity',
                                  'previous', 'current', 'action', 'reason',
-                                 'request_id']
+                                 'request_id', 'reason_data']
 
 # Create your views here.
+@csrf_exempt
 def notification(request):
+    '''
+    Handles notification requests.
+    :param request: Django HTTP request
+    :return: HTTPResponse
+    '''
     if request.method != 'POST':
         return HttpResponse("Request method should be POST",
                             content_type='text/plain')
     if not _check_validity(request):
         return HttpResponse("Illegal notification request!",
                             content_type='text/plain')
-
-    kwargs = _sanitize_arguments(_request_method_to_dict(request.POST, False),
+    kwargs = _sanitize_arguments(_request_method_to_dict(request.body),
                                  ALARM_NOTIFICATION_BODY_PARAS)
+    return _notice_by_mail(**kwargs)
 
-    return HttpResponse("Success", content_type='text/plain')
 
-def _notice_by_mail(email_args):
+def _notice_by_mail(**kwargs):
+    '''
+    Sending emails to administrator.
+    :param alarm_id: (string) alarm id provided by ceilometer
+    :param alarm_name: (string) name of the triggered alarm
+    :param kwargs: (dictionary) other arguments related to emails to send
+    :return: (HTTPResponse): Success or Failed.
+    '''
+    if not kwargs.get('alarm_name'):
+        return HttpResponse('Error: alarm_name not provided.')
+    if not kwargs.get('alarm_id') :
+        return HttpResponse('Error: alarm_id not provided.')
+    alarm_name = kwargs.get('alarm_name')
+    alarm_id = kwargs.get('alarm_id')
+
+    email_subject = '%(alarm_name)s is triggered' % ({
+                                                                        'alarm_name': alarm_name})
+    email_msg = "Request ID: %(request_id)s\n" \
+                "Alarm   ID: %(alarm_id)s\n" \
+                "Alarm Name: %(alarm_name)s\n" \
+                "Severity  : %(severity)s\n\n" \
+                "This alarm has been triggered. Its states was changed from " \
+                "%(previous)s to %(current)s. %(action)s has been taken because " \
+                "%(reason)s.\n" % ({'request_id': kwargs.get('request_id', 'N/A'),
+                                    'alarm_id': alarm_id,
+                                    'alarm_name': alarm_name,
+                                    'severity': kwargs.get('severity', 'N/A'),
+                                    'previous': kwargs.get('previous', 'N/A'),
+                                    'current': kwargs.get('current', 'N/A'),
+                                    'action': kwargs.get('action', 'No action'),
+                                    'reason': kwargs.get('reason', 'no reason')})
     try:
-        #send_mail(subject, message, from_email, ['admin@example.com'])
-        pass
-    except BadHeaderError:
-        return HttpResponse('Invalid header found.')
+        email = EmailMessage(subject=email_subject, body=email_msg,
+                             from_email='sender@mail.com',
+                             to=['receiver@mail.com'])
+        email.send()
+        return HttpResponse("Success", content_type='text/plain')
+    except smtplib.SMTPAuthenticationError, e:
+        return HttpResponse('Sending email failed. Reason: Authentication Error'
+                            , content_type='text/plain')
+    except smtplib.SMTPSenderRefused, e:
+        return HttpResponse('Sending email failed. Reason: ' + e.smtp_error
+                            , content_type='text/plain')
+    except smtplib.SMTPException, e:
+        return HttpResponse('Sending email failed. Reason: ' + e.message,
+                            content_type='text/plain')
+    except EnvironmentError, e:
+        return HttpResponse('Environment error ['+ str(e.errno)
+                            + ']. Reason: ' + e.strerror, content_type='text/plain')
 
 def _check_validity(request):
     '''
@@ -38,39 +88,19 @@ def _check_validity(request):
     '''
     return True
 
+
 def _sanitize_arguments(filter, capabilities):
     f = copy.copy(filter)
     return {k: v for k, v in f.iteritems() if k in capabilities}
 
-def _request_method_to_dict(qdict, seperate_args_and_list=True):
-    '''
-    Convert url parameters to seperate arrays and url variables
-    :param qdict: (QueryDict) QueryDict element such as request.GET
-    :return: (Dict) array: array elements in qdict
-              (Dict) url_variables: other url parameters
-          or: (Dict) array: all arguments and lists in request URL
-    '''
-    url_handle = _qdict_to_dict(qdict)
-    arrays = {}
-    url_variables = {}
-    for k in url_handle.iterkeys():
-        if type(url_handle[k]) is list:
-            arrays[k] = url_handle[k]
-        else:
-            url_variables[k] = url_handle[k]
 
-    if not seperate_args_and_list:
-        return arrays.update(url_variables)
-    return arrays, url_variables
+def _request_method_to_dict(json_body):
+    '''
+    Convert rquest body to seperate arrays and url variables
+    :param json_body: (String)
+    :return: (Dict) converted dictionary
+    '''
+    return json.loads(json_body)
 
 
-def _qdict_to_dict(qdict):
-    '''Convert a Django QueryDict to a Python dict.
-    Referenced from: http://stackoverflow.com/questions/13349573/how-to-change-a-django-querydict-to-python-dict
-    Single-value fields are put in directly, add for multi-value fields, a list
-    of all values is stored at the field's key.
-    :param qdict: <QueryDict>
-    :return: (Dict) python dict
-    '''
-    return {k[:-2] if k[len(k) - 2:] == '[]' else k: v if k[len(k) - 2:] == '[]' else v[0]
-            for k, v in qdict.lists()}
+

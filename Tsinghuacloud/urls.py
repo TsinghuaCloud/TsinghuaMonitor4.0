@@ -28,6 +28,6 @@ urlpatterns = [
     url(r'^monitor/meters/$', SiteViews.meters_page, name="Monitor | Meter Overview"),
     url(r'^monitor/alarms/create-alarm/$', SiteViews.createAlarm_page, name="Monitor | Alarms | Create New Alarm"),
     url(r'^test/$', SiteViews.test_page, name="Test Page"),
-    url(r'^alarm-notice/$', AlarmNotice.notification, name="createAlarm Page"),
+    url(r'^alarm-notice/$', AlarmNotice.notification, name="Alarm Notification API"),
     url(r'^$', SiteViews.overview, name="Overview Page"),
 ]
