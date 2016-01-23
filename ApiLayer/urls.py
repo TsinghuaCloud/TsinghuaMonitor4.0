@@ -20,6 +20,7 @@ urlpatterns = [
     url('^meters/meter-list$', views.get_meters, name='Meter List'),
     url('^meters/meter-samples$', views.get_samples, name='Sample List'),
     url('^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
-    url('^resources/resource-list$', views.get_resources, name='Resource List')
+    url('^resources/resource-list$', views.get_resources, name='Resource List'),
+    url('^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]
 

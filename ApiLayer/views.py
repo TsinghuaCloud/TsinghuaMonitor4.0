@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_protect
 
 import api_interface as ceilometer_api
 import capabilities
-
+import paramiko  #install it follow link http://www.it165.net/pro/html/201503/36363.html
 def get_token(request, token_type=None):
     '''
     Get token through Keystone v2 api
@@ -313,3 +313,14 @@ def _report_error(error_type, error_msg):
 def _sanitize_arguments(filter, capabilities):
     f = copy.copy(filter)
     return {k: v for k, v in f.iteritems() if k in capabilities}
+
+def getTopoInfo(request):  
+    #paramiko.util.log_to_file('paramiko.log')          
+    s=paramiko.SSHClient()                 
+    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())          
+    s.connect(hostname = settings.TOPO_SERVER, port=settings.TOPO_SERVER_PORT ,username=settings.TOPO_SERVER_USER, password=settings.TOPO_SERVER_PASSWD)          
+    stdin,stdout,stderr=s.exec_command('free;df -h')          
+    print stdout.read()      
+    s.close()
+    res_json = {'status': 'success'}    
+    return HttpResponse(json.dumps({'data': res_json}), content_type='application/json')

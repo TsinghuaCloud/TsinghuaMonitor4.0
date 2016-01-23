@@ -16,7 +16,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = '0xu25b&kv!!u-=+b#r2hwnm3$=ur=us(j-%ht8&%16mt&6hmi8'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -110,14 +110,14 @@ STATIC_FINDERS = {
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 # Project related
-OPENSTACK_TENANT_NAME = ''
-OPENSTACK_USERNAME_NAME = ''
-OPENSTACK_PASSWORD = ''
+OPENSTACK_TENANT_NAME = 'admin'
+OPENSTACK_USERNAME_NAME = 'admin'
+OPENSTACK_PASSWORD = 'cloud'
 
-OPENSTACK_CONTROLLER_IP = ""
+OPENSTACK_CONTROLLER_IP = "166.111.143.220"
 CEILOMETER_PORT = 8777
 NOVA_PORT = 8774
-ADMIN_TENANT_ID = ""
+ADMIN_TENANT_ID = "56fc364c204043b98a438122568fbf14"
 KEYSTONE_PORT = 35357
 
 # ------- Email related -----------
@@ -134,3 +134,9 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
 #EMAIL_SUBJECT_PREFIX = u'[TsinghuaMonitor]'
+
+##topology server
+TOPO_SERVER='166.111.143.250'
+TOPO_SERVER_USER='root'
+TOPO_SERVER_PORT =22
+TOPO_SERVER_PASSWD='tsinghuanmcloud'
