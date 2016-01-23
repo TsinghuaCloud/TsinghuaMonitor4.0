@@ -1,89 +1,101 @@
-$(document).ready(function(){					
-			var canvas = document.getElementById('canvas');
-			var stage = new JTopo.Stage(canvas);
-			//显示工具栏
-			showJTopoToobar(stage);
+var canvas = document.getElementById('canvas');
+var scene;
+function resizeCanvas() {
 
-			var scene = new JTopo.Scene();	
-			scene.background = '/static/img/bg.jpg';
-			
-			function node(x, y, img){
-				var node = new JTopo.Node();
-				node.setImage('/static/img/statistics/' + img, true);				
-				node.setLocation(x, y);
-				scene.add(node);
-				return node;
-			}				
-			
-			function linkNode(nodeA, nodeZ, f){
-				var link;
-				if(f){
-					link = new JTopo.FoldLink(nodeA, nodeZ);
-				}else{
-					link = new JTopo.Link(nodeA, nodeZ);
-				}
-				link.direction = 'vertical';
-				scene.add(link);
-				return link;
-			}
-			
-			var s1 = node(305, 43, 'server.png');
-			s1.alarm = '2 W';
-			var s2 = node(365, 43, 'server.png');
-			var s3 = node(425, 43, 'server.png');
-			
-			var g1 = node(366, 125, 'gather.png');
-			linkNode(s1, g1, true);
-			linkNode(s2, g1, true);
-			linkNode(s3, g1, true);
-			
-			var w1 = node(324, 167, 'wanjet.png');
-			linkNode(g1, w1);
-						
-			var c1 = node(364, 214, 'center.png');
-			linkNode(w1, c1);
-			
-			var cloud = node(344, 259, 'cloud.png');
-			linkNode(c1, cloud);
-			
-			var c2 = node(364, 328, 'center.png');
-			linkNode(cloud, c2);
-			
-			var w2 = node(324, 377, 'wanjet.png');
-			linkNode(c2, w2);
-			
-			var g2 = node(366, 411, 'gather.png');
-			linkNode(w2, g2);
-			
-			function hostLink(nodeA, nodeZ){				
-				var link = new JTopo.FlexionalLink(nodeA, nodeZ);				
-				link.shadow = false;
-				link.offsetGap = 44;
-				scene.add(link);
-				return link;
-			}
-			
-			var h1 = node(218, 520, 'host.png');
-			h1.alarm = '';
-			hostLink(g2, h1);
-			var h2 = node(292, 520, 'host.png');
-			hostLink(g2, h2);
-			var h3 = node(366, 520, 'host.png');
-			h3.alarm = '二级告警';
-			hostLink(g2, h3);
-			var h4 = node(447, 520, 'host.png');
-			hostLink(g2, h4);
-			var h5 = node(515, 520, 'host.png');
-			h5.alarm = '1M';
-			hostLink(g2, h5);
-			
-			setInterval(function(){
-				if(h3.alarm == '二级告警'){
-					h3.alarm = null;
-				}else{
-					h3.alarm = '二级告警'
-				}
-			}, 600);
-			
-			stage.add(scene);
-		});
+	canvas.setAttribute("width", $('#content').attr("width"));
+	canvas.setAttribute("height", $('#content').attr("height"));
+
+};
+$(document).ready(function() {
+	drawCanvas();
+//	$(window).resize(resizeCanvas);
+//	resizeCanvas();
+
+});
+function node(x, y, img) {
+	var node = new JTopo.Node();
+	node.setImage('/static/img/statistics/' + img, true);
+	node.setLocation(x, y);
+	scene.add(node);
+	return node;
+}
+function linkNode(nodeA, nodeZ, f) {
+	var link;
+	if (f) {
+		link = new JTopo.FoldLink(nodeA, nodeZ);
+	} else {
+		link = new JTopo.Link(nodeA, nodeZ);
+	}
+	link.direction = 'vertical';
+	scene.add(link);
+	return link;
+}
+function hostLink(nodeA, nodeZ) {
+	var link = new JTopo.FlexionalLink(nodeA, nodeZ);
+	link.shadow = false;
+	link.offsetGap = 44;
+	scene.add(link);
+	return link;
+}
+drawCanvas = function() {
+	var stage = new JTopo.Stage(canvas);
+	//显示工具栏
+	showJTopoToobar(stage);
+	scene = new JTopo.Scene();
+	scene.background = '/static/img/bg.jpg';
+
+	var w1 = node(524, 167, 'wanjet.png');
+
+	var w2 = node(324, 277, 'wanjet.png');
+	
+	var h1 = node(218, 420, 'host.png');
+	h1.alarm = '';
+	linkNode(h1, w2,true);
+	//linkNode(h1, w2,true);
+	var h2 = node(292, 420, 'host.png');
+	linkNode(h2, w2,true);
+	var h3 = node(366, 420, 'host.png');
+	h3.alarm = '二级告警';
+	linkNode(h3, w2,true);
+	var h4 = node(447, 420, 'host.png');
+	linkNode(h4, w2,true);
+	var h5 = node(515, 420, 'host.png');
+	h5.alarm = '1M';
+	linkNode(h5, w2,true);
+	
+	setInterval(function() {
+		if (h3.alarm == '二级告警') {
+			h3.alarm = null;
+		} else {
+			h3.alarm = '二级告警'
+		}
+	}, 600);
+	
+	var w21 = node(724, 277, 'wanjet.png');
+	//linkNode(c2, w21);
+
+	var h11 = node(618, 420, 'host.png');
+	h11.alarm = '';
+	linkNode(h11, w21,true);
+	var h21 = node(692, 420, 'host.png');
+	linkNode(h21, w21,true);
+	var h31 = node(766, 420, 'host.png');
+	h31.alarm = '二级告警';
+	linkNode(h31, w21,true);
+	var h41 = node(847, 420, 'host.png');
+	linkNode(h41, w21,true);
+	var h51 = node(915, 420, 'host.png');
+	h51.alarm = '1M';
+	linkNode(h51, w21,true);
+	setInterval(function() {
+		if (h31.alarm == '二级告警') {
+			h31.alarm = null;
+		} else {
+			h31.alarm = '二级告警'
+		}
+	}, 600);
+	linkNode(w2, w1,true);
+	linkNode(w21, w1,true);
+	
+	stage.add(scene);
+};
