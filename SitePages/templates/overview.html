@@ -14,9 +14,9 @@
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
             {% include "_topbar.html" %}
             <div class="navbar-default sidebar" role="navigation">
-            {% block sidebar %}
-                {% include '_sidebar.html' %}
-            {% endblock %}
+                {% block sidebar %}
+                    {% include '_sidebar.html' %}
+                {% endblock %}
             </div>
         </nav>
 
@@ -26,7 +26,7 @@
                 <div class="col-lg-12">
                     <h3 class="page-header">
                         <p class="col-lg-11">警报摘要 | Alarm Summary</p>
-                        <button type="button" class="btn btn-primary">创建警报</button>
+                        <a class="btn btn-primary" href="/monitor/alarms/create-alarm">创建警报</a>
                     </h3>
                 </div>
                 <div>
@@ -113,7 +113,7 @@
                 <div class="col-lg-12">
                     <h3 class="page-header">
                         <p class="col-lg-11">指标摘要 | Meter Summary</p>
-                        <button type="button" class="btn btn-primary">查看指标</button>
+                        <a class="btn btn-primary" href="/monitor/meters">指标列表</a>
                     </h3>
                 </div>
                 <div>
@@ -125,10 +125,12 @@
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="输入指标名称">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="button">搜索</button>
+                                <a class="btn btn-default" href="/monitor/meters">搜索</a>
                             </span>
-                        </div><!-- /input-group -->
-                    </div><!-- /.col-lg-6 -->
+                        </div>
+                        <!-- /input-group -->
+                    </div>
+                    <!-- /.col-lg-6 -->
                 </div>
             </div>
             <!-- END Meter Summary -->
@@ -138,7 +140,7 @@
                 <div class="col-lg-12">
                     <h3 class="page-header">
                         <p class="col-lg-11">分析摘要 | Analysis Summary</p>
-                        <button type="button" class="btn btn-primary">分析详情</button>
+                        <a class="btn btn-primary" href="/analyze">分析详情</a>
                     </h3>
                 </div>
                 <div class="col-lg-10 col-lg-push-1">
@@ -147,27 +149,25 @@
                         <div class="panel-heading">主机列表</div>
                         <!-- Table -->
                         <table class="table">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>主机名称</th>
-                                    <th>详细信息</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Computer 220</td>
-                                    <td>正常</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Computer 221</td>
-                                    <td>正常</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>主机名称</th>
+                                <th>详细信息</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th scope="row">1</th>
+                                <td>Computer 220</td>
+                                <td>正常</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Computer 221</td>
+                                <td>正常</td>
+                            </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>

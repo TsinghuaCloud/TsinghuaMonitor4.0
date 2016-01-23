@@ -15,13 +15,13 @@
             <a href="#"><i class="fa fa-dashboard fa-fw"></i> 概览<span class="fa arrow"></span></a>
             <ul class="nav nav-second-level collapse">
                 <li>
-                    <a href="/health"> 健康状况</a>
+                    <a href="/overview/health"> 健康状况</a>
                 </li>
                 <li>
-                    <a href="/resource"> 资源状况</a>
+                    <a href="/overview/resources"> 资源状况</a>
                 </li>
                 <li>
-                    <a href="/netTopo">网络拓扑</a>
+                    <a href="/overview/topology">网络拓扑</a>
                 </li>
             </ul>
         </li>
@@ -32,20 +32,23 @@
                     <a href="#">警报 <span class="fa arrow"></span></a>
                     <ul class="nav nav-third-level collapse">
                         <li>
-                            <a href="/monitor/alarm/all"><i class="fa fa-fw"></i> 全部</a>
+                            <a href="/monitor/alarms/create-alarm"><i class="fa fa-fw"></i> 创建警报</a>
                         </li>
                         <li>
-                            <a href="/monitor/alarm/alarm"><i class="fa fa-exclamation-circle fa-fw"></i> 报警
+                            <a href="/monitor/alarms/all"><i class="fa fa-fw"></i> 全部警报列表</a>
+                        </li>
+                        <li>
+                            <a href="/monitor/alarms/alarm"><i class="fa fa-exclamation-circle fa-fw"></i> 报警
                                 <span class="fa btn btn-danger statistics-circle">2</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/monitor/alarm/insufficient"><i class="fa fa-info-circle fa-fw"></i> 数据不足
+                            <a href="/monitor/alarms/insufficient"><i class="fa fa-info-circle fa-fw"></i> 数据不足
                                 <span class="fa btn btn-warning statistics-circle">5</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/monitor/alarm/ok"><i class="fa fa-check-circle fa-fw"></i> 正常
+                            <a href="/monitor/alarms/ok"><i class="fa fa-check-circle fa-fw"></i> 正常
                                 <span class="fa btn btn-success statistics-circle">12</span>
                             </a>
                         </li>
