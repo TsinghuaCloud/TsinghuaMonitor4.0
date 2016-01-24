@@ -130,7 +130,7 @@ function drawOneNode(referNode, id,type,level) {
 			xoffset = 150;
 			
 		}
-		xoffset-=35*level;
+		xoffset-=42*level;
 		if(type=='1'&&allSubNode[i].type == '1'){
 			index=2;
 		}
