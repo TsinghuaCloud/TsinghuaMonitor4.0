@@ -73,7 +73,7 @@ drawCanvas = function() {
 	}
 	stage.add(scene);
 };
-function drawOneNode(referNode, id,type) {
+function drawOneNode(referNode, id,type,level) {
 	var allSubNode = topoInfo[id];
 	var index = 1;
 	for ( var i = 0; i < allSubNode.length; i++) {
@@ -85,16 +85,17 @@ function drawOneNode(referNode, id,type) {
 			
 		} else if (allSubNode[i].type == '2') {
 			picName = 'server.png';
-			xoffset = 80;
+			xoffset = 150;
 			
 		}
+		xoffset-=40*level;
 		if(type=='1'&&allSubNode[i].type == '1'){
 			index=2;
 		}
-		var node_temp = createMyNode(referNode, i + index, xoffset, 100,
+		var node_temp = createMyNode(referNode, i + index, xoffset, 100+i*10,
 				picName);
 		if (topoInfo[allSubNode[i].toId] != null) {
-			drawOneNode(node_temp, allSubNode[i].toId,allSubNode[i].type);
+			drawOneNode(node_temp, allSubNode[i].toId,allSubNode[i].type,level+1);
 		}
 	}
 };
@@ -110,7 +111,7 @@ function getTopoInfo() {
 			topoInfo = data['data'];
 			topoInfo = eval('(' + topoInfo + ')');
 			var w1 = node(500, 30, 'wanjet.png');
-			drawOneNode(w1, topoInfo.first.id,'1');
+			drawOneNode(w1, topoInfo.first.id,'1',0);
 			stage.add(scene);
 		}
 	});
