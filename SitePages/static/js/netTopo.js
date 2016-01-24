@@ -63,7 +63,7 @@ drawCanvas = function() {
 	var thirdNodesLeft = new Array();
 	var thirdNodesright = new Array();
 	for ( var i = 2; i <= 3; i++) {
-		secondeNodes.push(createMyNode(w1, i, 200, 100, 'wanjet.png'));
+		secondeNodes.push(createMyNode(w1, i, 200, 100, 'switch.png'));
 	}
 	for ( var i = 1; i <= 5; i++) {
 		thirdNodesLeft.push(createMyNode(secondeNodes[0], i, 80, 100,
@@ -80,7 +80,7 @@ function drawOneNode(referNode, id,type,level) {
 		var picName = '';
 		var xoffset = 0;
 		if (allSubNode[i].type == '1') {
-			picName = 'wanjet.png';
+			picName = 'switch.png';
 			xoffset = 250;
 			
 		} else if (allSubNode[i].type == '2') {
@@ -92,7 +92,7 @@ function drawOneNode(referNode, id,type,level) {
 		if(type=='1'&&allSubNode[i].type == '1'){
 			index=2;
 		}
-		var node_temp = createMyNode(referNode, i + index, xoffset, 100+i*10,
+		var node_temp = createMyNode(referNode, i + index, xoffset, 100,
 				picName);
 		if (topoInfo[allSubNode[i].toId] != null) {
 			drawOneNode(node_temp, allSubNode[i].toId,allSubNode[i].type,level+1);
@@ -110,7 +110,7 @@ function getTopoInfo() {
 		success : function(data) {
 			topoInfo = data['data'];
 			topoInfo = eval('(' + topoInfo + ')');
-			var w1 = node(500, 30, 'wanjet.png');
+			var w1 = node(500, 30, 'switch.png');
 			drawOneNode(w1, topoInfo.first.id,'1',0);
 			stage.add(scene);
 		}
