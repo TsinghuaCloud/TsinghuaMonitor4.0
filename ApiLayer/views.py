@@ -319,8 +319,12 @@ def getTopoInfo(request):
     s=paramiko.SSHClient()                 
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())          
     s.connect(hostname = settings.TOPO_SERVER, port=settings.TOPO_SERVER_PORT ,username=settings.TOPO_SERVER_USER, password=settings.TOPO_SERVER_PASSWD)          
-    stdin,stdout,stderr=s.exec_command('free;df -h')          
-    print stdout.read()      
+    stdin,stdout,stderr=s.exec_command('cat '+settings.TOPO_FILE)          
+    res=stdout.read()  
+    error_json = {'status': 'error',
+                  'error_type': 'error_type',
+                  'error_msg': 'error_msg'
+                  }
     s.close()
-    res_json = {'status': 'success'}    
-    return HttpResponse(json.dumps({'data': res_json}), content_type='application/json')
+    return HttpResponse(json.dumps({'data': res.replace('\n','').replace(' ','')}), content_type='application/json')
+    #return HttpResponse(json.dumps({'data': error_json}), content_type='application/json')
