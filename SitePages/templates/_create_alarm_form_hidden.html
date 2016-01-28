@@ -1,0 +1,27 @@
+<form id="alarm-form" action="/monitor/alarms/create-alarm/" method="post" hidden>
+    {% csrf_token %}
+    <input name="step" value="{{ step }}">
+    <input name="resource_id" value="{{ resource_id }}">
+    <input name="meter_name" value="{{ meter_name }}">
+    <input name="name" value="{{ name }}">
+    <input name="severity" value="{{ severity }} ">
+    <input name="description" value="{{ description }}">
+    <input name="enabled" value="{{ name }}">
+    <input name="repeated_actions" value="{{ repeated_actions }}">
+    <input name="period" value="{{ period }}">
+    <input name="threshold" value="{{ threshold }}">
+    <input name="statistic" value="{{ statistic }}">
+    <input name="comparison_operator" value="{{ comparison_operator }}">
+    {% for alarm_action in alarm_actions %}
+        <input name="alarm_actions[]" value="{{ alarm_action }}">
+    {% endfor %}
+
+    {% for insufficient_data_action in insufficient_data_actions %}
+        <input name="insufficient_data_actions[]" value="{{ insufficient_data_action }}">
+    {% endfor %}
+
+    {% for ok_action in ok_actions %}
+        <input name="ok_actions[]" value="{{ ok_action }}">
+    {% endfor %}
+
+</form>

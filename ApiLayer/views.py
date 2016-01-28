@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_protect
 
 import api_interface as ceilometer_api
 import capabilities
-import paramiko  #install it follow link http://www.it165.net/pro/html/201503/36363.html
+#import paramiko  #install it follow link http://www.it165.net/pro/html/201503/36363.html
 def get_token(request, token_type=None):
     '''
     Get token through Keystone v2 api
