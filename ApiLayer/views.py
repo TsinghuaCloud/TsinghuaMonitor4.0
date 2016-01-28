@@ -63,10 +63,14 @@ def get_allVMList(token):
     if serverList['status'] == "success":
         for single in serverList['data']['servers']:
             PM_name = single['OS-EXT-SRV-ATTR:host']
-            VM_name = single['name']
             if PM_vmInfo.has_key(PM_name) == False:
                 PM_vmInfo[PM_name] = []
-            PM_vmInfo[PM_name].append(VM_name)
+            temp={}
+            temp['name']=single['name']
+            temp['id']=single['id']
+            temp['instance_name']=single['OS-EXT-SRV-ATTR:instance_name']
+            PM_vmInfo[PM_name].append(temp)
+            
     return PM_vmInfo
 
 
