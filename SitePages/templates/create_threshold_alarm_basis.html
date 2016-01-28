@@ -1,0 +1,69 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+    {% include '_basic_static_css.html' %}
+    <!-- Select2 4.0.0-->
+    <link href="{% static 'select2-4.0.0/css/select2.min.css' %}" rel="stylesheet">
+    <!-- Customized css for create-alarm page -->
+    <link href="{% static 'css/create-alarm.css' %}" rel="stylesheet">
+
+</head>
+<body>
+{% block content %}
+    <div id="container">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            {% include "_topbar.html" %}
+            <div class="navbar-default sidebar" role="navigation">
+                {% block sidebar %}
+                    {% include '_sidebar.html' %}
+                {% endblock %}
+            </div>
+        </nav>
+        <div id="page-wrapper">
+            <!-- Create Alarm -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="page-header">
+                        创建警报 | Create Alarms
+                    </h3>
+                </div>
+                {% include '_create_alarm_form_hidden.html' %}
+                <!-- Alarm configurations -->
+                <div class="col-lg-12">
+                    {% include threshold_step_html %}
+                </div>
+                <!-- END col-lg-12 -->
+            </div>
+            <!-- END col-lg-12 -->
+        </div>
+        <!-- END row -->
+    </div>
+    <!-- END page-wrapper -->
+    <div id="footer">
+    </div>
+    </div>
+{% endblock %}
+{% include '_basic_js.html' %}
+<!-- DataTables JS -->
+<script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
+<!-- DataTables Bootstrap JS -->
+<script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
+<!-- AmChart JS -->
+<script src="{% static 'amcharts/amcharts.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
+<!-- AmChart JS Serial Chart-->
+<script src="{% static 'amcharts/serial.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
+<!-- Table JS  -->
+<script src="{% static 'js/alarm.js' %}"></script>
+<!-- Select2 4.0.0 -->
+<script src="{% static 'select2-4.0.0/js/select2.min.js' %}"></script>
+
+</body>
+</html>
+

@@ -14,5 +14,5 @@ resource_list_capabilities = ['user_id', 'project_id', 'limit', 'skip', 'resourc
 
 post_alarm_capabilities = ['comparison_operator', 'description', 'enabled', 'periods',
                            'meter_name', 'name', 'project_id', 'query', 'severity',
-                           'resource_id', 'statistic', 'threshold', 'type',
+                           'resource_id', 'statistic', 'threshold', 'type', 'repeated_actions',
                            'alarm_actions', 'ok_actions', 'insufficient_data_actions']
