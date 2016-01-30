@@ -94,27 +94,27 @@ function createMyNode(refernode, index, xoffset, yoffset, picname,text,linktext)
 	return node_termp;
 }
 
-drawCanvas = function() {
-	var stage = new JTopo.Stage(canvas);
-	// 显示工具栏
-	showJTopoToobar(stage);
-	scene = new JTopo.Scene();
-	// scene.background = '/static/img/bg.jpg';
-	var w1 = node(500, 30, 'wanjet.png');
-	var secondeNodes = new Array();
-	var thirdNodesLeft = new Array();
-	var thirdNodesright = new Array();
-	for ( var i = 2; i <= 3; i++) {
-		secondeNodes.push(createMyNode(w1, i, 200, 100, 'switch.png'));
-	}
-	for ( var i = 1; i <= 5; i++) {
-		thirdNodesLeft.push(createMyNode(secondeNodes[0], i, 80, 100,
-				'server.png'));
-		thirdNodesright.push(createMyNode(secondeNodes[1], i, 80, 100,
-				'server.png'));
-	}
-	stage.add(scene);
-};
+//drawCanvas = function() {
+//	var stage = new JTopo.Stage(canvas);
+//	// 显示工具栏
+//	showJTopoToobar(stage);
+//	scene = new JTopo.Scene();
+//	// scene.background = '/static/img/bg.jpg';
+//	var w1 = node(500, 30, '物理交换机.png');
+//	var secondeNodes = new Array();
+//	var thirdNodesLeft = new Array();
+//	var thirdNodesright = new Array();
+//	for ( var i = 2; i <= 3; i++) {
+//		secondeNodes.push(createMyNode(w1, i, 200, 100, 'switch.png'));
+//	}
+//	for ( var i = 1; i <= 5; i++) {
+//		thirdNodesLeft.push(createMyNode(secondeNodes[0], i, 80, 100,
+//				'server.png'));
+//		thirdNodesright.push(createMyNode(secondeNodes[1], i, 80, 100,
+//				'server.png'));
+//	}
+//	stage.add(scene);
+//};
 function drawOneNode(referNode, id,type,level) {
 	var allSubNode = topoInfo[id];
 	var index = 1;
@@ -122,15 +122,21 @@ function drawOneNode(referNode, id,type,level) {
 		var picName = '';
 		var xoffset = 0;
 		if (allSubNode[i].type == '1') {
-			picName = 'switch.png';
+			if(level<=1)
+			picName = '物理交换机.png';
+			else picName = '虚拟交换机.png';
 			xoffset = 250;
 			
 		} else if (allSubNode[i].type == '2') {
-			picName = 'server.png';
+			if(level<=1)
+				picName = '物理机.png';
+			else
+				
+			picName = '虚拟机.png';
 			xoffset = 150;
 			
 		}
-		xoffset-=42*level;
+		xoffset-=40*level;
 		if(type=='1'&&allSubNode[i].type == '1'){
 			index=2;
 		}
@@ -150,7 +156,7 @@ function getTopoInfo() {
 			topoInfo = data['data'];
 			topoInfo = eval('(' + topoInfo + ')');
 			scene.clear();
-			var w1 = node(600, 30, 'switch.png');
+			var w1 = node(600, 30, '物理交换机.png');
 			drawOneNode(w1, topoInfo.first.id,'1',0);
 			
 		}
