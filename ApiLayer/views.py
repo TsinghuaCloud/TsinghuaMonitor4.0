@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 
+import CommonMethods.BaseMethods as BaseMethods
 import api_interface as ceilometer_api
 import capabilities
 import paramiko  #install it follow link http://www.it165.net/pro/html/201503/36363.html
@@ -111,7 +112,7 @@ def post_alarms(request):
     token = get_token(request, token_type='token')['token']
     request.session['token'] = token
     if request.method == 'POST':
-        kwargs = _sanitize_arguments(_request_GET_to_dict(request.POST, False),
+        kwargs = BaseMethods.sanitize_arguments(_request_GET_to_dict(request.POST, False),
                                      capabilities.post_alarm_capabilities)
         return ceilometer_api.post_alarm(token, **kwargs)
     else:
@@ -158,7 +159,7 @@ def get_meters(request):
         except KeyError, e:
             return _report_error('KeyError', e)
 
-    filters = _sanitize_arguments(filters, capabilities.meter_list_capabilities)
+    filters = BaseMethods.sanitize_arguments(filters, capabilities.meter_list_capabilities)
     result = ceilometer_api.get_meters(token, **filters)
 
     _update_total_meters_count(request, filters)
@@ -194,8 +195,11 @@ def _update_total_meters_count(request, filters):
 
     # TODO: Error handling for hashing meter_list
     # Resend the request purged of limit and skip to get total record number
-    meter_list = ceilometer_api.get_meters(request.session['token'], **filters)['data']
-    request.session['total_meters_count'] = len(meter_list)
+    meter_list_request = ceilometer_api.get_meters(request.session['token'], **filters)
+    if meter_list_request['status'] == 'success':
+        request.session['total_meters_count'] = len(meter_list_request['data'])
+    else:
+        request.session['total_meters_count'] = 0
     return request.session['total_meters_count']
 
 
@@ -241,14 +245,14 @@ def get_alarms(request):
     :return:
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = _sanitize_arguments(filters, capabilities.alarm_list_capabilities)
+    filters = BaseMethods.sanitize_arguments(filters, capabilities.alarm_list_capabilities)
     result = ceilometer_api.get_alarms(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 def get_resources(request):
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = _sanitize_arguments(filters, capabilities.resource_list_capabilities)
+    filters = BaseMethods.sanitize_arguments(filters, capabilities.resource_list_capabilities)
     result = ceilometer_api.get_resources(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
@@ -275,7 +279,7 @@ def _request_GET_to_dict(qdict, seperate_args_and_list=True):
               (Dict) url_variables: other url parameters
           or: (Dict) array: all arguments and lists in request URL
     '''
-    url_handle = _qdict_to_dict(qdict)
+    url_handle = BaseMethods.qdict_to_dict(qdict)
     arrays = {}
     url_variables = {}
     for k in url_handle.iterkeys():
@@ -287,18 +291,6 @@ def _request_GET_to_dict(qdict, seperate_args_and_list=True):
     if not seperate_args_and_list:
         return arrays.update(url_variables)
     return arrays, url_variables
-
-
-def _qdict_to_dict(qdict):
-    '''Convert a Django QueryDict to a Python dict.
-    Referenced from: http://stackoverflow.com/questions/13349573/how-to-change-a-django-querydict-to-python-dict
-    Single-value fields are put in directly, add for multi-value fields, a list
-    of all values is stored at the field's key.
-    :param qdict: <QueryDict>
-    :return: (Dict) python dict
-    '''
-    return {k[:-2] if k[len(k) - 2:] == '[]' else k: v if k[len(k) - 2:] == '[]' else v[0]
-            for k, v in qdict.lists()}
 
 
 def _report_error(error_type, error_msg):
@@ -313,10 +305,6 @@ def _report_error(error_type, error_msg):
                   'error_msg': error_msg
                   }
     return HttpResponse(json.dumps(error_json), content_type='application/json')
-
-def _sanitize_arguments(filter, capabilities):
-    f = copy.copy(filter)
-    return {k: v for k, v in f.iteritems() if k in capabilities}
 
 def getTopoInfo(request):  
     #paramiko.util.log_to_file('paramiko.log')          

@@ -16,7 +16,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 警报详情
                 </div>
@@ -52,14 +52,14 @@
             <div class="form-group">
                 <label for="name" class="col-sm-3 control-label">警报名称</label>
                 <div class="col-sm-6">
-                    <input class="form-control" name="name" id="name">
+                    <input class="form-control alarm-form-element" name="name" id="name">
                 </div>
             </div>
             <!-- END form-group -->
             <div class="form-group">
                 <label for="severity" class="col-sm-3 control-label">重要等级</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="severity" id="severity">
+                    <select class="form-control alarm-form-element" name="severity" id="severity">
                         <option value="low">低</option>
                         <option value="medium">中</option>
                         <option value="high">高</option>
@@ -70,14 +70,14 @@
             <div class="form-group">
                 <label for="name" class="col-sm-3 control-label">描述</label>
                 <div class="col-sm-9">
-                    <input class="form-control" name="description" id="description">
+                    <input class="form-control alarm-form-element" name="description" id="description">
                 </div>
             </div>
             <!-- END form-group -->
             <div class="form-group">
                 <label for="enabled" class="col-sm-3 control-label">开启警报</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="enabled" id="enabled">
+                    <select class="form-control alarm-form-element" name="enabled" id="enabled">
                         <option value="True">是</option>
                         <option value="False">否</option>
                     </select>
@@ -87,7 +87,7 @@
             <div class="form-group">
                 <label for="repeated_actions" class="col-sm-3 control-label">重复提醒</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="repeated_actions" id="repeated_actions">
+                    <select class="form-control alarm-form-element" name="repeated_actions" id="repeated_actions">
                         <option value="True">是</option>
                         <option value="False">否</option>
                     </select>
@@ -113,7 +113,7 @@
             <div class="form-group">
                 <label for="period"  class="col-sm-3 control-label">时间间隔</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="period" id="period">
+                    <select class="form-control alarm-form-element" name="period" id="period">
                         <option value="60">60</option>
                         <option value="120">120</option>
                         <option value="300">300</option>
@@ -126,14 +126,14 @@
             <div class="form-group">
                 <label for="period"  class="col-sm-3 control-label">  阈值  </label>
                 <div class="col-sm-4">
-                    <input class="form-control" name="threshold" id="threshold" value="0.5">
+                    <input class="form-control alarm-form-element" name="threshold" id="threshold" value="0.5">
                 </div>
             </div>
             <!-- END form-group -->
             <div class="form-group">
                 <label for="statistic"  class="col-sm-3 control-label">统计方式</label>
                 <div class="col-sm-4">
-                    <select class="form-control" name="statistic" id="statistic">
+                    <select class="form-control alarm-form-element" name="statistic" id="statistic">
                         <option value="avg">平均值</option>
                         <option value="max">最大值</option>
                         <option value="min">最小值</option>
@@ -146,7 +146,7 @@
             <div class="form-group">
                 <label for="comparison_operator"  class="col-sm-3 control-label">运算符号</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="comparison_operator" id="comparison_operator">
+                    <select class="form-control alarm-form-element" name="comparison_operator" id="comparison_operator">
                         <option value="gt"> 大于  </option>
                         <option value="ge"> 大于等于 </option>
                         <option value="eq"> 等于 </option>

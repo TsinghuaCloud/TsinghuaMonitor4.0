@@ -1,5 +1,6 @@
 import json
 import httplib
+import socket
 import urllib2
 
 from django.conf import settings
@@ -53,9 +54,15 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
     conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, settings.CEILOMETER_PORT))
     req_header = header
     req_body = None if body is None else json.dumps(body)
-    conn.request(method, '/v2/' + base_url + extra_url, headers=req_header, body=req_body)
-    print '/v2/' + base_url + extra_url
+
+    # Perform API request
+    status = None
+    data = None
+
+    # TODO(pwwp):
+    # use <finally> to handle final data
     try:
+        conn.request(method, '/v2/' + base_url + extra_url, headers=req_header, body=req_body)
         response = conn.getresponse()
         if response.status != 200:
             error = {'status': 'failed',
@@ -67,10 +74,16 @@ def ceilometer_connection(base_url, method, header, url_parameters=None, body=No
             data = {'status': 'success',
                     'data': json.loads(response.read())}
             return data
+    except socket.error, e:
+        return {'status': 'failed',
+                'error_message': e.strerror
+                }
     except httplib.HTTPException, e:
         return {'status': 'failed',
                 'error_message': e.message
                 }
+
+
 
 def get_meters(token, **kwargs):
     '''
@@ -122,7 +135,7 @@ def post_alarm(token, **kwargs):
         new_alarm['threshold'] = kwargs['threshold']
     except KeyError, e:
         return {'status': 'error',
-                'msg': 'Key: ' + str(e) + ' not provided!'}
+                'msg': 'Key: "' + str(e) + '" is illegal!'}
 
     # Pack other optional arguments
     new_alarm['alarm_actions'] = kwargs.get('alarm_actions', [])

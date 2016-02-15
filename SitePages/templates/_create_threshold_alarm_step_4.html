@@ -6,7 +6,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 选择指标</div>
             </div>
@@ -16,7 +16,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 警报详情
                 </div>
@@ -27,7 +27,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 通知方式
                 </div>
@@ -38,7 +38,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 确认信息
                 </div>
@@ -53,32 +53,32 @@
                 <div class="form-horizontal">
                     <div class="form-group">
                         <label class="col-sm-3 control-label">警报名称</label>
-                        <p class="col-sm-9 form-control-static">test-alarm</p>
+                        <p class="col-sm-9 form-control-static" name="name">{{ name }}</p>
                     </div>
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">主机类型</label>
-                        <p class="col-sm-9 form-control-static">物理机</p>
+                        <p class="col-sm-9 form-control-static">{{ machine_type }}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">资源ID</label>
-                        <p class="col-sm-9 form-control-static">123</p>
+                        <p class="col-sm-9 form-control-static">{{ resource_id }}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">指标名称</label>
-                        <p class="col-sm-9 form-control-static">CPU使用率</p>
+                        <p class="col-sm-9 form-control-static">{{ meter_name }}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">描述</label>
-                        <p class="col-sm-9 form-control-static">警报描述文字</p>
+                        <p class="col-sm-9 form-control-static">{{ description }}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">开启警报</label>
-                        <p class="col-sm-9 form-control-static">是</p>
+                        <p class="col-sm-9 form-control-static">{{ enabled }}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">重复提醒</label>
-                        <p class="col-sm-9 form-control-static">否</p>
+                        <p class="col-sm-9 form-control-static">{{ repeated_actions }}</p>
                     </div>
                 </div>
             </div>
@@ -87,8 +87,8 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label">触发条件</label>
 
-                        <p class="col-sm-9 form-control-static">当 Computer220 的 CPU利用率 在 60 秒内
-                                    平均值 大于 50% 时 触发警报</p>
+                        <p class="col-sm-9 form-control-static">当 {{ resource_id }} 的 {{ meter_name }} 在 {{ period }} 秒内
+                                    平均值 大于 {{ threshold }} 时 触发警报</p>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label">警报时操作</label>

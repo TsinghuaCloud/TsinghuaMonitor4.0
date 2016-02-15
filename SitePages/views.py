@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_protect
 
+import CommonMethods.BaseMethods as BaseMethods
 from ApiLayer import views as ceilometer_api
 from ApiLayer import api_interface
 
@@ -59,19 +60,20 @@ def create_alarm(request):
                           'title': 'Create-alarm',
                           'threshold_step_html': '_create_threshold_alarm_step_1.html',
                           'step': 1,
+                          'alarm_data': '',
                       })
     if request.method == 'POST':
-        step = request.POST.get('step')
-        # Invalid inputs for step will return 404_page
+        step = request.POST.get('next_step', '0')
+        # Invalid inputs for step will be served with 404 page
         if step is None or step not in ['1', '2', '3', '4']:
-            raise Http404
+            raise Http404('Invalid value of "step"')
+        alarm_data = BaseMethods.qdict_to_dict(request.POST)
+        print alarm_data
         return render(request, 'create_threshold_alarm_basis.html',
                       {
                           'threshold_step_html': '_create_threshold_alarm_step_' + step + '.html',
                           'step': step,
-                          'threshold': '1',
-                          'meter_name': 'cpu_util',
-                          'alarm_actions': ['166.111'],
+                          'alarm_data': alarm_data,
                       })
     return Http404
 

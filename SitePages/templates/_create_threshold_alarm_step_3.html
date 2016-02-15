@@ -6,7 +6,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 选择指标</div>
             </div>
@@ -16,7 +16,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 警报详情
                 </div>
@@ -27,7 +27,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 通知方式
                 </div>
@@ -38,7 +38,7 @@
                 <div class="progress">
                     <div class="progress-bar"></div>
                 </div>
-                <a href="#" class="bs-wizard-dot"></a>
+                <a class="bs-wizard-dot"></a>
 
                 <div class="bs-wizard-info text-center"> 确认信息
                 </div>
@@ -49,7 +49,7 @@
 <div class="col-md-12">
     <div class="well">
         <div class="form-horizontal">
-            <div class="form-group">
+            <div class="form-group alarm-action-element" name="alarm_actions[]">
                 <label for="name" class="col-sm-3 control-label">警报时通知</label>
                 <div class="col-sm-6">
                     <div class="controls">
@@ -58,9 +58,9 @@
                                 <div class="input-group-btn" style="width: 30%;;">
                                     <select id="noti-type" class="form-control" data-live-search="true"
                                         title="通知方式">
-                                        <option>邮件通知</option>
-                                        <option>消息通知</option>
-                                        <option>访问链接</option>
+                                        <option value="email">邮件通知</option>
+                                        <option value="message">消息通知</option>
+                                        <option value="link">访问链接</option>
                                     </select>
                                 </div>
                                 <input type="text" class="form-control" name="noti-detail" placeholder="Test">
@@ -89,7 +89,7 @@
 <div class="col-md-12">
     <div class="well">
         <div class="form-horizontal">
-            <div class="form-group">
+            <div class="form-group alarm-action-element" name="insufficient_data_actions[]">
                 <label for="name" class="col-sm-3 control-label">数据不足时通知</label>
                 <div class="col-sm-6">
                     <div class="controls">
@@ -98,9 +98,9 @@
                                 <div class="input-group-btn" style="width: 30%;;">
                                     <select id="noti-type" class="form-control" data-live-search="true"
                                         title="通知方式">
-                                        <option>邮件通知</option>
-                                        <option>消息通知</option>
-                                        <option>访问链接</option>
+                                        <option value="email">邮件通知</option>
+                                        <option value="message">消息通知</option>
+                                        <option value="link">访问链接</option>
                                     </select>
                                 </div>
                                 <input type="text" class="form-control" name="noti-detail" placeholder="Test">
@@ -129,7 +129,7 @@
 <div class="col-md-12">
     <div class="well">
         <div class="form-horizontal">
-            <div class="form-group">
+            <div class="form-group alarm-action-element" name="ok_actions[]">
                 <label for="name" class="col-sm-3 control-label">正常时通知</label>
                 <div class="col-sm-6">
                     <div class="controls">
@@ -138,9 +138,9 @@
                                 <div class="input-group-btn" style="width: 30%;;">
                                     <select id="noti-type" class="form-control" data-live-search="true"
                                         title="通知方式">
-                                        <option>邮件通知</option>
-                                        <option>消息通知</option>
-                                        <option>访问链接</option>
+                                        <option value="email">邮件通知</option>
+                                        <option value="message">消息通知</option>
+                                        <option value="link">访问链接</option>
                                     </select>
                                 </div>
                                 <input type="text" class="form-control" name="noti-detail" placeholder="Test">

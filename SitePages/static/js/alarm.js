@@ -23,6 +23,9 @@ $(document).ready(function(){
         ],
         responsive: true
     });
+    setTimeout(function(){
+        loadDataFromForm();
+    }, 1);
 });
 
 $(function () {
@@ -42,23 +45,6 @@ $(function () {
         allowClear: true
     });
 });
-
-// NextTab and prevTab are used to switch tabs between alarm information tabs.
-// The code is copied from
-//      http://stackoverflow.com/questions/9252127/how-to-change-twitter-bootstrap-tab-when-button-is-pressed
-function nextTab(elem) {
-  $(elem + ' li.active')
-    .next()
-    .find('a[data-toggle="tab"]')
-    .click();
-}
-function prevTab(elem) {
-  $(elem + ' li.active')
-    .prev()
-    .find('a[data-toggle="tab"]')
-    .click();
-}
-
 
 var chartData=generateChartData();
 
@@ -141,15 +127,44 @@ function generateChartData() {
 }
 
 function next_step() {
-    var step_element = document.getElementsByName("step")[0];
+    var step_element = document.getElementsByName("next_step")[0];
     step_element.value = parseInt(step_element.value) + 1;
+    var current_step = document.getElementsByName("cur_step")[0];
+    if (current_step.value === '3'){
+        submitAlarmActions();
+    }
     document.getElementById('alarm-form').submit();
 }
 
 function prev_step() {
-    var step_element = document.getElementsByName("step")[0];
+    var step_element = document.getElementsByName("next_step")[0];
     step_element.value = parseInt(step_element.value) - 1;
+    var current_step = document.getElementsByName("cur_step")[0];
+    if (current_step.value === '3'){
+        submitAlarmActions();
+    }
     document.getElementById('alarm-form').submit();
+}
+
+function submitAlarmActions(){
+    var action_forms = $('.alarm-action-element');
+    var i, j;
+    var submit_form_handle = $('#alarm-form')[0];
+    for(i = 0; i < action_forms.length; i++){
+        var action_name = action_forms[i].getAttribute('name');
+        while(submit_form_handle.children[action_name]){
+            submit_form_handle.removeChild(submit_form_handle.children[action_name])
+        }
+        var action_type_list = action_forms[i].getElementsByTagName('select')
+        var action_detail_list = action_forms[i].getElementsByTagName('input');
+        for(j = 0; j < action_type_list.length; j++){
+            var new_action = document.createElement('input');
+            new_action.setAttribute('name', action_name);
+            new_action.setAttribute('value', 'type=' + action_type_list[j].value
+                                            + '&detail=' + action_detail_list[j].value);
+            submit_form_handle.appendChild(new_action);
+        }
+    }
 }
 
 $(function()
@@ -160,7 +175,6 @@ $(function()
         var controlForm = $(this).parents('.controls form:first'),
             currentEntry = $(this).parents('.entry:first'),
             newEntry = $(currentEntry.clone()).appendTo(controlForm);
-        this_element = this;
         newEntry.find('input').val('');
         controlForm.find('.entry:not(:last) .btn-add')
             .removeClass('btn-add').addClass('btn-remove')
@@ -172,6 +186,47 @@ $(function()
 		e.preventDefault();
 		return false;
 	});
+    $(document).on('change', '.alarm-form-element', function(){
+        var this_name = $(this).attr('name');
+        $('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
+    });
+    $(document).on('change', '.alarm-action-element', function(){
+        var this_name = $(this).attr('name');
+        //$('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
+    });
+
 });
 
+function loadDataFromForm(){
+    var load_elements = $('.alarm-form-element');
+    var index;
+    for(index = 0; index < load_elements.length; index++){
+        var element = load_elements[index];
+        element.value = $('#alarm-form [name="'+element.name+'"]')[0].value;
+    }
+
+    var actions = $('.alarm-action-element');
+    for(index = 0; index < actions.length; index++){
+        var action = actions[index];
+        var action_list = $('#alarm-form [name="'+action.getAttribute('name')+'"]');
+        var list_index, base_element;
+        base_element = $('#alarm-detail-wrapper [name="'+action.getAttribute('name')+'"]')[0];
+
+        for(list_index = 0; list_index < action_list.length; list_index++){
+            // Match result [0: whole string  1: type_match(email|message)  2: detail_match]
+            var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
+            var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
+            if(list_index === 0){
+                base_element.getElementsByTagName('select')[0].value = match_result[1];
+                base_element.getElementsByTagName('input')[0].value = match_result[2];
+            }else{
+                base_element.getElementsByClassName('btn-add')[0].click();
+                var selects =  base_element.getElementsByTagName('select');
+                selects[selects.length-1].value = match_result[1];
+                var inputs = base_element.getElementsByTagName('input');
+                inputs[inputs.length-1].value = match_result[2];
+            }
+        }
+    }
+}
 
