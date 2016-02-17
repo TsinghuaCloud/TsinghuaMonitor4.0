@@ -24,7 +24,12 @@ $(document).ready(function(){
         responsive: true
     });
     setTimeout(function(){
-        loadDataFromForm();
+        var step = $('#alarm-form [name="cur_step"]')[0].value;
+        if(step === '2' || step === '3')
+            loadDataFromForm();
+        else if(step ==='4')
+            loadAlarmConfirmation();
+
     }, 1);
 });
 
@@ -155,7 +160,7 @@ function submitAlarmActions(){
         while(submit_form_handle.children[action_name]){
             submit_form_handle.removeChild(submit_form_handle.children[action_name])
         }
-        var action_type_list = action_forms[i].getElementsByTagName('select')
+        var action_type_list = action_forms[i].getElementsByTagName('select');
         var action_detail_list = action_forms[i].getElementsByTagName('input');
         for(j = 0; j < action_type_list.length; j++){
             var new_action = document.createElement('input');
@@ -228,5 +233,47 @@ function loadDataFromForm(){
             }
         }
     }
+}
+
+function loadAlarmConfirmation(){
+    var getAlarmFormElement = function(element_name){
+        // function has a hidden argument. Should be treated as getAlarmFormElement(name, getAllElements)
+        if(arguments[1] === true)
+            return $('#alarm-form [name="'+element_name+'"]');
+        return $('#alarm-form [name="'+element_name+'"]')[0];
+    };
+    var load_elements = $('.confirm-element');
+    var index;
+    for(index = 0; index < load_elements.length; index++){
+        var element = load_elements[index];
+        element.textContent = translate(getAlarmFormElement(element.getAttribute('name')).value, element.getAttribute('name'));
+    }
+
+    var actions = $('.confirm-action-element');
+    for(index = 0; index < actions.length; index++){
+        var action = actions[index];
+        var action_list = getAlarmFormElement(action.getAttribute('name'), true);
+        var list_index, base_element;
+        base_element = $('#alarm-detail-wrapper [name="'+action.getAttribute('name')+'"]')[0];
+
+        for(list_index = 0; list_index < action_list.length; list_index++){
+            // Match result [0: whole string  1: type_match(email|message)  2: detail_match]
+            var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
+            var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
+            var append_html = document.createElement('p');
+            append_html.textContent = translate(match_result[1], 'notification_type') + ": " + match_result[2];
+            base_element.appendChild(append_html);
+        }
+    }
+
+
+    $('.confirm-trigger-element')[0].textContent =
+        '当 ' + getAlarmFormElement('resource_id').value
+        + ' 的' + translate(getAlarmFormElement('meter_name').value, 'meter_name')
+        + ' 在' + getAlarmFormElement('period').value
+        + ' 秒内' + translate(getAlarmFormElement('statistic').value, 'statistic')
+        + '' + translate(getAlarmFormElement('comparison_operator').value, 'comparison_operator')
+        + ' ' + getAlarmFormElement('threshold').value
+        + ' 时触发警报';
 }
 

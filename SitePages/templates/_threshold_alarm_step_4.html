@@ -1,0 +1,81 @@
+<div class="col-lg-12">
+    <div class="well">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">警报名称</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="name"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">主机类型</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="machine_type"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">资源ID</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="resource_id"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">指标名称</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="meter_name"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">描述</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="description"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">开启警报</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="enabled"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">重复提醒</label>
+                        <p class="col-sm-9 form-control-static confirm-element" name="repeated_actions"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">触发条件</label>
+
+                        <p class="col-sm-9 form-control-static confirm-trigger-element">当 {{ resource_id }} 的 {{ meter_name }} 在 {{ period }} 秒内
+                                    平均值 大于 {{ threshold }} 时 触发警报</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">警报时操作</label>
+                        <div class="col-sm-9 form-control-static confirm-action-element" name="alarm_actions[]">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">正常时操作</label>
+                        <div class="col-sm-9 form-control-static confirm-action-element" name="ok_actions[]">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >数据不足时操作</label>
+                        <div class="col-sm-9 form-control-static confirm-action-element" name="insufficient_data_actions[]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END well -->
+</div>
+<!-- END col-lg-12 -->
+<div class="col-lg-12">
+    <div class="well no-border">
+        <div class="row">
+            <nav>
+                <ul class="pager">
+                    <li class="previous"><a class="btn" onclick="prev_step()">
+                        <span aria-hidden="true">&larr;</span> 上一页</a></li>
+                    <li class="next"><a class="btn" onclick="document.getElementById('alarm-form').submit()">
+                        完成 </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

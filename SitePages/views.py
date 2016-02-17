@@ -58,7 +58,7 @@ def create_alarm(request):
         return render(request, 'create_threshold_alarm_basis.html',
                       {
                           'title': 'Create-alarm',
-                          'threshold_step_html': '_create_threshold_alarm_step_1.html',
+                          'threshold_step_html': '_threshold_alarm_step_1.html',
                           'step': 1,
                           'alarm_data': '',
                       })
@@ -71,7 +71,7 @@ def create_alarm(request):
         print alarm_data
         return render(request, 'create_threshold_alarm_basis.html',
                       {
-                          'threshold_step_html': '_create_threshold_alarm_step_' + step + '.html',
+                          'threshold_step_html': '_threshold_alarm_step_' + step + '.html',
                           'step': step,
                           'alarm_data': alarm_data,
                       })

@@ -1,7 +1,7 @@
+import copy
 import json
 import time
-import copy
-import classdef
+import re
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -9,10 +9,13 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 
+from AlarmNotification.capabilities import NOTIFICATION_CAPABILITIES as NOTIFICATION_CAPABILITIES
 import CommonMethods.BaseMethods as BaseMethods
 import api_interface as ceilometer_api
 import capabilities
-import paramiko  #install it follow link http://www.it165.net/pro/html/201503/36363.html
+import paramiko  # install it follow link http://www.it165.net/pro/html/201503/36363.html
+
+
 def get_token(request, token_type=None):
     '''
     Get token through Keystone v2 api
@@ -60,18 +63,18 @@ def get_allVMList(token):
     '''
     serverList = ceilometer_api.nova_connection('/servers/detail', method='GET', header=request_header)
     # print tenantIdinfo['name']
-    #print serverList
+    # print serverList
     if serverList['status'] == "success":
         for single in serverList['data']['servers']:
             PM_name = single['OS-EXT-SRV-ATTR:host']
             if PM_vmInfo.has_key(PM_name) == False:
                 PM_vmInfo[PM_name] = []
-            temp={}
-            temp['name']=single['name']
-            temp['id']=single['id']
-            temp['instance_name']=single['OS-EXT-SRV-ATTR:instance_name']
+            temp = {}
+            temp['name'] = single['name']
+            temp['id'] = single['id']
+            temp['instance_name'] = single['OS-EXT-SRV-ATTR:instance_name']
             PM_vmInfo[PM_name].append(temp)
-            
+
     return PM_vmInfo
 
 
@@ -82,7 +85,7 @@ def get_PmInfo(token):
     # url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     allInfo = []
     serverList = ceilometer_api.nova_connection('/os-hypervisors', method='GET', header=request_header)
-    #print serverList
+    # print serverList
     for single in serverList['data']['hypervisors']:
         id = single['id']
         info = \
@@ -100,8 +103,9 @@ def get_PmInfo(token):
         allInfo.append(singleInfo)
     return allInfo
 
+
 @csrf_protect
-def post_alarms(request):
+def post_alarms(request, alarm_obj=None):
     '''
     Post new alarms through ceilometer API.
     Notice: This api is protected by csrf_protect. 'X-csrf-token' should be added to request headers .
@@ -113,12 +117,13 @@ def post_alarms(request):
     request.session['token'] = token
     if request.method == 'POST':
         kwargs = BaseMethods.sanitize_arguments(_request_GET_to_dict(request.POST, False),
-                                     capabilities.post_alarm_capabilities)
+                                                capabilities.POST_ALARM_CAPABILITIES)
         return ceilometer_api.post_alarm(token, **kwargs)
     else:
         return HttpResponse(json.dumps({'status': 'error',
                                         'error_msg': 'Request method should be POST.'}),
                             content_type='application/json')
+
 
 @csrf_protect
 def get_meters(request):
@@ -159,7 +164,7 @@ def get_meters(request):
         except KeyError, e:
             return _report_error('KeyError', e)
 
-    filters = BaseMethods.sanitize_arguments(filters, capabilities.meter_list_capabilities)
+    filters = BaseMethods.sanitize_arguments(filters, capabilities.METER_LIST_CAPABILITIES)
     result = ceilometer_api.get_meters(token, **filters)
 
     _update_total_meters_count(request, filters)
@@ -233,6 +238,7 @@ def get_samples(request):
             })
     return HttpResponse(json.dumps({'data': result}), content_type='application/json')
 
+
 def get_alarms(request):
     '''
     Fetch alarms for a query.
@@ -245,16 +251,17 @@ def get_alarms(request):
     :return:
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = BaseMethods.sanitize_arguments(filters, capabilities.alarm_list_capabilities)
+    filters = BaseMethods.sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
     result = ceilometer_api.get_alarms(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 def get_resources(request):
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = BaseMethods.sanitize_arguments(filters, capabilities.resource_list_capabilities)
+    filters = BaseMethods.sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
     result = ceilometer_api.get_resources(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
+
 
 def _rename_parameters(args_dict):
     '''
@@ -306,17 +313,27 @@ def _report_error(error_type, error_msg):
                   }
     return HttpResponse(json.dumps(error_json), content_type='application/json')
 
-def getTopoInfo(request):  
-    #paramiko.util.log_to_file('paramiko.log')          
-    s=paramiko.SSHClient()                 
-    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())          
-    s.connect(hostname = settings.TOPO_SERVER, port=settings.TOPO_SERVER_PORT ,username=settings.TOPO_SERVER_USER, password=settings.TOPO_SERVER_PASSWD)          
-    stdin,stdout,stderr=s.exec_command('cat '+settings.TOPO_FILE)          
-    res=stdout.read()  
+
+def getTopoInfo(request):
+    # paramiko.util.log_to_file('paramiko.log')
+    s = paramiko.SSHClient()
+    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    s.connect(hostname=settings.TOPO_SERVER, port=settings.TOPO_SERVER_PORT, username=settings.TOPO_SERVER_USER,
+              password=settings.TOPO_SERVER_PASSWD)
+    stdin, stdout, stderr = s.exec_command('cat ' + settings.TOPO_FILE)
+    res = stdout.read()
     error_json = {'status': 'error',
                   'error_type': 'error_type',
                   'error_msg': 'error_msg'
                   }
     s.close()
-    return HttpResponse(json.dumps({'data': res.replace('\n','').replace(' ','')}), content_type='application/json')
+    return HttpResponse(json.dumps({'data': res.replace('\n', '').replace(' ', '')}), content_type='application/json')
     #return HttpResponse(json.dumps({'data': error_json}), content_type='application/json')
+
+def _convert_action_to_action_url(action_list):
+    action_url = []
+    for action in action_list:
+        action_regex = re.compile('type=('+'|'.join(NOTIFICATION_CAPABILITIES) + ')&detail=(.*)')
+        reg_match = action_regex.match(action)
+        action_type, action_detail = reg_match.group(1), reg_match.group(2)
+        action_url.append('http://' + settings.THIS_ADDR + '/')
