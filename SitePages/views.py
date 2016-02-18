@@ -7,8 +7,8 @@ from django.shortcuts import render_to_response
 from django.views.decorators.csrf import csrf_protect
 
 import CommonMethods.BaseMethods as BaseMethods
-from ApiLayer import views as ceilometer_api
-from ApiLayer import api_interface
+from ApiLayer import views as openstack_api
+
 
 # Create your views here.
 def overview(request):
@@ -20,7 +20,7 @@ def meters_page(request):
 
 
 def test_page(request):
-    request.session['token'] = ceilometer_api.get_token(request, 'token')
+    request.session['token'] = openstack_api.get_token(request, 'token')
 
     return render(request, 'test-page.html')
 
@@ -28,28 +28,36 @@ def test_page(request):
 def resource_page(request):
     # token = api_interface.get_V3token()['token']
 
-    #print tokenv3
-    token = ceilometer_api.get_token(request, token_type='token')['token']
+    # print tokenv3
+    token = openstack_api.get_token(request, token_type='token')['token']
     request.session['token'] = token
-    PminfoDetail = ceilometer_api.get_PmInfo(token)
-    for i in range(len(PminfoDetail)):
-        PminfoDetail[i]['memory_mb_used']=round(PminfoDetail[i]['memory_mb_used']/1000.0,2)
-        PminfoDetail[i]['memory_mb']=round(PminfoDetail[i]['memory_mb']/1000.0,2)
-        PminfoDetail[i]['memory_percentage']=round(PminfoDetail[i]['memory_mb_used']/PminfoDetail[i]['memory_mb'],4)*100
-        PminfoDetail[i]['disk_percentage']=round(PminfoDetail[i]['local_gb_used']*1.0/PminfoDetail[i]['local_gb'],4)*100
-    resourceOverview=ceilometer_api.get_allPmStatistics(token)['data']['hypervisor_statistics']
-    resourceOverview['memory_mb_left']=round((resourceOverview['memory_mb']-resourceOverview['memory_mb_used'])/1000.0,2)
-    resourceOverview['memory_mb_used']=round(resourceOverview['memory_mb_used']/1000.0,2)
-    allVMList=ceilometer_api.get_allVMList(token)
-    PMs={}
-    for key in allVMList:
+    pm_info_detail = openstack_api.get_PmInfo(token)
+    for i in range(len(pm_info_detail)):
+        pm_info_detail[i]['memory_mb_used'] = round(pm_info_detail[i]['memory_mb_used'] / 1000.0, 2)
+        pm_info_detail[i]['memory_mb'] = round(pm_info_detail[i]['memory_mb'] / 1000.0, 2)
+        pm_info_detail[i]['memory_percentage'] = round(
+            pm_info_detail[i]['memory_mb_used'] / pm_info_detail[i]['memory_mb'],
+            4) * 100
+        pm_info_detail[i]['disk_percentage'] = round(
+            pm_info_detail[i]['local_gb_used'] * 1.0 / pm_info_detail[i]['local_gb'],
+            4) * 100
+    resource_overview = openstack_api.get_allPmStatistics(token)['data']['hypervisor_statistics']
+    resource_overview['memory_mb_left'] = round(
+        (resource_overview['memory_mb'] - resource_overview['memory_mb_used']) / 1000.0, 2)
+    resource_overview['memory_mb_used'] = round(resource_overview['memory_mb_used'] / 1000.0, 2)
+    all_vm_list = openstack_api.get_allVMList(token)
+    PMs = {}
+    for key in all_vm_list:
         temp = {}
-        temp['len'] = len(allVMList[key])
-        temp['left'] = allVMList[key][1:]
-        temp['first'] = allVMList[key][0]
+        temp['len'] = len(all_vm_list[key])
+        temp['left'] = all_vm_list[key][1:]
+        temp['first'] = all_vm_list[key][0]
         PMs[key] = temp
-    return render(request, 'resource.html',
-                  {'title': 'resource-list', 'PMs': PMs, 'Pminfo': PminfoDetail, 'resourceOverview': resourceOverview})
+    return render(request, 'resource.html', {'title': 'resource-list',
+                                             'PMs': PMs,
+                                             'Pminfo': pm_info_detail,
+                                             'resource_overview': resource_overview
+                                             })
 
 
 @csrf_protect
@@ -68,7 +76,6 @@ def create_alarm(request):
         if step is None or step not in ['1', '2', '3', '4']:
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
-        print alarm_data
         return render(request, 'create_threshold_alarm_basis.html',
                       {
                           'threshold_step_html': '_threshold_alarm_step_' + step + '.html',

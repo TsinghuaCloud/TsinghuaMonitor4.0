@@ -10,10 +10,13 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 
 from AlarmNotification.capabilities import NOTIFICATION_CAPABILITIES as NOTIFICATION_CAPABILITIES
-import CommonMethods.BaseMethods as BaseMethods
-import api_interface as ceilometer_api
+from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
+from ApiLayer.ceilometer import api as ceilometer_api
+from ApiLayer.nova import api as nova_api
+from ApiLayer.nova.connection import nova_connection   # TODO(pwwp): remove this import statement
+from ApiLayer.keystone import api as keystone_api
 import capabilities
-import paramiko  # install it follow link http://www.it165.net/pro/html/201503/36363.html
+#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 
 def get_token(request, token_type=None):
@@ -34,7 +37,7 @@ def get_token(request, token_type=None):
         token = {'status': 'error',
                  'message': 'Login information not provided.'}
     else:
-        token = ceilometer_api.get_token(tenant_name, username, password)
+        token = keystone_api.get_token(tenant_name, username, password)
     if token_type == 'token':
         return token
     else:
@@ -46,7 +49,7 @@ def get_allPmStatistics(token):
     request_header['X-Auth-Token'] = token
     request_header['Content-Type'] = 'application/json'
     # url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
-    return ceilometer_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
+    return nova_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
 
 
 def get_allVMList(token):
@@ -61,7 +64,7 @@ def get_allVMList(token):
     
     for tenantIdinfo in tenantList['data']['tenants']:
     '''
-    serverList = ceilometer_api.nova_connection('/servers/detail', method='GET', header=request_header)
+    serverList = nova_connection('/servers/detail', method='GET', header=request_header)
     # print tenantIdinfo['name']
     # print serverList
     if serverList['status'] == "success":
@@ -84,12 +87,12 @@ def get_PmInfo(token):
     request_header['Content-Type'] = 'application/json'
     # url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     allInfo = []
-    serverList = ceilometer_api.nova_connection('/os-hypervisors', method='GET', header=request_header)
+    serverList = nova_connection('/os-hypervisors', method='GET', header=request_header)
     # print serverList
     for single in serverList['data']['hypervisors']:
         id = single['id']
         info = \
-            ceilometer_api.nova_connection('/os-hypervisors/' + str(id), method='GET', header=request_header)['data'][
+            nova_connection('/os-hypervisors/' + str(id), method='GET', header=request_header)['data'][
                 'hypervisor']
         singleInfo = {}
         singleInfo['id'] = id
@@ -116,7 +119,7 @@ def post_alarms(request, alarm_obj=None):
     token = get_token(request, token_type='token')['token']
     request.session['token'] = token
     if request.method == 'POST':
-        kwargs = BaseMethods.sanitize_arguments(_request_GET_to_dict(request.POST, False),
+        kwargs = sanitize_arguments(_request_GET_to_dict(request.POST, False),
                                                 capabilities.POST_ALARM_CAPABILITIES)
         return ceilometer_api.post_alarm(token, **kwargs)
     else:
@@ -164,9 +167,8 @@ def get_meters(request):
         except KeyError, e:
             return _report_error('KeyError', e)
 
-    filters = BaseMethods.sanitize_arguments(filters, capabilities.METER_LIST_CAPABILITIES)
+    filters = sanitize_arguments(filters, capabilities.METER_LIST_CAPABILITIES)
     result = ceilometer_api.get_meters(token, **filters)
-
     _update_total_meters_count(request, filters)
 
     if result['status'] == 'success':
@@ -189,12 +191,11 @@ def _update_total_meters_count(request, filters):
         filters.pop('limit')
     if 'skip' in filters:
         filters.pop('skip')
-    if request.session.has_key('total_meters_count'):
+    if 'total_meters_count' in request.session:
         refreshed_time = request.session['refreshed_time']
         delta = time.time() - refreshed_time
         if delta < 1000 and request.session['criteria_hash'] == filters:
             return
-
     request.session['refreshed_time'] = time.time()
     request.session['criteria_hash'] = filters
 
@@ -251,14 +252,14 @@ def get_alarms(request):
     :return:
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = BaseMethods.sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
+    filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
     result = ceilometer_api.get_alarms(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 def get_resources(request):
     arrays, filters = _request_GET_to_dict(request.GET)
-    filters = BaseMethods.sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
+    filters = sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
     result = ceilometer_api.get_resources(request.session['token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
@@ -286,7 +287,7 @@ def _request_GET_to_dict(qdict, seperate_args_and_list=True):
               (Dict) url_variables: other url parameters
           or: (Dict) array: all arguments and lists in request URL
     '''
-    url_handle = BaseMethods.qdict_to_dict(qdict)
+    url_handle = qdict_to_dict(qdict)
     arrays = {}
     url_variables = {}
     for k in url_handle.iterkeys():

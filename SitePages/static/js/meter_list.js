@@ -43,7 +43,8 @@ $(document).ready(function () {
             {"data": "resource_id"},
             {"data": "resource_name"},
             {"data": "name"},
-            {"data": "type"}
+            {"data": "type"},
+            {"data": "unit"}
         ],
         "columnDefs": [
             {
@@ -52,7 +53,7 @@ $(document).ready(function () {
                 "searchable": false
             },
             {
-                "targets": [0, 1, 2, 3, 4, 5],
+                "targets": [0, 1, 2, 3, 4, 5, 6],
                 "sortable": false
             },
             {
@@ -81,8 +82,15 @@ $(document).ready(function () {
 //                        "<button type='button' class='btn btn-xs btn-empty fa fa-wrench'></button>" +
 //                        "<button type='button' class='btn btn-xs btn-empty fa fa-trash-o'></button>");
 //                    }
+            },
+            {
+                "targets": [6],
+                "width": "10%",
+                "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench'></a>" +
+                    "<a href='#' class='btn btn-xs btn-empty fa fa-trash-o'></a>");
+                }
             }
-
         ],
         "order": [[1, "desc"]],
         responsive: true,
@@ -295,7 +303,7 @@ var chart = AmCharts.makeChart("meter-chart", {
     "categoryField": "date",
     "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
 	"categoryAxis": {
-		"minPeriod": "ss",
+		"minPeriod": "SS",
 		"parseDates": true
 	},
     "export": {
@@ -303,12 +311,3 @@ var chart = AmCharts.makeChart("meter-chart", {
         "position": "bottom-right"
      }
 });
-
-chart.addListener("rendered", zoomChart);
-zoomChart();
-
-// this method is called when chart is first inited as we listen for "rendered" event
-function zoomChart() {
-    // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
-    chart.zoomToIndexes(chartData.length - 40, chartData.length - 1);
-}

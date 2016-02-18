@@ -104,7 +104,7 @@ var meter_name_CN = {
 var machine_type_CN ={
     'vm' : '虚拟机',
     'pm' : '物理机'
-}
+};
 
 var enabled_CN = bool_CN;
 var repeated_actions_CN = bool_CN;
@@ -112,14 +112,16 @@ var repeated_actions_CN = bool_CN;
 function translate(name, type){
     /*
      * Function "translate" translates "name" into translation of desired language
-     * name: name to be translated
-     * type: type of name (e.g. meter_name | comparison_operator| ...)
-     * language: (hidden argument) language for translation. Default: CN
+     *
+     * Usage: translate(name, type, [language])
+     * param name: name to be translated
+     * param type: type of name (e.g. meter_name | comparison_operator| ...)
+     * (hidden parameter) language: language for translation. Default: CN
      * return: translated string
      */
     var language = arguments[2] ? arguments[2] : 'CN';
     try {
-        return eval(type + '_CN["' + name + '"]');
+        return eval(type + '_' + language + '["' + name + '"]');
     }catch(e){
         if (e instanceof EvalError) {
             console.info('Eval Error: In translating "'+ name+ '" of type "'+type+'"');
