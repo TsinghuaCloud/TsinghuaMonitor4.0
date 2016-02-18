@@ -6,7 +6,7 @@ from django.conf import settings
 from CommonMethods import BaseMethods
 
 def openstack_api_connection(base_url, method, header, port, version,
-                             url_parameters=None, body=None):
+                             tenant_id=None, url_parameters=None, body=None):
     '''
     :param url: (string)
     :param method: (string) [POST | GET | PUT | DELETE ]
@@ -27,7 +27,9 @@ def openstack_api_connection(base_url, method, header, port, version,
     # TODO(pwwp):
     # use <finally> to handle success or error data
     try:
-        conn.request(method, '/%s/'%(version) + base_url + extra_url, headers=req_header, body=req_body)
+        conn.request(method,
+                     '/%s/'%(version) + '' if tenant_id is None else '%s/'%(tenant_id)  + base_url + extra_url,
+                     headers=req_header, body=req_body)
         response = conn.getresponse()
         if response.status != 200:
             error = {'status': 'failed',
