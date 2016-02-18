@@ -264,6 +264,43 @@ def get_resources(request):
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
+def get_vm_list(request):
+    '''
+    Get tenant's server list through nova api.
+    Temporarily does not support filter or pagination.
+    :param request:
+    :return: server list json:
+              [{name: <server_name>, id: <server_id>} ... ]
+    '''
+    servers = nova_api.get_server_list(request.session['token'])
+    result = {"status": "success",
+              "recordsTotal": len(servers['data']['servers']),
+              "recordsFiltered": len(servers['data']['servers']),
+              "data": [{'name': server['name'], 'id': server['id']}
+                        for server in servers['data']['servers']]
+              }
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
+
+def get_pm_list(request):
+    '''
+    Get tenant's server list through nova api.
+    Temporarily does not support filter or pagination.
+    :param request:
+    :return: server list json:
+              [{name: <server_name>, id: <server_id>} ... ]
+    '''
+    hypervisors = nova_api.get_hypervisor_list(request.session['token'])
+    result = {"status": "success",
+              "recordsTotal": len(hypervisors['data']['hypervisors']),
+              "recordsFiltered": len(hypervisors['data']['hypervisors']),
+              "data": [{'name': hypervisor['hypervisor_hostname'],
+                        'id': hypervisor['id']
+                        }
+                        for hypervisor in hypervisors['data']['hypervisors']]}
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
+
 def _rename_parameters(args_dict):
     '''
     In some cases, arguments passed from the front side doesn't meet with ceilometer-ap

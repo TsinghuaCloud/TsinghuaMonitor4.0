@@ -21,7 +21,6 @@ def meters_page(request):
 
 def test_page(request):
     request.session['token'] = openstack_api.get_token(request, 'token')
-
     return render(request, 'test-page.html')
 
 
@@ -68,7 +67,9 @@ def create_alarm(request):
                           'title': 'Create-alarm',
                           'threshold_step_html': '_threshold_alarm_step_1.html',
                           'step': 1,
-                          'alarm_data': '',
+                          'alarm_data': {
+                              'machine_type': 'vm',
+                          },
                       })
     if request.method == 'POST':
         step = request.POST.get('next_step', '0')

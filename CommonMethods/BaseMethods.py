@@ -46,7 +46,7 @@ def url_para_to_url(**kwargs):
     :param kwargs: (Dict) query criteria, e.g. limit, skip, resource_id, meter_name etc.
     :return: url: (String) converted url
     '''
-    if not kwargs:
+    if kwargs is None or len(kwargs) == 0:
         return ''
     else:
         complete_url = ''

@@ -17,6 +17,8 @@ from django.conf.urls import include, url
 import views
 urlpatterns = [
     url('^authentication/get-token$', views.get_token, name='Token'),
+    url('^servers/vm-list$', views.get_vm_list, name='Server List'),
+    url('^servers/pm-list$', views.get_pm_list, name='Server List'),
     url('^meters/meter-list$', views.get_meters, name='Meter List'),
     url('^meters/meter-samples$', views.get_samples, name='Sample List'),
     url('^alarms/alarm-list$', views.get_alarms, name='Alarm List'),

@@ -15,7 +15,8 @@ def openstack_api_connection(base_url, method, header, port, version,
     :param body: (JSON Object)
     :return: (JSON Object) Data fetched from openstack api
     '''
-    extra_url = BaseMethods.url_para_to_url(**url_parameters)
+
+    extra_url = (BaseMethods.url_para_to_url(**url_parameters)) if url_parameters else ''
     conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, port))
     req_header = header
     req_body = None if body is None else json.dumps(body)
@@ -28,7 +29,7 @@ def openstack_api_connection(base_url, method, header, port, version,
     # use <finally> to handle success or error data
     try:
         conn.request(method,
-                     '/%s/'%(version) + '' if tenant_id is None else '%s/'%(tenant_id)  + base_url + extra_url,
+                     '/%s/'%(version) + ('' if tenant_id is None else '%s/'% tenant_id) + base_url + extra_url,
                      headers=req_header, body=req_body)
         response = conn.getresponse()
         if response.status != 200:

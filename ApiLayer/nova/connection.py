@@ -4,7 +4,7 @@ from django.conf import settings
 from ApiLayer.connection_base import openstack_api_connection
 
 def nova_connection(base_url, method, header, url_parameters=None, body=None):
-    return _nova_connection(base_url, method, header, url_parameters, body)
+    return _nova_connection(base_url, method, header, url_parameters=url_parameters, body=body)
 
 def _nova_connection(*args, **kwargs):
     '''
@@ -12,6 +12,6 @@ def _nova_connection(*args, **kwargs):
     '''
     return openstack_api_connection(*args,
                                     port=settings.NOVA_PORT,
-                                    version='v2.1',
+                                    version='v2',
                                     tenant_id=settings.ADMIN_TENANT_ID,
                                     **kwargs)

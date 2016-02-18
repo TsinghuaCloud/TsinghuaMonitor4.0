@@ -1,26 +1,42 @@
 $(document).ready(function(){
-    machine_table_handle = $('#machine-table').DataTable({
-        "dom": 'tp',
+    $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", $('#alarm-form').find('[name="csrfmiddlewaretoken"]')[0].value);
+        }
+    }
+    });
+    datatable_handle = $('#machine-table').DataTable({
+        dom: '<"toolbar">tr',
+        processing: true,
+        serverSide: true,
+        ajax: {
+            "url": "http://" + window.location.host
+                                + "/api/servers/vm-list",
+            "contentType": "application/json",
+            "type": "GET"
+        },
         "columns": [
-            {"data": "checkbox"},
             {"data": "id"},
             {"data": "name"},
-            {"data": "backup"}
+            {"data": "name"}
         ],
         "columnDefs": [
             {
-                "targets": [0, 1, 2, 3],
+                "targets": [0, 1, 2],
+                "width": '40%',
                 "sortable": false
             },
             {
-                "targets": [0],
-                "sortable": false,
-                "width": "5%",
+                "targets": [2],
+                "width": '30%' ,
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html("<input type='checkbox' onclick='updateMeterList(" + iRow + ")'>");
+                    $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench'></a>" +
+                    "<a href='#' class='btn btn-xs btn-empty fa fa-trash-o'></a>");
                 }
-            },
+            }
         ],
+        "order": [[1, "desc"]],
         responsive: true
     });
     setTimeout(function(){
@@ -193,13 +209,23 @@ $(function()
 	});
     $(document).on('change', '.alarm-form-element', function(){
         var this_name = $(this).attr('name');
-        $('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
+        $('#alarm-form [name="'+this_name+'"]')[0].value = this.value;
+    });
+    $(document).on('click', '.alarm-form-element', function(){
+        var this_name = $(this).attr('name');
+        $('#alarm-form [name="'+this_name+'"]')[0].value = this.value;
     });
     $(document).on('change', '.alarm-action-element', function(){
         var this_name = $(this).attr('name');
         //$('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
     });
-
+    $(document).on('click', '.machine-type-selector', function(){
+        datatable_handle.ajax.url("http://" + window.location.host
+                                    + "/api/servers/"
+                                    + this.value
+                                    + '-list');
+        datatable_handle.ajax.reload();
+    });
 });
 
 function loadDataFromForm(){
@@ -239,8 +265,8 @@ function loadAlarmConfirmation(){
     var getAlarmFormElement = function(element_name){
         // function has a hidden argument. Should be treated as getAlarmFormElement(name, getAllElements)
         if(arguments[1] === true)
-            return $('#alarm-form [name="'+element_name+'"]');
-        return $('#alarm-form [name="'+element_name+'"]')[0];
+            return $('#alarm-form').find('[name="'+element_name+'"]');
+        return $('#alarm-form').find('[name="'+element_name+'"]')[0];
     };
     var load_elements = $('.confirm-element');
     var index;
@@ -277,3 +303,7 @@ function loadAlarmConfirmation(){
         + ' 时触发警报';
 }
 
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
