@@ -92,7 +92,6 @@ $(document).ready(function () {
                 }
             }
         ],
-        "order": [[1, "desc"]],
         responsive: true,
         "createdRow": function (row, data, index) {
             if (checkMeterList(data)) {

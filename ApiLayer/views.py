@@ -8,6 +8,7 @@ from django.http import HttpRequest
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
+from urllib import urlencode
 
 from AlarmNotification.capabilities import NOTIFICATION_CAPABILITIES as NOTIFICATION_CAPABILITIES
 from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
@@ -258,6 +259,11 @@ def get_alarms(request):
 
 
 def get_resources(request):
+    '''
+    Get resource list through Ceilometer API
+    :param request: Django request object
+    :return:
+    '''
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
     result = ceilometer_api.get_resources(request.session['token'], **filters)
@@ -266,13 +272,24 @@ def get_resources(request):
 
 def get_vm_list(request):
     '''
-    Get tenant's server list through nova api.
+    Get tenant's server list(virtual-machine list) through nova api.
     Temporarily does not support filter or pagination.
-    :param request:
-    :return: server list json:
-              [{name: <server_name>, id: <server_id>} ... ]
+    :param request: Django request object
+    :return: server list json(packed according to data source requirements
+                               of DataTables):
+              {
+                  status: <success| failure> ,
+                  recordsTotal: <total>,
+                  recordsFiltered: <filtered>,
+                  data: [
+                      {name: <server_name>, id: <server_id>} ...
+                  ],
+              }
     '''
     servers = nova_api.get_server_list(request.session['token'])
+    print servers
+    if servers['status'] != 'success':
+        return _report_error('', 'error')
     result = {"status": "success",
               "recordsTotal": len(servers['data']['servers']),
               "recordsFiltered": len(servers['data']['servers']),
@@ -284,13 +301,23 @@ def get_vm_list(request):
 
 def get_pm_list(request):
     '''
-    Get tenant's server list through nova api.
+    Get hypervisor list(physical-machine list) through nova api.
     Temporarily does not support filter or pagination.
-    :param request:
-    :return: server list json:
-              [{name: <server_name>, id: <server_id>} ... ]
+    :param request: Django request object
+    :return: server list json(packed according to data source requirements
+                               of DataTables):
+              {
+                  status: <success| failure> ,
+                  recordsTotal: <total>,
+                  recordsFiltered: <filtered>,
+                  data: [
+                      {name: <server_name>, id: <server_id>} ...
+                  ],
+              }
     '''
     hypervisors = nova_api.get_hypervisor_list(request.session['token'])
+    if hypervisors['status'] != 'success':
+        return _report_error('', 'error')
     result = {"status": "success",
               "recordsTotal": len(hypervisors['data']['hypervisors']),
               "recordsFiltered": len(hypervisors['data']['hypervisors']),
@@ -343,7 +370,7 @@ def _report_error(error_type, error_msg):
     Report error data
     :param error_type: (string) Error type
     :param error_msg: (string) Error message
-    :return: HTTPResponse Object
+    :return: HTTPResponse Object(application/json response)
     '''
     error_json = {'status': 'error',
                   'error_type': error_type,
@@ -369,9 +396,20 @@ def getTopoInfo(request):
     #return HttpResponse(json.dumps({'data': error_json}), content_type='application/json')
 
 def _convert_action_to_action_url(action_list):
+    '''
+    Convert an alarm action to link for backend storage.
+    Rule:
+        Original: type=<email|link|...>&detail=<detail>
+        Converted: http://THIS_ADDR/notification/<type>?detail=<detail>
+    Example:
+        Original: type=email&detail=mail@site.com
+        Converted: http://THIS_ADDR/notification/email?detail=mail@site.com
+    :param action_list:
+    :return:
+    '''
     action_url = []
     for action in action_list:
         action_regex = re.compile('type=('+'|'.join(NOTIFICATION_CAPABILITIES) + ')&detail=(.*)')
         reg_match = action_regex.match(action)
         action_type, action_detail = reg_match.group(1), reg_match.group(2)
-        action_url.append('http://' + settings.THIS_ADDR + '/')
+        action_url.append('http://' + settings.THIS_ADDR + '/notification/')

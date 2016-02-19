@@ -19,7 +19,7 @@ $(document).ready(function(){
         "columns": [
             {"data": "id"},
             {"data": "name"},
-            {"data": "name"}
+            {"data": "id"}
         ],
         "columnDefs": [
             {
@@ -31,16 +31,14 @@ $(document).ready(function(){
                 "targets": [2],
                 "width": '30%' ,
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench'></a>" +
-                    "<a href='#' class='btn btn-xs btn-empty fa fa-trash-o'></a>");
+                    $(nTd).html('<a onclick="getMeterList(\''+oData.id+'\')" class="btn btn-xs btn-empty fa fa-wrench"></a>')
                 }
             }
         ],
-        "order": [[1, "desc"]],
         responsive: true
     });
     setTimeout(function(){
-        var step = $('#alarm-form [name="cur_step"]')[0].value;
+        var step = $('#alarm-form').find('[name="cur_step"]')[0].value;
         if(step === '2' || step === '3')
             loadDataFromForm();
         else if(step ==='4')
@@ -50,15 +48,23 @@ $(document).ready(function(){
 });
 
 $(function () {
-    $("#project-select").select2({
+    $("#meter-select").select2({
         ajax: {
-            url: '/projects/get-project-name-list',
+            url: '/api/meters/meter-list?resource_id='
+                        + $('#alarm-form').find('[name="resource_id"]')[0].value,
             dataType: 'json',
             type: 'GET',
             delay: 500,
-            processResults: function (data, page) {
+            results: function (data, page) {
+                console.log(data);
+                var i, result;
+                for (i = 0; i < data.data.length; i++){
+                    data.data[i]['id'] = i;
+                    result.push(data.data[i]);
+                }
+                console.info(result);
                 return {
-                    results: data
+                    results: result
                 };
             }
         },
@@ -228,6 +234,16 @@ $(function()
     });
 });
 
+function getMeterList(resource_id){
+    $('#alarm-form').find('[name="resource_id"]')[0].value = resource_id;
+        $("#meter-select").select2({
+        ajax: {
+            url: '/api/meters/meter-list?resource_id='
+                        + $('#alarm-form').find('[name="resource_id"]')[0].value,
+        }
+    });
+}
+
 function loadDataFromForm(){
     var load_elements = $('.alarm-form-element');
     var index;
@@ -280,7 +296,7 @@ function loadAlarmConfirmation(){
         var action = actions[index];
         var action_list = getAlarmFormElement(action.getAttribute('name'), true);
         var list_index, base_element;
-        base_element = $('#alarm-detail-wrapper [name="'+action.getAttribute('name')+'"]')[0];
+        base_element = $('#alarm-detail-wrapper').find('[name="'+action.getAttribute('name')+'"]')[0];
 
         for(list_index = 0; list_index < action_list.length; list_index++){
             // Match result [0: whole string  1: type_match(email|message)  2: detail_match]

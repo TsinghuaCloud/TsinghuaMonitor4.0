@@ -20,7 +20,7 @@ def meters_page(request):
 
 
 def test_page(request):
-    request.session['token'] = openstack_api.get_token(request, 'token')
+    request.session['token'] = openstack_api.get_token(request, 'token')['token']
     return render(request, 'test-page.html')
 
 
@@ -62,6 +62,7 @@ def resource_page(request):
 @csrf_protect
 def create_alarm(request):
     if request.method == 'GET':
+        request.session['token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'create_threshold_alarm_basis.html',
                       {
                           'title': 'Create-alarm',
