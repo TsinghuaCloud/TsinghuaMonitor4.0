@@ -322,7 +322,8 @@ def get_pm_list(request):
               "recordsTotal": len(hypervisors['data']['hypervisors']),
               "recordsFiltered": len(hypervisors['data']['hypervisors']),
               "data": [{'name': hypervisor['hypervisor_hostname'],
-                        'id': hypervisor['id']
+                        # TODO(pwwp): Confirm this usage (setting id = name)
+                        'id': hypervisor['hypervisor_hostname']
                         }
                         for hypervisor in hypervisors['data']['hypervisors']]}
     return HttpResponse(json.dumps(result), content_type='application/json')

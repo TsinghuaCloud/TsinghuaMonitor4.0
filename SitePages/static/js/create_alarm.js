@@ -31,7 +31,7 @@ $(document).ready(function(){
                 "targets": [2],
                 "width": '30%' ,
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html('<a onclick="getMeterList(\''+oData.id+'\')" class="btn btn-xs btn-empty fa fa-wrench"></a>')
+                    $(nTd).html('<a onclick="getMeterList(\''+oData.id+'\')" class="btn btn-sm btn-primary">选择该主机</a>')
                 }
             }
         ],
@@ -43,7 +43,6 @@ $(document).ready(function(){
             loadDataFromForm();
         else if(step ==='4')
             loadAlarmConfirmation();
-
     }, 1);
 });
 
@@ -89,8 +88,10 @@ var chart = AmCharts.makeChart("meter-chart", {
        "limitToGraph":"g1"
     },
     "categoryField": "date",
+    "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
     "categoryAxis": {
         "parseDates": true,
+        "minPeriod": "ss",
         "axisColor": "#DADADA",
         "dashLength": 1,
         "minorGridEnabled": true
@@ -99,15 +100,6 @@ var chart = AmCharts.makeChart("meter-chart", {
         "enabled": true
     }
 });
-
-chart.addListener("rendered", zoomChart);
-zoomChart();
-
-// this method is called when chart is first inited as we listen for "rendered" event
-function zoomChart() {
-    // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
-    chart.zoomToIndexes(chartData.length - 40, chartData.length - 1);
-}
 
 // generate some random data, quite different range
 function generateChartData() {
@@ -175,7 +167,7 @@ function submitAlarmActions(){
 function initializeMeterSelect(){
     $("#meter-select").select2({
         ajax: {
-            url: '/api/meters/meter-list?resource_id='
+            url: '/api/meters/meter-list?resource_id_match='
                         + $('#alarm-form').find('[name="resource_id"]')[0].value,
             dataType: 'json',
             type: 'GET',
@@ -241,6 +233,10 @@ $(function()
     $(document).on("change", '#meter-select', function(e) {
         updateMeterChart();
     });
+    $(document).on("change", '#alarm-form [name="resource_id"]', function(e) {
+        if()
+        $('#meter-select-form').removeAttr('hidden');
+    });
 });
 
 function getMeterList(resource_id){
@@ -254,32 +250,26 @@ function updateMeterChart(){
     var selected_meter = {};
     selected_meter[name_m] = [resource_id];
 
-
+    // Here we just request for one meter's data.
     var chart_data_handle = $.get('/api/meters/meter-samples', selected_meter, function (data) {
         var chart_data = data['data'];
-
         // Get series' names
         var chart_data_object = {};
-        var chart_series_count = chart_data.length;
-        var meter_samples, sample, date_string, chart_dataset_list=[];
-        for (var i = 0; i < chart_series_count; i++) {
-            meter_samples = chart_data[i]['data'];
-            var meter_display_name = (chart_data[i])['meter_name'] + '@' + chart_data[i]['resource_id'];
-            chart_dataset_list.push(meter_display_name);
-            for (var j = 0; j < meter_samples.length; j++) {
-                sample = meter_samples[j];
-                var new_date = new Date(sample['timestamp']);
-                date_string = new_date.getTime().toString();
-                if (date_string in chart_data_object) {
-                    chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
-                } else {
-                    chart_data_object[new_date] = {};
-                    chart_data_object[new_date]['date'] = getFormattedDate(new_date);
-                    chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
-                }
+        var meter_samples, sample, date_string;
+        meter_samples = chart_data[0]['data'];
+        var meter_display_name = (chart_data[0])['meter_name'];
+        for (var j = 0; j < meter_samples.length; j++) {
+            sample = meter_samples[j];
+            var new_date = new Date(sample['timestamp']);
+            date_string = new_date.getTime().toString();
+            if (date_string in chart_data_object) {
+                chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
+            } else {
+                chart_data_object[new_date] = {};
+                chart_data_object[new_date]['date'] = new_date;
+                chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
             }
         }
-
 
         // Add data into dataprovider
         chartData = [];
@@ -289,6 +279,7 @@ function updateMeterChart(){
             }
         }
         chart.dataProvider = chartData.sort(compareDate);
+        chart.graphs[0].valueField = meter_display_name;
         chart.validateData();
         chart.validateNow();
     });

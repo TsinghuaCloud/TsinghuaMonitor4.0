@@ -301,7 +301,7 @@ var chart = AmCharts.makeChart("meter-chart", {
     "categoryField": "date",
     "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
 	"categoryAxis": {
-		"minPeriod": "SS",
+		"minPeriod": "ss",
 		"parseDates": true
 	},
     "export": {
