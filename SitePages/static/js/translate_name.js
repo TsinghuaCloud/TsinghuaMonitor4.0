@@ -109,7 +109,7 @@ var machine_type_CN ={
 var enabled_CN = bool_CN;
 var repeated_actions_CN = bool_CN;
 
-function translate(name, type){
+function translate_name(name, type){
     /*
      * Function "translate" translates "name" into translation of desired language
      *

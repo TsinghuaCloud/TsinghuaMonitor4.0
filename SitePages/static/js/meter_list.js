@@ -173,7 +173,6 @@ function updateChart(){
     /*
      *
      */
-
     // Convert data requested from meter-samples api to amchart data
     var chart_data_handle;
     chart_data_handle = $.get('/api/meters/meter-samples', selected_meter_list, function (data) {
@@ -185,7 +184,7 @@ function updateChart(){
         var meter_samples, sample, date_string, chart_dataset_list=[];
         for (var i = 0; i < chart_series_count; i++) {
             meter_samples = chart_data[i]['data'];
-            var meter_display_name = (chart_data[i])['meter_name'] + '@' + chart_data[i]['resource_id'];
+            var meter_display_name = translate_name((chart_data[i])['meter_name'], 'meter_name') + '@' + chart_data[i]['resource_id'];
             chart_dataset_list.push(meter_display_name);
             for (var j = 0; j < meter_samples.length; j++) {
                 sample = meter_samples[j];

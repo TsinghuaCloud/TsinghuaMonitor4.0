@@ -48,29 +48,7 @@ $(document).ready(function(){
 });
 
 $(function () {
-    $("#meter-select").select2({
-        ajax: {
-            url: '/api/meters/meter-list?resource_id='
-                        + $('#alarm-form').find('[name="resource_id"]')[0].value,
-            dataType: 'json',
-            type: 'GET',
-            delay: 500,
-            results: function (data, page) {
-                console.log(data);
-                var i, result;
-                for (i = 0; i < data.data.length; i++){
-                    data.data[i]['id'] = i;
-                    result.push(data.data[i]);
-                }
-                console.info(result);
-                return {
-                    results: result
-                };
-            }
-        },
-        placeholder: "Select an item",
-        allowClear: true
-    });
+    initializeMeterSelect();
 });
 
 var chartData=generateChartData();
@@ -194,6 +172,34 @@ function submitAlarmActions(){
     }
 }
 
+function initializeMeterSelect(){
+    $("#meter-select").select2({
+        ajax: {
+            url: '/api/meters/meter-list?resource_id='
+                        + $('#alarm-form').find('[name="resource_id"]')[0].value,
+            dataType: 'json',
+            type: 'GET',
+            delay: 500,
+            processResults: function (data, page) {
+                var i;
+                var result = [];
+                for (i = 0; i < data.data.length; i++){
+                    var meter = {
+                        'id': data.data[i]['name'],
+                        'text': translate_name(data.data[i]['name'], 'meter_name'),
+                    };
+                    result.push(meter);
+                }
+                return {
+                    results: result
+                };
+            }
+        },
+        placeholder: "Select an item",
+        allowClear: true
+    });
+}
+
 $(function()
 {
     $(document).on('click', '.btn-add', function(e)
@@ -232,16 +238,61 @@ $(function()
                                     + '-list');
         datatable_handle.ajax.reload();
     });
+    $(document).on("change", '#meter-select', function(e) {
+        updateMeterChart();
+    });
 });
 
 function getMeterList(resource_id){
     $('#alarm-form').find('[name="resource_id"]')[0].value = resource_id;
-        $("#meter-select").select2({
-        ajax: {
-            url: '/api/meters/meter-list?resource_id='
-                        + $('#alarm-form').find('[name="resource_id"]')[0].value,
+    initializeMeterSelect();
+}
+
+function updateMeterChart(){
+    var resource_id = $('#alarm-form').find('[name="resource_id"]')[0].value;
+    var name_m = $('#alarm-form').find('[name="meter_name"]')[0].value;
+    var selected_meter = {};
+    selected_meter[name_m] = [resource_id];
+
+
+    var chart_data_handle = $.get('/api/meters/meter-samples', selected_meter, function (data) {
+        var chart_data = data['data'];
+
+        // Get series' names
+        var chart_data_object = {};
+        var chart_series_count = chart_data.length;
+        var meter_samples, sample, date_string, chart_dataset_list=[];
+        for (var i = 0; i < chart_series_count; i++) {
+            meter_samples = chart_data[i]['data'];
+            var meter_display_name = (chart_data[i])['meter_name'] + '@' + chart_data[i]['resource_id'];
+            chart_dataset_list.push(meter_display_name);
+            for (var j = 0; j < meter_samples.length; j++) {
+                sample = meter_samples[j];
+                var new_date = new Date(sample['timestamp']);
+                date_string = new_date.getTime().toString();
+                if (date_string in chart_data_object) {
+                    chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
+                } else {
+                    chart_data_object[new_date] = {};
+                    chart_data_object[new_date]['date'] = getFormattedDate(new_date);
+                    chart_data_object[new_date][meter_display_name] = sample['counter_volume'];
+                }
+            }
         }
+
+
+        // Add data into dataprovider
+        chartData = [];
+        for (var key in chart_data_object) {
+            if (chart_data_object.hasOwnProperty(key)) {
+              chartData.push(chart_data_object[key]);
+            }
+        }
+        chart.dataProvider = chartData.sort(compareDate);
+        chart.validateData();
+        chart.validateNow();
     });
+
 }
 
 function loadDataFromForm(){
@@ -288,7 +339,7 @@ function loadAlarmConfirmation(){
     var index;
     for(index = 0; index < load_elements.length; index++){
         var element = load_elements[index];
-        element.textContent = translate(getAlarmFormElement(element.getAttribute('name')).value, element.getAttribute('name'));
+        element.textContent = translate_name(getAlarmFormElement(element.getAttribute('name')).value, element.getAttribute('name'));
     }
 
     var actions = $('.confirm-action-element');
@@ -303,7 +354,7 @@ function loadAlarmConfirmation(){
             var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
             var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
             var append_html = document.createElement('p');
-            append_html.textContent = translate(match_result[1], 'notification_type') + ": " + match_result[2];
+            append_html.textContent = translate_name(match_result[1], 'notification_type') + ": " + match_result[2];
             base_element.appendChild(append_html);
         }
     }
@@ -311,10 +362,10 @@ function loadAlarmConfirmation(){
 
     $('.confirm-trigger-element')[0].textContent =
         '当 ' + getAlarmFormElement('resource_id').value
-        + ' 的' + translate(getAlarmFormElement('meter_name').value, 'meter_name')
+        + ' 的' + translate_name(getAlarmFormElement('meter_name').value, 'meter_name')
         + ' 在' + getAlarmFormElement('period').value
-        + ' 秒内' + translate(getAlarmFormElement('statistic').value, 'statistic')
-        + '' + translate(getAlarmFormElement('comparison_operator').value, 'comparison_operator')
+        + ' 秒内' + translate_name(getAlarmFormElement('statistic').value, 'statistic')
+        + '' + translate_name(getAlarmFormElement('comparison_operator').value, 'comparison_operator')
         + ' ' + getAlarmFormElement('threshold').value
         + ' 时触发警报';
 }
@@ -322,4 +373,26 @@ function loadAlarmConfirmation(){
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+function getFormattedDate(dt)
+{
+    var yyyy = dt.getFullYear().toString();
+   var MM = (dt.getMonth()+1).toString();
+   var dd  = dt.getDate().toString();
+   var hh = dt.getHours().toString();
+   var mm = dt.getMinutes().toString();
+   var ss = dt.getSeconds().toString();
+
+   //Returns your formatted result
+  return yyyy + '-' + (MM[1]?MM:"0"+MM[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + 'T' + (hh[1]?hh:"0"+hh[0]) + ':' + (mm[1]?mm:"0"+mm[0]) + ':' + (ss[1]?ss:"0"+ss[0])+'Z';
+}
+
+function compareDate(a,b) {
+  if (a.date < b.date)
+    return -1;
+  else if (a.date > b.date)
+    return 1;
+  else
+    return 0;
 }
