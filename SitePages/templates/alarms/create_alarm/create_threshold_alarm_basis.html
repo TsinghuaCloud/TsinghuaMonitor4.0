@@ -6,7 +6,7 @@
     <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
     <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
-    {% include '_basic_static_css.html' %}
+    {% include 'basis/_basic_static_css.html' %}
     <!-- Select2 4.0.0-->
     <link href="{% static 'select2-4.0.0/css/select2.min.css' %}" rel="stylesheet">
     <!-- Customized css for create-alarm page -->
@@ -17,10 +17,10 @@
 {% block content %}
     <div id="container">
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-            {% include "_topbar.html" %}
+            {% include "basis/_topbar.html" %}
             <div class="navbar-default sidebar" role="navigation">
                 {% block sidebar %}
-                    {% include '_sidebar.html' %}
+                    {% include 'basis/_sidebar.html' %}
                 {% endblock %}
             </div>
         </nav>
@@ -32,10 +32,10 @@
                         创建警报 | Create Alarms
                     </h3>
                 </div>
-                {% include '_create_alarm_form_hidden.html' %}
+                {% include 'alarms/create_alarm/_create_alarm_form_hidden.html' %}
                 <!-- Alarm configurations -->
                 <div class="col-lg-12" id="alarm-detail-wrapper">
-                    {% include '_create_threshold_alarm_step_instruction.html' %}
+                    {% include 'alarms/create_alarm/_create_threshold_alarm_step_instruction.html' %}
                     {% include threshold_step_html %}
                 </div>
                 <!-- END col-lg-12 -->
@@ -48,7 +48,7 @@
     <div id="footer">
     </div>
 {% endblock %}
-{% include '_basic_js.html' %}
+{% include 'basis/_basic_js.html' %}
 <!-- DataTables JS -->
 <script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
 <!-- DataTables Bootstrap JS -->

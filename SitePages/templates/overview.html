@@ -6,16 +6,16 @@
     <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
     <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
-    {% include '_basic_static_css.html' %}
+    {% include 'basis/_basic_static_css.html' %}
 </head>
 <body>
 {% block content %}
     <div id="container">
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-            {% include "_topbar.html" %}
+            {% include "basis/_topbar.html" %}
             <div class="navbar-default sidebar" role="navigation">
                 {% block sidebar %}
-                    {% include '_sidebar.html' %}
+                    {% include 'basis/_sidebar.html' %}
                 {% endblock %}
             </div>
         </nav>
@@ -183,7 +183,7 @@
 <div hidden="hidden">
 
 </div>
-{% include '_basic_js.html' %}
+{% include 'basis/_basic_js.html' %}
 </body>
 </html>
 

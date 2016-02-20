@@ -31,16 +31,16 @@
         }
     </style>
 
-    {% include '_basic_static_css.html' %}
+    {% include 'basis/_basic_static_css.html' %}
 
 </head>
 <body>
 <div id="container">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-        {% include "_topbar.html" %}
+        {% include "basis/_topbar.html" %}
         <div class="navbar-default sidebar" role="navigation">
             {% block sidebar %}
-                {% include '_sidebar.html' %}
+                {% include 'basis/_sidebar.html' %}
             {% endblock %}
         </div>
     </nav>
@@ -136,7 +136,7 @@
 
 <div id="footer">
 </div>
-{% include '_basic_js.html' %}
+{% include 'basis/_basic_js.html' %}
 <!-- DataTables JS -->
 <script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
 

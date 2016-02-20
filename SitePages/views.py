@@ -16,7 +16,7 @@ def overview(request):
 
 
 def meters_page(request):
-    return render(request, 'meters.html', {'title': 'Meter-list'})
+    return render(request, 'meters/meters.html', {'title': 'Meter-list'})
 
 
 def test_page(request):
@@ -52,7 +52,7 @@ def resource_page(request):
         temp['left'] = all_vm_list[key][1:]
         temp['first'] = all_vm_list[key][0]
         PMs[key] = temp
-    return render(request, 'resource.html', {'title': 'resource-list',
+    return render(request, 'resources/resource.html', {'title': 'resource-list',
                                              'PMs': PMs,
                                              'Pminfo': pm_info_detail,
                                              'resource_overview': resource_overview
@@ -63,10 +63,10 @@ def resource_page(request):
 def create_alarm(request):
     if request.method == 'GET':
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
-        return render(request, 'create_threshold_alarm_basis.html',
+        return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
                           'title': 'Create-alarm',
-                          'threshold_step_html': '_threshold_alarm_step_1.html',
+                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_1.html',
                           'step': 1,
                           'alarm_data': {
                               'machine_type': 'vm',
@@ -78,9 +78,9 @@ def create_alarm(request):
         if step is None or step not in ['1', '2', '3', '4']:
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
-        return render(request, 'create_threshold_alarm_basis.html',
+        return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
-                          'threshold_step_html': '_threshold_alarm_step_' + step + '.html',
+                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
                           'step': step,
                           'alarm_data': alarm_data,
                       })
