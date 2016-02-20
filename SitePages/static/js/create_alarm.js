@@ -50,7 +50,7 @@ $(function () {
     initializeMeterSelect();
 });
 
-var chartData=generateChartData();
+var chartData=[];
 
 var chart = AmCharts.makeChart("meter-chart", {
     "type": "serial",
@@ -100,28 +100,6 @@ var chart = AmCharts.makeChart("meter-chart", {
         "enabled": true
     }
 });
-
-// generate some random data, quite different range
-function generateChartData() {
-    var chartData = [];
-    var firstDate = new Date();
-    firstDate.setDate(firstDate.getDate() - 5);
-
-    for (var i = 0; i < 1000; i++) {
-        // we create date objects here. In your data, you can have date strings
-        // and then set format of your dates using chart.dataDateFormat property,
-        // however when possible, use date objects, as this will speed up chart rendering.
-        var newDate = new Date(firstDate);
-        newDate.setDate(newDate.getDate() + i);
-
-        var visits = Math.round(Math.random() * (40 + i / 5)) + 20 + i;
-        chartData.push({
-            date: newDate,
-            visits: visits
-        });
-    }
-    return chartData;
-}
 
 function next_step() {
     var step_element = document.getElementsByName("next_step")[0];
@@ -234,8 +212,7 @@ $(function()
         updateMeterChart();
     });
     $(document).on("change", '#alarm-form [name="resource_id"]', function(e) {
-        if()
-        $('#meter-select-form').removeAttr('hidden');
+
     });
 });
 
