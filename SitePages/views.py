@@ -15,9 +15,12 @@ def overview(request):
     return render(request, 'overview.html')
 
 
-def meters_page(request):
-    return render(request, 'meters/meters.html', {'title': 'Meter-list'})
+def meter_list_page(request):
+    return render(request, 'meters/meters.html', {'title': 'Meter list'})
 
+
+def alarm_list_page(request):
+    return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
 
 def test_page(request):
     request.session['token'] = openstack_api.get_token(request, 'token')['token']

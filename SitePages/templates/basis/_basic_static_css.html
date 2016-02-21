@@ -29,7 +29,6 @@
 
 <!-- Customized CSS -->
 <style type="text/css">
- 
     .nav-tsinghua{
         float: left;
         padding: 5px 15px 5px 25px;
@@ -45,5 +44,22 @@
         font-size: 6px;
         line-height: 1.428571429;
         border-radius: 8px;
+    }
+
+    .fixed-layout-table{
+        table-layout: fixed;
+    }
+
+    .fixed-layout-table * td{
+        text-overflow: ellipsis;
+        white-space : nowrap;
+        overflow: hidden;
+    }
+
+    .fixed-layout-table * .td-show-all{
+        text-overflow: inherit;
+        white-space: inherit;
+        overflow: inherit;
+    }
 </style>
 <!-- END Customized CSS -->
