@@ -66,7 +66,7 @@ def post_alarm(token, **kwargs):
         new_alarm['threshold'] = kwargs['threshold']
     except KeyError, e:
         return {'status': 'error',
-                'msg': 'Key: "' + str(e) + '" is illegal!'}
+                'error_msg': 'Key: "' + str(e) + '" is illegal!'}
 
     # Pack other optional arguments
     new_alarm['alarm_actions'] = kwargs.get('alarm_actions', [])

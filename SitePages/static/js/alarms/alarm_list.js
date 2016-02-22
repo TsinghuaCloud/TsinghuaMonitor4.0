@@ -16,24 +16,23 @@ $(document).ready(function () {
     });
     datatable_handle = $('#alarm-list-table').DataTable({
         dom: '<"toolbar">lrtip',
-        //processing: true,
-        //serverSide: true,
-        //ajax: {
-        //    "url": "http://" + window.location.host + "/api/alarms/alarm-list",
-        //    "contentType": "application/json",
-        //    "type": "POST",
-        //    "data": function (d) {
-        //        var query_value = document.getElementById("search-value").value.trim();
-        //        var query_filter = document.getElementById("search-filter").value;
-        //        if(query_value != ""){
-        //            d.q = [];
-        //            d.q[0] = {};
-        //            d.q[0].field= query_filter;
-        //            d.q[0].value = query_value;
-        //        }
-        //        return JSON.stringify(d);
-        //    }
-        //},
+        processing: true,
+        ajax: {
+            "url": "http://" + window.location.host + "/api/alarms/alarm-list",
+            "contentType": "application/json",
+            "type": "POST",
+            "data": function (d) {
+                var query_value = document.getElementById("search-value").value.trim();
+                var query_filter = document.getElementById("search-filter").value;
+                if(query_value != ""){
+                    d.q = [];
+                    d.q[0] = {};
+                    d.q[0].field= query_filter;
+                    d.q[0].value = query_value;
+                }
+                return JSON.stringify(d);
+            }
+        },
         "columns": [
             {"data": "alarm_id"},
             {"data": "name"},
@@ -53,6 +52,23 @@ $(document).ready(function () {
                 "sortable": false
             },
             {
+                "targets": [2],
+                "fnCreatedCell": function(nTd, sData, oData, iRow, iCol){
+                    $(nTd).html(translate_name(oData.state, 'alarm_state'))
+                }
+            },
+            {
+                "targets": [3],
+                "width": "10%",
+                "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    $(nTd).html('<div class="material-switch">' +
+                                    '<input id="switch-input-'+ oData.alarm_id +
+                                    '" type="checkbox"' + (oData.enabled ? 'checked' : '')  + '/>' +
+                                    '<label for="switch-input-' + oData.alarm_id +'" class="label-primary"></label>' +
+                                    '</div>');
+                }
+            },
+            {
                 "targets": [4],
                 "width": "30%"
             },
@@ -69,11 +85,15 @@ $(document).ready(function () {
                 "targets": [5],
                 "width": "18%",
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html('<a class="btn btn-primary btn-sm" href="alarm-detail?alarm_id=' + oData.alarm_id +
-                                    '">查看</a>' +
-                               '<a class="btn btn-default btn-sm" href="/api/alarms/delete-alarms?alarm_id=' + oData.alarm_id +
-                                    '">删除</a>');
-
+                    $(nTd).html('<a class="btn btn-xs btn-empty fa fa-search" ' +
+                                'href="alarm-detail?alarm_id=' + oData.alarm_id +
+                                '"></a>' +
+                                '<a class="btn btn-xs btn-empty fa fa-gear" ' +
+                                'href="/api/alarms/modify-alarms?alarm_id=' + oData.alarm_id +
+                                '"></a>' +
+                                '<a class="btn btn-xs btn-empty fa fa-trash-o" ' +
+                                'href="/api/alarms/delete-alarms?alarm_id=' + oData.alarm_id +
+                                '"></a>');
                 }
             }
         ],

@@ -106,6 +106,12 @@ var machine_type_CN ={
     'pm' : '物理机'
 };
 
+var alarm_state_CN = {
+    'alarm': '报警',
+    'ok': '正常',
+    'insufficient data': '数据不足'
+};
+
 var enabled_CN = bool_CN;
 var repeated_actions_CN = bool_CN;
 

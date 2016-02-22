@@ -34,8 +34,8 @@ def openstack_api_connection(base_url, method, header, port, version,
         response = conn.getresponse()
         if response.status != 200:
             error = {'status': 'failed',
-                     'code': response.status,
-                     'msg': response.reason,
+                     'error_code': response.status,
+                     'error_msg': response.reason,
                      'data': ''}
             return error
         else:
@@ -44,10 +44,10 @@ def openstack_api_connection(base_url, method, header, port, version,
             return data
     except socket.error, e:
         return {'status': 'failed',
-                'error_message': e.strerror
+                'error_msg': e.strerror
                 }
     except httplib.HTTPException, e:
         return {'status': 'failed',
-                'error_message': e.message
+                'error_msg': e.message
                 }
 

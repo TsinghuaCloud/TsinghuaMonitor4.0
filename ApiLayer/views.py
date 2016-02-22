@@ -4,11 +4,8 @@ import time
 import re
 
 from django.conf import settings
-from django.http import HttpRequest
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
-from urllib import urlencode
 
 from AlarmNotification.capabilities import NOTIFICATION_CAPABILITIES as NOTIFICATION_CAPABILITIES
 from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
@@ -16,7 +13,8 @@ from ApiLayer.ceilometer import api as ceilometer_api
 from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection   # TODO(pwwp): remove this import statement
 from ApiLayer.keystone import api as keystone_api
-import capabilities
+from ApiLayer.base import capabilities
+
 #import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 
@@ -255,7 +253,13 @@ def get_alarms(request):
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
     result = ceilometer_api.get_alarms(request.session['token'], **filters)
-    return HttpResponse(json.dumps(result), content_type='application/json')
+    if result['status'] == 'success':
+        result['recordsTotal'] = len(result['data'])
+        result['recordsFiltered'] = len(result['data'])
+        return HttpResponse(json.dumps(result), content_type='application/json')
+    else:
+        return _report_error(result['status'], result['error_msg'])
+
 
 
 def get_resources(request):

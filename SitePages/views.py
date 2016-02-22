@@ -89,6 +89,38 @@ def create_alarm(request):
                       })
     return Http404
 
+@csrf_protect
+def edit_alarm(request, alarm_id):
+    try:
+        pass
+    except KeyError:
+        pass
+
+    if request.method == 'GET':
+        request.session['token'] = openstack_api.get_token(request, 'token')['token']
+        return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
+                      {
+                          'title': 'Edit Alarm',
+                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_1.html',
+                          'step': 1,
+                          'alarm_data': {
+                              'machine_type': 'vm',
+                          },
+                      })
+    if request.method == 'POST':
+        step = request.POST.get('next_step', '0')
+        # Invalid inputs for step will be served with 404 page
+        if step is None or step not in ['1', '2', '3', '4']:
+            raise Http404('Invalid value of "step"')
+        alarm_data = BaseMethods.qdict_to_dict(request.POST)
+        return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
+                      {
+                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
+                          'step': step,
+                          'alarm_data': alarm_data,
+                      })
+    return Http404
+
 
 def netTopo_page(request):
     return render(request, 'netTopo.html', {'title': 'Create-alarm'})

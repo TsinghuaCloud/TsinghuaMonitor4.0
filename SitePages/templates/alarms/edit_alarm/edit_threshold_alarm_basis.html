@@ -29,13 +29,13 @@
             <div class="row">
                 <div class="col-lg-12">
                     <h3 class="page-header">
-                        创建警报 | Create Alarms
+                        编辑警报 {{ alarm_data.name }} | Create Alarms
                     </h3>
                 </div>
-                {% include 'alarms/create_alarm/_create_alarm_form_hidden.html' %}
+                {% include 'alarms/edit_alarm/_edit_alarm_form_hidden.html' %}
                 <!-- Alarm configurations -->
                 <div class="col-lg-12" id="alarm-detail-wrapper">
-                    {% include 'alarms/create_alarm/_create_threshold_alarm_step_instruction.html' %}
+                    {% include 'alarms/edit_alarm/_edit_threshold_alarm_step_instruction.html' %}
                     {% include threshold_step_html %}
                 </div>
                 <!-- END col-lg-12 -->
