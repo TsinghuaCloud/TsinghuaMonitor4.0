@@ -261,6 +261,20 @@ def get_alarms(request):
         return _report_error(result['status'], result['error_msg'])
 
 
+def get_alarm_detail(request):
+    print request.GET
+    arrays = _request_GET_to_dict(request.GET, seperate_args_and_list=False)
+    if 'alarm_id' not in arrays:
+        return _report_error('KeyError', 'alarm_id not provided')
+    alarm_id = arrays['alarm_id']
+    #filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
+    result = ceilometer_api.get_alarm_detail(request.session['token'], alarm_id,)
+    if result['status'] == 'success':
+        return HttpResponse(json.dumps(result), content_type='application/json')
+    else:
+        return _report_error(result['status'], result['error_msg'])
+
+
 
 def get_resources(request):
     '''
@@ -365,8 +379,10 @@ def _request_GET_to_dict(qdict, seperate_args_and_list=True):
         else:
             url_variables[k] = url_handle[k]
 
+    print arrays, url_variables
     if not seperate_args_and_list:
-        return arrays.update(url_variables)
+        arrays.update(url_variables)
+        return arrays
     return arrays, url_variables
 
 

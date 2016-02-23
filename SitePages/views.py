@@ -92,7 +92,7 @@ def create_alarm(request):
 @csrf_protect
 def edit_alarm(request, alarm_id):
     try:
-        pass
+        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id)
     except KeyError:
         pass
 

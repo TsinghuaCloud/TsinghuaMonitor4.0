@@ -87,3 +87,13 @@ def post_alarm(token, **kwargs):
                                  body=new_alarm)['data']
 
 
+def get_alarm_detail(token, alarm_id, **kwargs):
+    '''
+    Get alarm detail from Ceilometer
+    :param token:
+    :param kwargs:
+    :return:
+    '''
+    request_header = {'X-Auth-Token': token,
+                      'Content-Type': 'application/json'}
+    return ceilometer_connection('alarms/'+ alarm_id, method='GET', header=request_header)
