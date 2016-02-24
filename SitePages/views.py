@@ -15,11 +15,11 @@ def overview(request):
     return render(request, 'overview.html')
 
 
-def meter_list_page(request):
+def meter_list(request):
     return render(request, 'meters/meters.html', {'title': 'Meter list'})
 
 
-def alarm_list_page(request):
+def alarm_list(request):
     return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
 
 def test_page(request):
@@ -76,11 +76,12 @@ def create_alarm(request):
                           },
                       })
     if request.method == 'POST':
-        step = request.POST.get('next_step', '0')
+        step = request.POST.get('next_step', '1')
         # Invalid inputs for step will be served with 404 page
         if step is None or step not in ['1', '2', '3', '4']:
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
+        print alarm_data
         return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
@@ -98,28 +99,31 @@ def edit_alarm(request, alarm_id):
 
     if request.method == 'GET':
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
-        return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
+        return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
                           'title': 'Edit Alarm',
-                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_1.html',
-                          'step': 1,
-                          'alarm_data': {
-                              'machine_type': 'vm',
-                          },
+                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_2.html',
+                          'step': 2,
+                          'alarm_data': alarm_data['data']
                       })
     if request.method == 'POST':
-        step = request.POST.get('next_step', '0')
+        step = request.POST.get('next_step', '2')
         # Invalid inputs for step will be served with 404 page
-        if step is None or step not in ['1', '2', '3', '4']:
+        if step is None or step not in ['2', '3', '4']:
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
-        return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
+        print alarm_data
+        return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
                           'step': step,
                           'alarm_data': alarm_data,
                       })
     return Http404
+
+
+def alarm_detail(request):
+    return render(request, 'alarms/alarm_detail.html', {'title': 'Alarm list'})
 
 
 def netTopo_page(request):

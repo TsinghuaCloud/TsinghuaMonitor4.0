@@ -1,0 +1,65 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+</head>
+<body>
+{% csrf_token %}
+<div id="container">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        {% include "basis/_topbar.html" %}
+        <div class="navbar-default sidebar" role="navigation">
+            {% block sidebar %}
+                {% include 'basis/_sidebar.html' %}
+            {% endblock %}
+        </div>
+    </nav>
+
+    <div id="page-wrapper" style="min-height: 219px;">
+        <!-- Meter Page -->
+        <div style="display:none">
+            <input type="hidden" id="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="page-header">
+                    警报详情 | Alarm Detail
+                    <div class="pull-right">
+                        <a class="btn btn-primary">WHAT?</a>
+                    </div>
+                </h2>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">警报详细信息</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-3">名称</div>
+                            <div class="col-md-9">abc</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">启用</div>
+                            <div class="col-md-9">是</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END Table -->
+            </div>
+            <!-- END Panel -->
+        </div>
+    </div>
+    <!-- END Alarm Page -->
+</div>
+
+<div id="footer">
+</div>
+{% include 'basis/_basic_js.html' %}
+<!-- Alarm-detail specified js -->
+<script src="{% static 'js/translate_name.js' %}"></script>
+</body>
+</html>
+

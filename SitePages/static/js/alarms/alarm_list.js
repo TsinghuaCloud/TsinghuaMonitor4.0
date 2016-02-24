@@ -89,10 +89,10 @@ $(document).ready(function () {
                                 'href="alarm-detail?alarm_id=' + oData.alarm_id +
                                 '"></a>' +
                                 '<a class="btn btn-xs btn-empty fa fa-gear" ' +
-                                'href="/api/alarms/modify-alarms?alarm_id=' + oData.alarm_id +
+                                'href="/monitor/alarms/edit-alarm/' + oData.alarm_id +
                                 '"></a>' +
                                 '<a class="btn btn-xs btn-empty fa fa-trash-o" ' +
-                                'href="/api/alarms/delete-alarms?alarm_id=' + oData.alarm_id +
+                                'href="/monitor/alarms/delete-alarm/' + oData.alarm_id +
                                 '"></a>');
                 }
             }
