@@ -86,7 +86,7 @@ $(document).ready(function () {
                 "width": "18%",
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     $(nTd).html('<a class="btn btn-xs btn-empty fa fa-search" ' +
-                                'href="alarm-detail?alarm_id=' + oData.alarm_id +
+                                'href="/monitor/alarms/alarm-detail/' + oData.alarm_id +
                                 '"></a>' +
                                 '<a class="btn btn-xs btn-empty fa fa-gear" ' +
                                 'href="/monitor/alarms/edit-alarm/' + oData.alarm_id +

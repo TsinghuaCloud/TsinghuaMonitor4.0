@@ -7,6 +7,7 @@
                         <label class="col-sm-3 control-label">警报名称</label>
                         <p class="col-sm-9 form-control-static confirm-element" name="name"></p>
                     </div>
+                    {% if page_type == 'create_alarm' %}
                     <div class="form-group">
                         <label class="col-sm-3 control-label">资源ID</label>
                         <p class="col-sm-9 form-control-static confirm-element" name="resource_id"></p>
@@ -15,6 +16,7 @@
                         <label class="col-sm-3 control-label">指标名称</label>
                         <p class="col-sm-9 form-control-static confirm-element" name="meter_name"></p>
                     </div>
+                    {% endif %}
                     <div class="form-group">
                         <label class="col-sm-3 control-label">描述</label>
                         <p class="col-sm-9 form-control-static confirm-element" name="description"></p>
@@ -33,7 +35,6 @@
                 <div class="form-horizontal">
                     <div class="form-group">
                         <label class="col-sm-3 control-label">触发条件</label>
-
                         <p class="col-sm-9 form-control-static confirm-trigger-element">当 {{ resource_id }} 的 {{ meter_name }} 在 {{ period }} 秒内
                                     平均值 大于 {{ threshold }} 时 触发警报</p>
                     </div>

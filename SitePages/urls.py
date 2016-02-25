@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^overview/topology/$', SiteViews.netTopo_page, name="Overview | Network Topology"),
     url(r'^monitor/meters/$', SiteViews.meter_list, name="Monitor | Meter Overview"),
     url(r'^monitor/alarms/$', SiteViews.alarm_list, name="Monitor | Alarms | Alarm Overview"),
+    url(r'^monitor/alarms/alarm-detail/([a-z0-9\-]+)/$', SiteViews.alarm_detail, name="Monitor | Alarms | Alarm Detail"),
     url(r'^monitor/alarms/edit-alarm/([a-z0-9\-]+)/$', SiteViews.edit_alarm, name="Monitor | Alarms | Edit Alarm"),
     url(r'^monitor/alarms/create-alarm/$', SiteViews.create_alarm, name="Monitor | Alarms | Create New Alarm"),
     url(r'^test/$', SiteViews.test_page, name="Test Page"),

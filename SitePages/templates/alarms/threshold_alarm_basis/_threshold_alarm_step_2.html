@@ -57,8 +57,8 @@
         <div class="form-horizontal">
             <div class="form-group">
                 <label class="col-sm-3 control-label"> 监控指标 </label>
-                <label class="col-sm-3 alarm-form-element" name="resource_id">{{ alarm_data.resource_id }}</label>
-                <label class="col-sm-6 alarm-form-element" name="meter_name">{{ alarm_data.meter_name }}</label>
+                <label class="col-sm-3" name="resource_id">{{ alarm_data.resource_id }}</label>
+                <label class="col-sm-6" name="meter_name">{{ alarm_data.meter_name }}</label>
             </div>
             <!-- END form-group -->
             <div class="form-group">
@@ -120,8 +120,10 @@
         <div class="row">
             <nav>
                 <ul class="pager">
+                    {% if page_type == 'create_alarm' %}
                     <li class="previous"><a class="btn" onclick="prev_step()">
                         <span aria-hidden="true">&larr;</span> 上一页</a></li>
+                    {% endif %}
                     <li class="next"><a class="btn" onclick="next_step()">
                         下一页 <span aria-hidden="true">&rarr;</span></a>
                     </li>

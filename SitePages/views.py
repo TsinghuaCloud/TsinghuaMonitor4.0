@@ -68,6 +68,7 @@ def create_alarm(request):
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
+                          'page_type': 'create_alarm',
                           'title': 'Create-alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_1.html',
                           'step': 1,
@@ -84,6 +85,7 @@ def create_alarm(request):
         print alarm_data
         return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
+                          'page_type': 'create_alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
                           'step': step,
                           'alarm_data': alarm_data,
@@ -101,6 +103,7 @@ def edit_alarm(request, alarm_id):
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
+                          'page_type': 'edit_alarm',
                           'title': 'Edit Alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_2.html',
                           'step': 2,
@@ -115,6 +118,7 @@ def edit_alarm(request, alarm_id):
         print alarm_data
         return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
+                          'page_type': 'edit_alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
                           'step': step,
                           'alarm_data': alarm_data,
@@ -122,8 +126,20 @@ def edit_alarm(request, alarm_id):
     return Http404
 
 
-def alarm_detail(request):
-    return render(request, 'alarms/alarm_detail.html', {'title': 'Alarm list'})
+def alarm_detail(request, alarm_id):
+    ''' Display detail of an alarm '''
+    request.session['token'] = openstack_api.get_token(request, 'token')['token']
+    alarm_data = {}
+    try:
+        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id)['data']
+    except SystemError:
+        pass
+    print alarm_data
+    if alarm_data.get('type', '') == 'threshold':
+        alarm_data.update(alarm_data.pop('threshold_rule'))
+        alarm_data['resource_id'] = alarm_data.get('query', [{}])[0].get('value', '')
+    print alarm_data
+    return render(request, 'alarms/alarm_detail.html', {'title': 'Alarm list', 'alarm_data': alarm_data})
 
 
 def netTopo_page(request):

@@ -163,15 +163,12 @@ function loadAlarmConfirmation(){
         }
     }
 
-
-    $('.confirm-trigger-element')[0].textContent =
-        '当 ' + getAlarmFormElement('resource_id').value
-        + ' 的' + translate_name(getAlarmFormElement('meter_name').value, 'meter_name')
-        + ' 在' + getAlarmFormElement('period').value
-        + ' 秒内' + translate_name(getAlarmFormElement('statistic').value, 'statistic')
-        + '' + translate_name(getAlarmFormElement('comparison_operator').value, 'comparison_operator')
-        + ' ' + getAlarmFormElement('threshold').value
-        + ' 时触发警报';
+    $('.confirm-trigger-element')[0].innerHTML =
+        ' 在    <b>' + getAlarmFormElement('period').value
+        + '</b>    秒内指标的   <b>' + translate_name(getAlarmFormElement('statistic').value, 'statistic')
+        + '</b>   <b>' + translate_name(getAlarmFormElement('comparison_operator').value, 'comparison_operator')
+        + '</b>   <b>' + getAlarmFormElement('threshold').value
+        + '</b>   时触发警报';
 }
 
 function csrfSafeMethod(method) {
