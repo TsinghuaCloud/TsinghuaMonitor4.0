@@ -16,13 +16,14 @@ Including another URLconf
 from django.conf.urls import include, url
 import views
 urlpatterns = [
-    url('^authentication/get-token$', views.get_token, name='Token'),
-    url('^servers/vm-list$', views.get_vm_list, name='Server List'),
-    url('^servers/pm-list$', views.get_pm_list, name='Server List'),
-    url('^meters/meter-list$', views.get_meters, name='Meter List'),
-    url('^meters/meter-samples$', views.get_samples, name='Sample List'),
-    url('^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
-    url('^resources/resource-list$', views.get_resources, name='Resource List'),
-    url('^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
+    url(r'^authentication/get-token$', views.get_token, name='Token'),
+    url(r'^servers/vm-list$', views.get_vm_list, name='Server List'),
+    url(r'^servers/pm-list$', views.get_pm_list, name='Server List'),
+    url(r'^meters/meter-list$', views.get_meters, name='Meter List'),
+    url(r'^meters/meter-samples$', views.get_samples, name='Sample List'),
+    url(r'^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
+    url(r'^alarms/alarm-detail$', views.get_alarm_detail, name='Alarm Detail'),
+    url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
+    url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]
 

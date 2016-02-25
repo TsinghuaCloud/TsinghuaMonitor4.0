@@ -2,7 +2,7 @@ $(document).ready(function(){
     $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", $('#alarm-form').find('[name="csrfmiddlewaretoken"]')[0].value);
+            xhr.setRequestHeader("X-CSRFToken", $('#alarm-form [name="csrfmiddlewaretoken"]')[0].value);
         }
     }
     });
@@ -38,7 +38,7 @@ $(document).ready(function(){
         responsive: true
     });
     setTimeout(function(){
-        var step = $('#alarm-form').find('[name="cur_step"]')[0].value;
+        var step = $('#alarm-form [name="cur_step"]')[0].value;
         if(step === '2' || step === '3')
             loadDataFromForm();
         else if(step ==='4')
@@ -91,7 +91,7 @@ var chart = AmCharts.makeChart("meter-chart", {
     "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
     "categoryAxis": {
         "parseDates": true,
-        "minPeriod": "ss",
+        "minPeriod": "SS",
         "axisColor": "#DADADA",
         "dashLength": 1,
         "minorGridEnabled": true
@@ -133,6 +133,7 @@ function submitAlarmActions(){
         var action_type_list = action_forms[i].getElementsByTagName('select');
         var action_detail_list = action_forms[i].getElementsByTagName('input');
         for(j = 0; j < action_type_list.length; j++){
+            if ((action_detail_list[j]).value === "") continue;
             var new_action = document.createElement('input');
             new_action.setAttribute('name', action_name);
             new_action.setAttribute('value', 'type=' + action_type_list[j].value
@@ -146,7 +147,7 @@ function initializeMeterSelect(){
     $("#meter-select").select2({
         ajax: {
             url: '/api/meters/meter-list?resource_id_match='
-                        + $('#alarm-form').find('[name="resource_id"]')[0].value,
+                        + $('#alarm-form [name="resource_id"]')[0].value,
             dataType: 'json',
             type: 'GET',
             delay: 500,
@@ -199,7 +200,7 @@ $(function()
     });
     $(document).on('change', '.alarm-action-element', function(){
         var this_name = $(this).attr('name');
-        //$('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
+        $('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
     });
     $(document).on('click', '.machine-type-selector', function(){
         datatable_handle.ajax.url("http://" + window.location.host
@@ -217,13 +218,13 @@ $(function()
 });
 
 function getMeterList(resource_id){
-    $('#alarm-form').find('[name="resource_id"]')[0].value = resource_id;
+    $('#alarm-form [name="resource_id"]')[0].value = resource_id;
     initializeMeterSelect();
 }
 
 function updateMeterChart(){
-    var resource_id = $('#alarm-form').find('[name="resource_id"]')[0].value;
-    var name_m = $('#alarm-form').find('[name="meter_name"]')[0].value;
+    var resource_id = $('#alarm-form [name="resource_id"]')[0].value;
+    var name_m = $('#alarm-form [name="meter_name"]')[0].value;
     var selected_meter = {};
     selected_meter[name_m] = [resource_id];
 
@@ -300,8 +301,8 @@ function loadAlarmConfirmation(){
     var getAlarmFormElement = function(element_name){
         // function has a hidden argument. Should be treated as getAlarmFormElement(name, getAllElements)
         if(arguments[1] === true)
-            return $('#alarm-form').find('[name="'+element_name+'"]');
-        return $('#alarm-form').find('[name="'+element_name+'"]')[0];
+            return $('#alarm-form [name="'+element_name+'"]');
+        return $('#alarm-form [name="'+element_name+'"]')[0];
     };
     var load_elements = $('.confirm-element');
     var index;
@@ -315,7 +316,7 @@ function loadAlarmConfirmation(){
         var action = actions[index];
         var action_list = getAlarmFormElement(action.getAttribute('name'), true);
         var list_index, base_element;
-        base_element = $('#alarm-detail-wrapper').find('[name="'+action.getAttribute('name')+'"]')[0];
+        base_element = $('#alarm-detail-wrapper [name="'+action.getAttribute('name')+'"]')[0];
 
         for(list_index = 0; list_index < action_list.length; list_index++){
             // Match result [0: whole string  1: type_match(email|message)  2: detail_match]

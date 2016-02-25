@@ -1,7 +1,9 @@
 __author__ = 'pwwpcheng'
 
 from django.conf import settings
-from ApiLayer.connection_base import openstack_api_connection
+
+from ApiLayer.base.connection_base import openstack_api_connection
+
 
 def keystone_connection(base_url, method, header, url_parameters=None, body=None):
     return _keystone_connection(base_url, method, header, url_parameters, body)
