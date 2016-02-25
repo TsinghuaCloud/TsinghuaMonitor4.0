@@ -113,7 +113,7 @@ var alarm_state_CN = {
 };
 
 var enabled_CN = bool_CN;
-var repeated_actions_CN = bool_CN;
+var repeat_actions_CN = bool_CN;
 
 function translate_name(name, type){
     /*

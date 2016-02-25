@@ -22,6 +22,6 @@ from AlarmNotification import views as AlarmNotice
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(ceilometer_api_interface)),
-    url(r'^alarm-notice/$', AlarmNotice.notification, name="Alarm Notification API"),
+    url(r'^notification/$', AlarmNotice.notification, name="Alarm Notification API"),
     url(r'', include(SitePagesUrls)),
 ]

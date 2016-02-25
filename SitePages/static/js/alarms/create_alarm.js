@@ -102,19 +102,21 @@ var chart = AmCharts.makeChart("meter-chart", {
 });
 
 function next_step() {
-    var step_element = document.getElementsByName("next_step")[0];
-    step_element.value = parseInt(step_element.value) + 1;
+    var next_step = document.getElementsByName("next_step")[0];
     var current_step = document.getElementsByName("cur_step")[0];
-    if (current_step.value === '3'){
+    if (current_step.value === '3')
         submitAlarmActions();
-    }
+    if (current_step.value === '4')
+        next_step.value = 'post';
+    else
+        next_step.value = parseInt(current_step.value) + 1;
     document.getElementById('alarm-form').submit();
 }
 
 function prev_step() {
-    var step_element = document.getElementsByName("next_step")[0];
-    step_element.value = parseInt(step_element.value) - 1;
+    var next_step = document.getElementsByName("next_step")[0];
     var current_step = document.getElementsByName("cur_step")[0];
+    next_step.value = parseInt(current_step.value) - 1;
     if (current_step.value === '3'){
         submitAlarmActions();
     }
@@ -136,8 +138,8 @@ function submitAlarmActions(){
             if ((action_detail_list[j]).value === "") continue;
             var new_action = document.createElement('input');
             new_action.setAttribute('name', action_name);
-            new_action.setAttribute('value', 'type=' + action_type_list[j].value
-                                            + '&detail=' + action_detail_list[j].value);
+            var new_action_value = encodeURIComponent('type=' + action_type_list[j].value  + '&detail=' + action_detail_list[j].value);
+            new_action.setAttribute('value', new_action_value);
             submit_form_handle.appendChild(new_action);
         }
     }
@@ -282,7 +284,7 @@ function loadDataFromForm(){
         for(list_index = 0; list_index < action_list.length; list_index++){
             // Match result [0: whole string  1: type_match(email|message)  2: detail_match]
             var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
-            var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
+            var match_result = regMatchTypeDetail.exec(decodeURIComponent(action_list[list_index].value));
             if(list_index === 0){
                 base_element.getElementsByTagName('select')[0].value = match_result[1];
                 base_element.getElementsByTagName('input')[0].value = match_result[2];
@@ -321,7 +323,7 @@ function loadAlarmConfirmation(){
         for(list_index = 0; list_index < action_list.length; list_index++){
             // Match result [0: whole string  1: type_match(email|message)  2: detail_match]
             var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
-            var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
+            var match_result = regMatchTypeDetail.exec(decodeURIComponent(action_list[list_index].value));
             var append_html = document.createElement('p');
             append_html.textContent = translate_name(match_result[1], 'notification_type') + ": " + match_result[2];
             base_element.appendChild(append_html);
@@ -329,7 +331,7 @@ function loadAlarmConfirmation(){
     }
 
 
-    $('.confirm-trigger-element')[0].textContent =
+    $('.confirm-trigger-element')[0].innerHTML =
         '当   <b>' + getAlarmFormElement('resource_id').value
         + '  </b>  的  <b>' + translate_name(getAlarmFormElement('meter_name').value, 'meter_name')
         + '  </b>  在  <b>' + getAlarmFormElement('period').value

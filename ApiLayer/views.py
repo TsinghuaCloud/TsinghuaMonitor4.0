@@ -8,16 +8,15 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
 
 from AlarmNotification.capabilities import NOTIFICATION_CAPABILITIES as NOTIFICATION_CAPABILITIES
-from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
+from ApiLayer.base import capabilities
 from ApiLayer.ceilometer import api as ceilometer_api
+from ApiLayer.keystone import api as keystone_api
 from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection   # TODO(pwwp): remove this import statement
-from ApiLayer.keystone import api as keystone_api
+from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
 
-import capabilities
-import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
-from ApiLayer.base import capabilities
 
 #import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
@@ -112,7 +111,7 @@ def get_PmInfo(token):
 
 
 @csrf_protect
-def post_alarms(request, alarm_obj=None):
+def post_alarm(request, alarm_obj=None):
     '''
     Post new alarms through ceilometer API.
     Notice: This api is protected by csrf_protect. 'X-csrf-token' should be added to request headers .
@@ -125,7 +124,17 @@ def post_alarms(request, alarm_obj=None):
     if request.method == 'POST':
         kwargs = sanitize_arguments(_request_GET_to_dict(request.POST, False),
                                                 capabilities.POST_ALARM_CAPABILITIES)
-        return ceilometer_api.post_alarm(token, **kwargs)
+        q = []
+        try:
+            q[0] = {}
+            q[0]['value'] = kwargs.pop('resource_id')
+            q[0]['field'] = 'resource_id'
+            q[0]['op'] = 'eq'
+        except NameError:
+            q[0] = {}
+        finally:
+            kwargs['q'] = q
+            return ceilometer_api.post_threshold_alarm(token, **kwargs)
     else:
         return HttpResponse(json.dumps({'status': 'error',
                                         'error_msg': 'Request method should be POST.'}),
@@ -267,7 +276,6 @@ def get_alarms(request):
 
 
 def get_alarm_detail(request):
-    print request.GET
     arrays = _request_GET_to_dict(request.GET, seperate_args_and_list=False)
     if 'alarm_id' not in arrays:
         return _report_error('KeyError', 'alarm_id not provided')

@@ -37,9 +37,9 @@
             </div>
             <!-- END form-group -->
             <div class="form-group">
-                <label for="repeated_actions" class="col-sm-3 control-label">重复提醒</label>
+                <label for="repeat_actions" class="col-sm-3 control-label">重复提醒</label>
                 <div class="col-sm-3">
-                    <select class="form-control alarm-form-element" name="repeated_actions" id="repeated_actions">
+                    <select class="form-control alarm-form-element" name="repeat_actions" id="repeat_actions">
                         <option value="True">是</option>
                         <option value="False">否</option>
                     </select>
@@ -57,8 +57,8 @@
         <div class="form-horizontal">
             <div class="form-group">
                 <label class="col-sm-3 control-label"> 监控指标 </label>
-                <label class="col-sm-3" name="resource_id">{{ alarm_data.resource_id }}</label>
-                <label class="col-sm-6" name="meter_name">{{ alarm_data.meter_name }}</label>
+                <label class="col-sm-3 form-control-static" name="resource_id">{{ alarm_data.resource_id }}</label>
+                <label class="col-sm-6 form-control-static" name="meter_name">{{ alarm_data.meter_name }}</label>
             </div>
             <!-- END form-group -->
             <div class="form-group">

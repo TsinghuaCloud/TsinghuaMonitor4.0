@@ -9,7 +9,7 @@
     <input name="severity" value="{% if alarm_data.severity %}{{ alarm_data.severity }}{% else %}low{% endif %}">
     <input name="description" value="{{ alarm_data.description }}">
     <input name="enabled" value="{% if alarm_data.enabled %}{{ alarm_data.enabled }}{% else %}True{% endif %}">
-    <input name="repeated_actions" value="{% if alarm_data.repeated_actions %}{{ alarm_data.repeated_actions }}{% else %}True{% endif %}">
+    <input name="repeat_actions" value="{% if alarm_data.repeated_actions %}{{ alarm_data.repeat_actions }}{% else %}False{% endif %}">
     <input name="period" value="{% if alarm_data.period %}{{ alarm_data.period }}{% else %}60{% endif %}">
     <input name="threshold" value="{% if alarm_data.threshold %}{{ alarm_data.threshold }}{% else %}60{% endif %}">
     <input name="statistic" value="{% if alarm_data.statistic %}{{ alarm_data.statistic }}{% else %}avg{% endif %}">

@@ -54,16 +54,17 @@ def get_samples(token, meter_name, **kwargs):
                                  url_parameters=url_para_obj)['data']
 
 
-def post_alarm(token, **kwargs):
+def post_threshold_alarm(token, **kwargs):
     # Pack related kwargs into alarm_dictionary
     new_alarm = {}
+    new_alarm['threshold_rule'] = {}
     request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
 
     # Mandatory arguments for packing a new alarm
     try:
         new_alarm['name'] = kwargs['name']
-        new_alarm['meter_name'] = kwargs['meter_name']
-        new_alarm['threshold'] = kwargs['threshold']
+        new_alarm['threshold_rule']['meter_name'] = kwargs['meter_name']
+        new_alarm['threshold_rule']['threshold'] = kwargs['threshold']
     except KeyError, e:
         return {'status': 'error',
                 'error_msg': 'Key: "' + str(e) + '" is illegal!'}
@@ -73,15 +74,14 @@ def post_alarm(token, **kwargs):
     new_alarm['ok_actions'] = kwargs.get('ok_actions', [])
     new_alarm['insufficient_data_actions'] = kwargs.get('insufficient_data_actions', [])
     new_alarm['type'] = kwargs.get('type', 'threshold')
-    new_alarm['period'] = kwargs.get('evaluation_period', 60)
-    new_alarm['query'] = kwargs.get('q', {})
-    new_alarm['repeat_actions'] = kwargs.get('repeat_actions', 'False')
+    new_alarm['repeat_actions'] = kwargs.get('repeat_actions', 'false')
     new_alarm['severity'] = kwargs.get('severity', 'low')
     new_alarm['enabled'] = kwargs.get('enabled', 'True')
-    new_alarm['statistic'] = kwargs.get('statistic', 'avg')
-    new_alarm['comparison_operator'] = kwargs.get('comparison_operator', 'ge')
-
-    return ceilometer_connection(base_url='alarms',
+    new_alarm['threshold_rule']['period'] = kwargs.get('evaluation_period', 60)
+    new_alarm['threshold_rule']['statistic'] = kwargs.get('statistic', 'avg')
+    new_alarm['threshold_rule']['comparison_operator'] = kwargs.get('comparison_operator', 'ge')
+    new_alarm['threshold_rule']['query'] = kwargs.get('q', [])
+    return ceilometer_connection(base_url='alarms/',
                                  method='POST',
                                  header=request_header,
                                  body=new_alarm)['data']
