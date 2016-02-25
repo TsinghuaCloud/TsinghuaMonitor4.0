@@ -17,7 +17,7 @@ from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection   # TODO(pwwp): remove this import statement
 from ApiLayer.keystone import api as keystone_api
 import capabilities
-#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 
 def get_token(request, token_type=None):
