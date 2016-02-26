@@ -1,4 +1,4 @@
-<form id="alarm-form" method="post" hidden>
+<form id="alarm-form" action="/monitor/alarms/create-alarm/" method="post" hidden>
     {% csrf_token %}
     <input name="cur_step" value="{{ step }}">
     <input name="next_step" value="{{ step }}">
@@ -27,4 +27,3 @@
     {% endfor %}
 
 </form>
-

@@ -30,8 +30,8 @@ var bool_CN = {
 
 var level_CN = {
     'low': '低',
-    'medium': '中',
-    'high': '高'
+    'moderate': '中',
+    'critical': '高'
 };
 
 var statistic_CN = {

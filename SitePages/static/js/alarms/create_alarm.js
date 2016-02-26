@@ -6,13 +6,6 @@ $(document).ready(function(){
         }
     }
     });
-    $("#alarm-form").ajaxForm({
-        url : '/monitor/alarms/create-alarm/', // or whatever
-        dataType : 'json',
-        success : function (response) {
-            alert("The server says: " + response);
-        }
-    });
     datatable_handle = $('#machine-table').DataTable({
         dom: '<"toolbar">tr',
         processing: true,
