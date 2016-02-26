@@ -74,9 +74,9 @@ def post_threshold_alarm(token, **kwargs):
     new_alarm['ok_actions'] = kwargs.get('ok_actions', [])
     new_alarm['insufficient_data_actions'] = kwargs.get('insufficient_data_actions', [])
     new_alarm['type'] = kwargs.get('type', 'threshold')
-    new_alarm['repeat_actions'] = kwargs.get('repeat_actions', 'false')
+    new_alarm['repeat_actions'] = kwargs.get('repeat_actions', False)
     new_alarm['severity'] = kwargs.get('severity', 'low')
-    new_alarm['enabled'] = kwargs.get('enabled', 'True')
+    new_alarm['enabled'] = kwargs.get('enabled', True)
     new_alarm['threshold_rule']['period'] = kwargs.get('evaluation_period', 60)
     new_alarm['threshold_rule']['statistic'] = kwargs.get('statistic', 'avg')
     new_alarm['threshold_rule']['comparison_operator'] = kwargs.get('comparison_operator', 'ge')
@@ -84,7 +84,7 @@ def post_threshold_alarm(token, **kwargs):
     return ceilometer_connection(base_url='alarms/',
                                  method='POST',
                                  header=request_header,
-                                 body=new_alarm)['data']
+                                 body=new_alarm)
 
 
 def get_alarm_detail(token, alarm_id, **kwargs):

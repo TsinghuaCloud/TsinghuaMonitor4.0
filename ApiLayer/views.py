@@ -111,7 +111,7 @@ def get_PmInfo(token):
 
 
 @csrf_protect
-def post_alarm(request, alarm_obj=None):
+def post_alarm(request):
     '''
     Post new alarms through ceilometer API.
     Notice: This api is protected by csrf_protect. 'X-csrf-token' should be added to request headers .
@@ -134,7 +134,8 @@ def post_alarm(request, alarm_obj=None):
             q[0] = {}
         finally:
             kwargs['q'] = q
-            return ceilometer_api.post_threshold_alarm(token, **kwargs)
+            return HttpResponse(json.dumps(ceilometer_api.post_threshold_alarm(token, **kwargs)),
+                                content_type='application/json')
     else:
         return HttpResponse(json.dumps({'status': 'error',
                                         'error_msg': 'Request method should be POST.'}),
@@ -318,7 +319,6 @@ def get_vm_list(request):
               }
     '''
     servers = nova_api.get_server_list(request.session['token'])
-    print servers
     if servers['status'] != 'success':
         return _report_error('', 'error')
     result = {"status": "success",
@@ -392,7 +392,6 @@ def _request_GET_to_dict(qdict, seperate_args_and_list=True):
         else:
             url_variables[k] = url_handle[k]
 
-    print arrays, url_variables
     if not seperate_args_and_list:
         arrays.update(url_variables)
         return arrays

@@ -84,7 +84,8 @@ def create_alarm(request):
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
         if step == 'post':
-            return _post_new_alarm(request)
+            return_data =  _post_new_alarm(request)
+            return return_data
         else:
             return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
@@ -104,15 +105,32 @@ def _post_new_alarm(request):
     alarm_data = BaseMethods.qdict_to_dict(request.POST)
     alarm_data.pop('next_step')
     alarm_data.pop('cur_step')
-    alarm_data['enabled'] = False if alarm_data['enabled'] == 'false' else True
-    alarm_data['repeat_actions'] = False if alarm_data['repeat_actions'] == 'false' else True
+
+    if 'enabled' in alarm_data:
+        alarm_data['enabled'] = False if alarm_data['enabled'] == 'false' else True
+    if 'repeat_actions' in alarm_data:
+        alarm_data['repeat_actions'] = False if alarm_data['repeat_actions'] == 'false' else True
     for action_type in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
         if action_type in alarm_data:
             for i in range(0, len(alarm_data[action_type])):
                 alarm_data[action_type][i] = 'http://' + settings.THIS_ADDR + '/notification/notify?op=' \
                                              + alarm_data[action_type][i]
-
-    return openstack_api.ceilometer_api.post_threshold_alarm(request.session['token'], **alarm_data)
+    kwargs = {}
+    kwargs.update(alarm_data)
+    q = [{}]
+    try:
+        q[0] = {}
+        q[0]['value'] = kwargs.pop('resource_id')
+        q[0]['field'] = 'resource_id'
+        q[0]['op'] = 'eq'
+    except NameError:
+        q[0] = {}
+    finally:
+        kwargs['q'] = q
+    result = openstack_api.ceilometer_api.post_threshold_alarm(request.session['token'], **kwargs)
+    print result
+    return HttpResponse(json.dumps(result),
+                        content_type='application/json')
 
 @csrf_protect
 def edit_alarm(request, alarm_id):
