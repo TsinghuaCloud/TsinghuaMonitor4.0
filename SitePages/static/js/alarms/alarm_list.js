@@ -17,6 +17,7 @@ $(document).ready(function () {
     datatable_handle = $('#alarm-list-table').DataTable({
         dom: '<"toolbar">lrtip',
         processing: true,
+        paging: true,
         ajax: {
             "url": "http://" + window.location.host + "/api/alarms/alarm-list",
             "contentType": "application/json",
@@ -104,8 +105,8 @@ $(document).ready(function () {
             }
         }
     });
-    var search_html= document.getElementById('alarm-table-searchbox').innerHTML;
-    $("div.toolbar").html(search_html);
+    //var search_html= document.getElementById('alarm-table-searchbox').innerHTML;
+    //$("div.toolbar").html(search_html);
 });
 
 function reloadTableData(){

@@ -7,9 +7,10 @@ $(document).ready(function(){
     }
     });
     datatable_handle = $('#machine-table').DataTable({
-        dom: '<"toolbar">tr',
+        dom: "<'row'<'col-sm-7'<'typebox'>><'col-sm-4 pull-right'l>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         processing: true,
-        serverSide: true,
         ajax: {
             "url": "http://" + window.location.host
                                 + "/api/servers/vm-list",
@@ -31,7 +32,8 @@ $(document).ready(function(){
                 "targets": [2],
                 "width": '30%' ,
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html('<a onclick="getMeterList(\''+oData.id+'\')" class="btn btn-sm btn-primary">选择该主机</a>')
+                    $(nTd).html('<a onclick="getMeterList(\'' + oData.id + '\',\''+ oData.name + '\')" ' +
+                    'class="btn btn-sm btn-primary">选择该主机</a>')
                 }
             }
         ],
@@ -39,7 +41,11 @@ $(document).ready(function(){
     });
     setTimeout(function(){
         var step = $('#alarm-form [name="cur_step"]')[0].value;
-        if(step === '2' || step === '3')
+        if (step === '1'){
+            var search_html= document.getElementById('machine-type-select-box').innerHTML;
+            $("div.typebox").html(search_html);
+        }
+        else if(step === '2' || step === '3')
             loadDataFromForm();
         else if(step ==='4')
             loadAlarmConfirmation();
@@ -192,11 +198,11 @@ $(function()
 		e.preventDefault();
 		return false;
 	});
-    $(document).on('change', '.alarm-form-element', function(){
+    $(document).on('change', '.alarm-form-element:input,select', function(){
         var this_name = $(this).attr('name');
         $('#alarm-form [name="'+this_name+'"]')[0].value = this.value;
     });
-    $(document).on('click', '.alarm-form-element', function(){
+    $(document).on('click', '.alarm-form-element:input,select', function(){
         var this_name = $(this).attr('name');
         $('#alarm-form [name="'+this_name+'"]')[0].value = this.value;
     });
@@ -219,8 +225,10 @@ $(function()
     });
 });
 
-function getMeterList(resource_id){
+function getMeterList(resource_id, resource_name){
     $('#alarm-form [name="resource_id"]')[0].value = resource_id;
+    $('#machine-name')[0].innerHTML = resource_name;
+    $("#meter-select")[0].value = "";
     initializeMeterSelect();
 }
 
@@ -271,7 +279,11 @@ function loadDataFromForm(){
     var index;
     for(index = 0; index < load_elements.length; index++){
         var element = load_elements[index];
-        element.value = $('#alarm-form [name="'+element.name+'"]')[0].value;
+        if(['INPUT', 'SELECT'].indexOf(element.tagName) > -1)
+            element.value = $('#alarm-form [name="'+element.getAttribute('name')+'"]')[0].value;
+        else if(['LABEL'].indexOf(element.tagName) > -1)
+            element.innerHTML = translate_name($('#alarm-form [name="'+element.getAttribute('name')+'"]')[0].value,
+                                                    element.getAttribute('name'));
     }
 
     var actions = $('.alarm-action-element');

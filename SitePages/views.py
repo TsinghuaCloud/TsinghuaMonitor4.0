@@ -3,9 +3,9 @@ import json
 import httplib
 
 from django.conf import settings
-from django.shortcuts import render
+from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 
 import CommonMethods.BaseMethods as BaseMethods
@@ -21,7 +21,9 @@ def meter_list(request):
 
 
 def alarm_list(request):
+    messages.info(request, 'test-msg')
     return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
+
 
 def test_page(request):
     request.session['token'] = openstack_api.get_token(request, 'token')['token']
@@ -57,10 +59,10 @@ def resource_page(request):
         temp['first'] = all_vm_list[key][0]
         PMs[key] = temp
     return render(request, 'resources/resource.html', {'title': 'resource-list',
-                                             'PMs': PMs,
-                                             'Pminfo': pm_info_detail,
-                                             'resource_overview': resource_overview
-                                             })
+                                                       'PMs': PMs,
+                                                       'Pminfo': pm_info_detail,
+                                                       'resource_overview': resource_overview
+                                                       })
 
 
 @csrf_protect
@@ -84,17 +86,23 @@ def create_alarm(request):
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
         if step == 'post':
-            return_data =  _post_new_alarm(request)
-            return return_data
+            return_data = _post_new_alarm(request)
+            new_message = [], {}
+            if return_data['status'] == 'success':
+                messages.success(request, return_data['data']['name'] + " has been created")
+            else:
+                messages.error(request, return_data['error_msg'])
+            return HttpResponseRedirect('/monitor/alarms/')
         else:
             return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
-                      {
-                          'page_type': 'create_alarm',
-                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
-                          'step': step,
-                          'alarm_data': alarm_data,
-                      })
+                          {
+                              'page_type': 'create_alarm',
+                              'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
+                              'step': step,
+                              'alarm_data': alarm_data,
+                          })
     return Http404
+
 
 def _post_new_alarm(request):
     '''
@@ -127,10 +135,8 @@ def _post_new_alarm(request):
         q[0] = {}
     finally:
         kwargs['q'] = q
-    result = openstack_api.ceilometer_api.post_threshold_alarm(request.session['token'], **kwargs)
-    print result
-    return HttpResponse(json.dumps(result),
-                        content_type='application/json')
+    return openstack_api.ceilometer_api.post_threshold_alarm(request.session['token'], **kwargs)
+
 
 @csrf_protect
 def edit_alarm(request, alarm_id):
@@ -155,7 +161,7 @@ def edit_alarm(request, alarm_id):
         if step is None or step not in ['2', '3', '4']:
             raise Http404('Invalid value of "step"')
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
-        return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
+        return render(request, 'alarms/alarm_list.html',
                       {
                           'page_type': 'edit_alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',

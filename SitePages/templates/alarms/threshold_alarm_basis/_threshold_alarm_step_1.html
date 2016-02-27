@@ -1,22 +1,12 @@
+<style type="text/css">
+    div.dataTables_length label{
+        text-align: right;
+    }
+</style>
+
 <div class="col-lg-12">
     <div class="well">
-        <form class="form-horizontal">
-            <div class="form-group">
-                <label for="machine-type" class="col-sm-2 control-label ">主机类型</label>
-                <div class="col-sm-10" >
-                    <label class="radio-inline">
-                        <input type="radio" name="machine_type" class="alarm-form-element machine-type-selector"
-                               value="vm">虚拟机
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="machine_type" class="alarm-form-element machine-type-selector"
-                               value="pm">物理机
-                    </label>
-                </div>
-            </div>
-            <!-- END col-lg-12 -->
-        </form>
-        <div class="row">
+        <div class="row" id="machine-type-box">
             <div class="col-lg-12">
                 <div class="dataTable_wrapper">
                     <table class="table table-striped table-hover" id="machine-table"
@@ -45,8 +35,15 @@
 </div>
 <!-- END col-lg-12 -->
 <div class="col-lg-12" id="meter-select-form">
-    <div class="well">
-        <div class="row">
+    <div class="well form-horizontal">
+        <div class="form-group">
+            <div class="col-lg-12 form-group-lg">
+                <label class="col-sm-2" for="machine-name">已选主机</label>
+                <label class="control-label-static alarm-form-element" name="machine-name"
+                        id="machine-name"></label>
+            </div>
+        </div>
+        <div class="form-group">
             <div class="col-sm-12 form-group-lg">
                 <label class="col-sm-2" for="project-select">指标名称</label>
                 <select name="meter_name" id="meter-select" class="col-sm-4 alarm-form-element">
@@ -72,3 +69,21 @@
     </div>
 </div>
 
+<div class="row" hidden="hidden">
+    <div id="machine-type-select-box">
+        <div class="">
+            <label for="machine-type" class="col-sm-3 control-label ">主机类型</label>
+            <div class="col-sm-9" >
+                <label class="radio-inline">
+                    <input type="radio" name="machine_type" class="alarm-form-element machine-type-selector"
+                           value="vm">虚拟机
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="machine_type" class="alarm-form-element machine-type-selector"
+                           value="pm">物理机
+                </label>
+            </div>
+        </div>
+        <!-- END col-lg-12 -->
+    </div>
+</div>
