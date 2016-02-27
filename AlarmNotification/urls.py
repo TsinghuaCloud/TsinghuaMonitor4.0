@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 import views
 urlpatterns = [
-    url('^email/$', views.get_token, name='Token'),
+    url('^notify/$', views.notification, name='Token'),
+
 ]
 

@@ -113,7 +113,7 @@ def _post_new_alarm(request):
     for action_type in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
         if action_type in alarm_data:
             for i in range(0, len(alarm_data[action_type])):
-                alarm_data[action_type][i] = 'http://' + settings.THIS_ADDR + '/notification/notify?op=' \
+                alarm_data[action_type][i] = 'http://' + settings.THIS_ADDR + '/notification/notify/?op=' \
                                              + alarm_data[action_type][i]
     kwargs = {}
     kwargs.update(alarm_data)

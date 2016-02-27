@@ -6,3 +6,6 @@ ALARM_NOTIFICATION_BODY_PARAS = ['alarm_name', 'alarm_id', 'severity',
 
 # Capable notification methods
 NOTIFICATION_CAPABILITIES = ['email', 'message', 'link']
+
+# OP
+NOTIFICATION_STRING_TYPE = ['op']

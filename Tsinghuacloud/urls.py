@@ -17,11 +17,11 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from SitePages import urls as SitePagesUrls
 from ApiLayer import urls as ceilometer_api_interface
-from AlarmNotification import views as AlarmNotice
+from AlarmNotification import urls as NotificationUrls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(ceilometer_api_interface)),
-    url(r'^notification/$', AlarmNotice.notification, name="Alarm Notification API"),
+    url(r'^notification/', include(NotificationUrls)),
     url(r'', include(SitePagesUrls)),
 ]
