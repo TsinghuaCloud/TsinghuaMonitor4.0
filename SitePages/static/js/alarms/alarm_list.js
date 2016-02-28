@@ -92,9 +92,9 @@ $(document).ready(function () {
                                 '<a class="btn btn-xs btn-empty fa fa-gear" ' +
                                 'href="/monitor/alarms/edit-alarm/' + oData.alarm_id +
                                 '"></a>' +
-                                '<a class="btn btn-xs btn-empty fa fa-trash-o" ' +
-                                'href="/monitor/alarms/delete-alarm/' + oData.alarm_id +
-                                '"></a>');
+                                '<a class="btn btn-xs btn-empty fa fa-trash-o" data-toggle="modal" ' +
+                                'data-target="#delete-alarm-modal" data-alarm-name="'+oData.name+'" ' +
+                                'data-alarm-id="'+ oData.alarm_id +'"></a>');
                 }
             }
         ],
@@ -125,5 +125,10 @@ $(function(){
         .on('mouseleave', '.td-show-all', function(){
         $(this).removeClass('td-show-all');
     });
-
+    $('#delete-alarm-modal').on('show.bs.modal', function (event) {
+        var trigger = $(event.relatedTarget);
+        var alarm_id = trigger.data('alarm-id');
+        var alarm_name = trigger.data('alarm-name');
+        $(this).find('.modal-body * strong').text(alarm_name);
+    })
 });

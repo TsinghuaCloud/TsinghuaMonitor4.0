@@ -20,10 +20,10 @@ def get_token(tenant_name=None, username=None, password=None):
     try:
         handle = urllib2.urlopen(request)
     except urllib2.HTTPError as e:
-        return {'status': 'failed',
+        return {'status': 'error',
                 'reason': 'HTTPCode: %s, Message: %s' % (e.code, e.msg)}
     except urllib2.URLError as e:
-        return {'status': 'failed',
+        return {'status': 'error',
                 'reason': e.reason}
 
     token = json.loads(handle.read())['access']['token']['id']

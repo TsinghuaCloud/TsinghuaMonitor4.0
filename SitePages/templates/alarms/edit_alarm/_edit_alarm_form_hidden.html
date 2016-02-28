@@ -2,7 +2,6 @@
     {% csrf_token %}
     <input name="cur_step" value="{{ step }}">
     <input name="next_step" value="{{ step }}">
-    <input name="alarm_id" value="{{ alarm_data.alarm_id }}">
     <input name="name" value="{% if alarm_data.name %}{{ alarm_data.name }}{% else %}{{ alarm_data.resource_id }}-{{ alarm_data.meter_name }}{% endif %}">
     <input name="severity" value="{% if alarm_data.severity %}{{ alarm_data.severity }}{% else %}low{% endif %}">
     <input name="description" value="{{ alarm_data.description }}">

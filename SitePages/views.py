@@ -21,7 +21,6 @@ def meter_list(request):
 
 
 def alarm_list(request):
-    messages.info(request, 'test-msg')
     return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
 
 
@@ -67,6 +66,7 @@ def resource_page(request):
 
 @csrf_protect
 def create_alarm(request):
+    '''  Create new alarm through ceilometer alarm-create api  '''
     if request.method == 'GET':
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
@@ -74,17 +74,20 @@ def create_alarm(request):
                           'page_type': 'create_alarm',
                           'title': 'Create-alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_1.html',
-                          'step': 1,
+                          'step': '1',
                           'alarm_data': {
                               'machine_type': 'vm',
                           },
                       })
     if request.method == 'POST':
-        step = request.POST.get('next_step', '1')
         # Invalid inputs for step will be served with 404 page
+        step = request.POST.get('next_step', '1')
         if step is None or step not in ['1', '2', '3', '4', 'post']:
             raise Http404('Invalid value of "step"')
+
+        # alarm_data passes alarm data between alarm-create pages.
         alarm_data = BaseMethods.qdict_to_dict(request.POST)
+
         if step == 'post':
             return_data = _post_new_alarm(request)
             new_message = [], {}
@@ -101,7 +104,7 @@ def create_alarm(request):
                               'step': step,
                               'alarm_data': alarm_data,
                           })
-    return Http404
+    raise Http404('Unknown method')
 
 
 def _post_new_alarm(request):
@@ -121,8 +124,8 @@ def _post_new_alarm(request):
     for action_type in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
         if action_type in alarm_data:
             for i in range(0, len(alarm_data[action_type])):
-                alarm_data[action_type][i] = 'http://' + settings.THIS_ADDR + '/notification/notify/?op=' \
-                                             + alarm_data[action_type][i]
+                alarm_data[action_type][i] = \
+                    'http://%s/notification/notify/?op=%s' % (settings.THIS_ADDR, alarm_data[action_type][i])
     kwargs = {}
     kwargs.update(alarm_data)
     q = [{}]
@@ -140,10 +143,26 @@ def _post_new_alarm(request):
 
 @csrf_protect
 def edit_alarm(request, alarm_id):
+    '''
+    Edit alarm through ceilometer alarm-update api
+    If alarm_id does not exist, return 404 error.
+    alarm-id, meter-name, resource-name are not allowed for editing
+    Thus users shall create a new alarm if one(more) of these
+    options was to be modified.
+    :param request: Django request object
+    :param alarm_id: (string)
+    :return: HTTPResponse
+    '''
+    alarm_data, original_data = None, {}
     try:
-        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id)
-    except KeyError:
-        pass
+        alarm_data = _read_alarm_data(openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id))
+        if alarm_data['status'] == 'error':
+            raise Http404('Unknown alarm-id')
+        original_data['alarm_id'] = alarm_data['alarm_id']
+        original_data['meter_name'] = alarm_data['meter_name']
+        original_data['query'] = alarm_data.get('query', [])
+    except KeyError, e:
+        raise Http404(e.message)
 
     if request.method == 'GET':
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
@@ -156,19 +175,26 @@ def edit_alarm(request, alarm_id):
                           'alarm_data': alarm_data['data']
                       })
     if request.method == 'POST':
-        step = request.POST.get('next_step', '2')
+
         # Invalid inputs for step will be served with 404 page
-        if step is None or step not in ['2', '3', '4']:
+        step = request.POST.get('next_step', '2')
+        if step is None or step not in ['2', '3', '4', 'post']:
             raise Http404('Invalid value of "step"')
-        alarm_data = BaseMethods.qdict_to_dict(request.POST)
-        return render(request, 'alarms/alarm_list.html',
+        edited_data = BaseMethods.qdict_to_dict(request.POST)
+        edited_data.update(original_data)
+        if step == 'post':
+            pass
+
+        # Overwrite keys that are not allowed to modify
+        edited_data.update(original_data)
+        return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
                           'page_type': 'edit_alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
                           'step': step,
-                          'alarm_data': alarm_data,
+                          'alarm_data': edited_data,
                       })
-    return Http404
+    raise Http404
 
 
 def alarm_detail(request, alarm_id):
@@ -188,3 +214,19 @@ def alarm_detail(request, alarm_id):
 def netTopo_page(request):
     return render(request, 'netTopo.html', {'title': 'Create-alarm'})
 
+
+def _read_alarm_data(alarm_data):
+    '''
+    Flatten alarm dictionary to a two-level dict.
+    This is only designed for threshold alarms.
+    :param alarm_data:
+    :return:
+    '''
+    assert isinstance(alarm_data, dict)
+    data = alarm_data.copy()
+    data.update(data.pop('threshold_rule'))
+    if len(data['query']) > 0:
+        data[data['query'][0].get('field', 'no_field')] = data['query'][0].get('value', '')
+    print 'alarm_data is read as: '
+    print data
+    return data

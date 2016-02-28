@@ -227,6 +227,7 @@ $(function()
 
 function getMeterList(resource_id, resource_name){
     $('#alarm-form [name="resource_id"]')[0].value = resource_id;
+    alert('已选主机： '+ resource_name);
     $('#machine-name')[0].innerHTML = resource_name;
     $("#meter-select")[0].value = "";
     initializeMeterSelect();

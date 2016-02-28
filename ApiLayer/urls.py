@@ -23,7 +23,8 @@ urlpatterns = [
     url(r'^meters/meter-samples$', views.get_samples, name='Sample List'),
     url(r'^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
     url(r'^alarms/alarm-detail$', views.get_alarm_detail, name='Alarm Detail'),
-    url(r'^alarms/post-alarm/$', views.post_alarm, name='Alarm Detail'),
+    url(r'^alarms/post-alarm/$', views.post_alarm, name='Create New Alarm'),
+    url(r'^alarms/update-alarm/[0-9a-f\-]+/$', views.post_alarm, name='Edit Alarm'),
     url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
     url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]

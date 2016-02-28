@@ -30,13 +30,9 @@ def openstack_api_connection(base_url, method, header, port, version,
         conn.request(method,
                      '/%s/'%(version) + ('' if tenant_id is None else '%s/'% tenant_id) + base_url + extra_url,
                      headers=req_header, body=req_body)
-        print method
-        print '/%s/'%(version) + ('' if tenant_id is None else '%s/'% tenant_id) + base_url + extra_url
-        print req_header
-        print req_body
         response = conn.getresponse()
         if response.status > 299:
-            error = {'status': 'failed',
+            error = {'status': 'error',
                      'error_code': response.status,
                      'error_msg': response.reason,
                      'data': ''}
@@ -46,11 +42,11 @@ def openstack_api_connection(base_url, method, header, port, version,
                     'data': json.loads(response.read())}
             return data
     except socket.error, e:
-        return {'status': 'failed',
+        return {'status': 'error',
                 'error_msg': e.strerror
                 }
     except httplib.HTTPException, e:
-        return {'status': 'failed',
+        return {'status': 'error',
                 'error_msg': e.message
                 }
 
