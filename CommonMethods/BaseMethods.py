@@ -61,3 +61,20 @@ def url_para_to_url(**kwargs):
                                               % (item['field'], item['value'])
         complete_url = '?' + complete_url
         return complete_url[:-1]
+
+
+def add_list_unique(original_list, *args):
+    '''
+    Join several lists together, while maintaining uniqueness of every element.
+    Example: add_list_unique( [1, 2], [2, 3], [3, 5])
+             return: [1, 2, 3, 5]
+    :param original_list: List to be added
+    :param args: (Multiple list) Lists to be appended to original list
+    :return: (List) New list
+    '''
+    new_list = copy.copy(original_list)
+    for _list in args:
+        for _item in _list:
+            if _item not in new_list:
+                new_list.append(_item)
+    return new_list

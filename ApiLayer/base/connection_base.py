@@ -10,10 +10,10 @@ def openstack_api_connection(base_url, method, header, port, version,
     '''
     :param url: (string)
     :param method: (string) [POST | GET | PUT | DELETE ]
-    :param header: (JSON Object) headers for request
-    :param url_parameters: (JSON Object)
-    :param body: (JSON Object)
-    :return: (JSON Object) Data fetched from openstack api
+    :param header: (Dict) headers for request
+    :param url_parameters: (Dict)
+    :param body: (Dict)
+    :return: (Dict) Data fetched from openstack api
     '''
     extra_url = (BaseMethods.url_para_to_url(**url_parameters)) if url_parameters else ''
     conn = httplib.HTTPConnection('%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, port))

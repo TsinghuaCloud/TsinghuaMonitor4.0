@@ -181,21 +181,46 @@ def edit_alarm(request, alarm_id):
         if step is None or step not in ['2', '3', '4', 'post']:
             raise Http404('Invalid value of "step"')
         edited_data = BaseMethods.qdict_to_dict(request.POST)
-        edited_data.update(original_data)
-        if step == 'post':
-            pass
+        edited_data.update(original_data)                           # Overwrite keys that are not allowed to modify
 
-        # Overwrite keys that are not allowed to modify
-        edited_data.update(original_data)
+        if step == 'post':
+            return_data = _post_edited_alarm(request)
+            new_message = [], {}
+            if return_data['status'] == 'success':
+                messages.success(request, return_data['data']['name'] + " has been created")
+            else:
+                messages.error(request, return_data['error_msg'])
+            return HttpResponseRedirect('/monitor/alarms/')
+
         return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
                           'page_type': 'edit_alarm',
-                          'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
+                          'threshold_step_html':
+                              'alarms/threshold_alarm_basis/_threshold_alarm_step_' + step + '.html',
                           'step': step,
                           'alarm_data': edited_data,
                       })
     raise Http404
 
+
+def _post_edited_alarm(request):
+    alarm_data = BaseMethods.qdict_to_dict(request.POST)
+    alarm_data.pop('next_step')
+    alarm_data.pop('cur_step')
+
+    if 'enabled' in alarm_data:
+        alarm_data['enabled'] = False if alarm_data['enabled'] == 'false' else True
+    if 'repeat_actions' in alarm_data:
+        alarm_data['repeat_actions'] = False if alarm_data['repeat_actions'] == 'false' else True
+    for action_type in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
+        if action_type in alarm_data:
+            for i in range(0, len(alarm_data[action_type])):
+                alarm_data[action_type][i] = \
+                    'http://%s/notification/notify/?op=%s' % (settings.THIS_ADDR, alarm_data[action_type][i])
+    kwargs = {}
+    kwargs.update(alarm_data)
+
+    return openstack_api.ceilometer_api.update_threshold_alarm(request.session['token'], **kwargs)
 
 def alarm_detail(request, alarm_id):
     ''' Display detail of an alarm '''

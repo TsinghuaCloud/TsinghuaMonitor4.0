@@ -1,7 +1,11 @@
 __author__ = 'pwwpcheng'
 
-from CommonMethods.BaseMethods import kwargs_to_url_parameter_object
+from CommonMethods.BaseMethods import kwargs_to_url_parameter_object, \
+                                        sanitize_arguments, \
+                                        add_list_unique
 from ApiLayer.ceilometer.connection import ceilometer_connection
+from ApiLayer.base import capabilities
+
 
 def get_alarms(token, **kwargs):
     '''
@@ -24,7 +28,7 @@ def get_meters(token, **kwargs):
     :return:
     '''
     request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
-    url_para_obj =kwargs_to_url_parameter_object(**kwargs)
+    url_para_obj = kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_connection('meters', method='GET', header=request_header, url_parameters=url_para_obj)
 
 
@@ -52,6 +56,50 @@ def get_samples(token, meter_name, **kwargs):
                                  method='GET',
                                  header=request_header,
                                  url_parameters=url_para_obj)['data']
+
+
+def update_threshold_alarm(token, alarm_id, **kwargs):
+    '''
+    Update threshold alarm via Ceilometer alarm-threshold-update api
+    :param token: (string) OpenStack Keystone token
+    :param alarm_id: (string) alarm to be updated
+    :param kwargs: (Dict) alarm_detail
+    :return:
+    '''
+
+    alarm_existence_status = get_alarms(token, alarm_id=alarm_id)['status']
+    if alarm_existence_status != 'success':
+        return {'status': 'error', 'error_msg': 'Alarm [' + alarm_id + '] does not exist!'}
+
+    request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+
+    # Threshold alarms
+    threshold_alarm_capabilities = add_list_unique(
+        capabilities.ALARM_CAPABILITIES,
+        capabilities.THRESHOLD_ALARM_CAPABILITIES,
+        capabilities.QUERY_CAPABILITIES
+    )
+    kwargs = sanitize_arguments(kwargs, threshold_alarm_capabilities)
+
+    query_obj = []
+    for query_para in capabilities.QUERY_CAPABILITIES:
+        if query_para in kwargs:
+            query_obj.append({'field': query_para, 'value': kwargs.pop(query_para)})
+
+    threshold_rule_obj = {'query': query_obj}
+    for threshold_rule_para in capabilities.THRESHOLD_ALARM_CAPABILITIES:
+        if threshold_rule_para in kwargs:
+            threshold_rule_obj[threshold_rule_para] = kwargs.pop(threshold_rule_para)
+
+    alarm_obj = {'threshold_rule': threshold_rule_obj}
+    for alarm_para in capabilities.ALARM_CAPABILITIES:
+        if alarm_para in kwargs:
+            alarm_obj[alarm_para] = kwargs.pop(alarm_para)
+
+    return ceilometer_connection('alarms/' + alarm_id,
+                                 method='GET',
+                                 header=request_header,
+                                 body=alarm_obj)['data']
 
 
 def post_threshold_alarm(token, **kwargs):
@@ -96,4 +144,4 @@ def get_alarm_detail(token, alarm_id, **kwargs):
     '''
     request_header = {'X-Auth-Token': token,
                       'Content-Type': 'application/json'}
-    return ceilometer_connection('alarms/'+ alarm_id, method='GET', header=request_header)
+    return ceilometer_connection('alarms/' + alarm_id, method='GET', header=request_header)
