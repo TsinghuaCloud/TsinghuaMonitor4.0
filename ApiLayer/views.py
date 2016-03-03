@@ -12,10 +12,10 @@ from ApiLayer.base import capabilities
 from ApiLayer.ceilometer import api as ceilometer_api
 from ApiLayer.keystone import api as keystone_api
 from ApiLayer.nova import api as nova_api
-from ApiLayer.nova.connection import nova_connection   # TODO(pwwp): remove this import statement
+from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this import statement
 from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
 
-#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+# import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 
 #import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
@@ -123,7 +123,7 @@ def post_alarm(request):
     request.session['token'] = token
     if request.method == 'POST':
         kwargs = sanitize_arguments(_request_GET_to_dict(request.POST, False),
-                                                capabilities.POST_ALARM_CAPABILITIES)
+                                    capabilities.ALARM_CAPABILITIES)
         q = []
         try:
             q[0] = {}
@@ -282,12 +282,11 @@ def get_alarm_detail(request):
         return _report_error('KeyError', 'alarm_id not provided')
     alarm_id = arrays['alarm_id']
     #filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
-    result = ceilometer_api.get_alarm_detail(request.session['token'], alarm_id,)
+    result = ceilometer_api.get_alarm_detail(request.session['token'], alarm_id, )
     if result['status'] == 'success':
         return HttpResponse(json.dumps(result), content_type='application/json')
     else:
         return _report_error(result['status'], result['error_msg'])
-
 
 
 def get_resources(request):
@@ -325,7 +324,7 @@ def get_vm_list(request):
               "recordsTotal": len(servers['data']['servers']),
               "recordsFiltered": len(servers['data']['servers']),
               "data": [{'name': server['name'], 'id': server['id']}
-                        for server in servers['data']['servers']]
+                       for server in servers['data']['servers']]
               }
     return HttpResponse(json.dumps(result), content_type='application/json')
 
@@ -356,7 +355,7 @@ def get_pm_list(request):
                         # TODO(pwwp): Confirm this usage (setting id = name)
                         'id': hypervisor['hypervisor_hostname']
                         }
-                        for hypervisor in hypervisors['data']['hypervisors']]}
+                       for hypervisor in hypervisors['data']['hypervisors']]}
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
@@ -428,6 +427,7 @@ def getTopoInfo(request):
     return HttpResponse(json.dumps({'data': res.replace('\n', '').replace(' ', '')}), content_type='application/json')
     #return HttpResponse(json.dumps({'data': error_json}), content_type='application/json')
 
+
 def _convert_action_to_action_url(action_list):
     '''
     Convert an alarm action to link for backend storage.
@@ -442,7 +442,7 @@ def _convert_action_to_action_url(action_list):
     '''
     action_url = []
     for action in action_list:
-        action_regex = re.compile('type=('+'|'.join(NOTIFICATION_CAPABILITIES) + ')&detail=(.*)')
+        action_regex = re.compile('type=(' + '|'.join(NOTIFICATION_CAPABILITIES) + ')&detail=(.*)')
         reg_match = action_regex.match(action)
         action_type, action_detail = reg_match.group(1), reg_match.group(2)
         action_url.append('http://' + settings.THIS_ADDR + '/notification/')

@@ -15,19 +15,21 @@ $(document).ready(function(){
     }, 1);
 });
 function next_step() {
-    var step_element = document.getElementsByName("next_step")[0];
-    step_element.value = parseInt(step_element.value) + 1;
+    var next_step = document.getElementsByName("next_step")[0];
     var current_step = document.getElementsByName("cur_step")[0];
-    if (current_step.value === '3'){
+    if (current_step.value === '3')
         submitAlarmActions();
-    }
+    if (current_step.value === '4')
+        next_step.value = 'post';
+    else
+        next_step.value = parseInt(current_step.value) + 1;
     document.getElementById('alarm-form').submit();
 }
 
 function prev_step() {
-    var step_element = document.getElementsByName("next_step")[0];
-    step_element.value = parseInt(step_element.value) - 1;
+    var next_step = document.getElementsByName("next_step")[0];
     var current_step = document.getElementsByName("cur_step")[0];
+    next_step.value = parseInt(current_step.value) - 1;
     if (current_step.value === '3'){
         submitAlarmActions();
     }
@@ -46,11 +48,12 @@ function submitAlarmActions(){
         var action_type_list = action_forms[i].getElementsByTagName('select');
         var action_detail_list = action_forms[i].getElementsByTagName('input');
         for(j = 0; j < action_type_list.length; j++){
-            if ((action_detail_list[j]).value === "") continue
+            if ((action_detail_list[j]).value === "") continue;
             var new_action = document.createElement('input');
             new_action.setAttribute('name', action_name);
-            new_action.setAttribute('value', 'type=' + action_type_list[j].value
-                                            + '&detail=' + action_detail_list[j].value);
+            var new_action_value = encodeURIComponent('type=' + action_type_list[j].value
+                                                        + '&detail=' + action_detail_list[j].value);
+            new_action.setAttribute('value', new_action_value);
             submit_form_handle.appendChild(new_action);
         }
     }
@@ -75,11 +78,11 @@ $(function()
 		e.preventDefault();
 		return false;
 	});
-    $(document).on('change', '.alarm-form-element', function(){
+    $(document).on('change', '.alarm-form-element:input,select', function(){
         var this_name = $(this).attr('name');
         $('#alarm-form [name="'+this_name+'"]')[0].value = this.value;
     });
-    $(document).on('click', '.alarm-form-element', function(){
+    $(document).on('click', '.alarm-form-element:input,select', function(){
         var this_name = $(this).attr('name');
         $('#alarm-form [name="'+this_name+'"]')[0].value = this.value;
     });
@@ -104,7 +107,7 @@ function loadDataFromForm(){
     var index;
     for(index = 0; index < load_elements.length; index++){
         var element = load_elements[index];
-        element.value = $('#alarm-form [name="'+element.name+'"]')[0].value;
+        element.value = $('#alarm-form [name="'+element.getAttribute('name')+'"]')[0].value;
     }
 
     var actions = $('.alarm-action-element');
@@ -117,7 +120,7 @@ function loadDataFromForm(){
         for(list_index = 0; list_index < action_list.length; list_index++){
             // Match result [0: whole string  1: type_match(email|message)  2: detail_match]
             var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
-            var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
+            var match_result = regMatchTypeDetail.exec(decodeURIComponent(action_list[list_index].value));
             if(list_index === 0){
                 base_element.getElementsByTagName('select')[0].value = match_result[1];
                 base_element.getElementsByTagName('input')[0].value = match_result[2];
@@ -156,7 +159,7 @@ function loadAlarmConfirmation(){
         for(list_index = 0; list_index < action_list.length; list_index++){
             // Match result [0: whole string  1: type_match(email|message)  2: detail_match]
             var regMatchTypeDetail = /type=(email|message|link)\&detail=(.*)/g;
-            var match_result = regMatchTypeDetail.exec(action_list[list_index].value);
+            var match_result = regMatchTypeDetail.exec(decodeURIComponent(action_list[list_index].value));
             var append_html = document.createElement('p');
             append_html.textContent = translate_name(match_result[1], 'notification_type') + ": " + match_result[2];
             base_element.appendChild(append_html);

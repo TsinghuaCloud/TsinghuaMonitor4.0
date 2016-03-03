@@ -23,7 +23,6 @@ def openstack_api_connection(base_url, method, header, port, version,
     # Perform API request
     status = None
     data = None
-
     # TODO(pwwp):
     # use <finally> to handle success or error data
     try:

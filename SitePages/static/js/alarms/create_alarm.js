@@ -144,7 +144,8 @@ function submitAlarmActions(){
             if ((action_detail_list[j]).value === "") continue;
             var new_action = document.createElement('input');
             new_action.setAttribute('name', action_name);
-            var new_action_value = encodeURIComponent('type=' + action_type_list[j].value  + '&detail=' + action_detail_list[j].value);
+            var new_action_value = encodeURIComponent('type=' + action_type_list[j].value
+                                                        + '&detail=' + action_detail_list[j].value);
             new_action.setAttribute('value', new_action_value);
             submit_form_handle.appendChild(new_action);
         }

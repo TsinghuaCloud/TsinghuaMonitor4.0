@@ -1,6 +1,6 @@
-import copy
 import json
-import httplib
+import urllib
+import urlparse
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_protect
 
 import CommonMethods.BaseMethods as BaseMethods
 from ApiLayer import views as openstack_api
+from ApiLayer.base import capabilities as APICapabilities
 
 # Create your views here.
 def overview(request):
@@ -156,13 +157,12 @@ def edit_alarm(request, alarm_id):
     alarm_data, original_data = None, {}
     try:
         alarm_data = _read_alarm_data(openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id))
-        if alarm_data['status'] == 'error':
-            raise Http404('Unknown alarm-id')
         original_data['alarm_id'] = alarm_data['alarm_id']
         original_data['meter_name'] = alarm_data['meter_name']
         original_data['query'] = alarm_data.get('query', [])
+        original_data['type'] = 'threshold'
     except KeyError, e:
-        raise Http404(e.message)
+        raise Http404(str(e.message) + ' is missing')
 
     if request.method == 'GET':
         request.session['token'] = openstack_api.get_token(request, 'token')['token']
@@ -172,10 +172,9 @@ def edit_alarm(request, alarm_id):
                           'title': 'Edit Alarm',
                           'threshold_step_html': 'alarms/threshold_alarm_basis/_threshold_alarm_step_2.html',
                           'step': 2,
-                          'alarm_data': alarm_data['data']
+                          'alarm_data': alarm_data
                       })
     if request.method == 'POST':
-
         # Invalid inputs for step will be served with 404 page
         step = request.POST.get('next_step', '2')
         if step is None or step not in ['2', '3', '4', 'post']:
@@ -184,10 +183,10 @@ def edit_alarm(request, alarm_id):
         edited_data.update(original_data)                           # Overwrite keys that are not allowed to modify
 
         if step == 'post':
-            return_data = _post_edited_alarm(request)
+            return_data = _post_edited_alarm(request.session['token'], edited_data, alarm_id)
             new_message = [], {}
             if return_data['status'] == 'success':
-                messages.success(request, return_data['data']['name'] + " has been created")
+                messages.success(request, return_data['data']['name'] + " has been modified")
             else:
                 messages.error(request, return_data['error_msg'])
             return HttpResponseRedirect('/monitor/alarms/')
@@ -200,13 +199,15 @@ def edit_alarm(request, alarm_id):
                           'step': step,
                           'alarm_data': edited_data,
                       })
-    raise Http404
+    raise Http404('Unknown error in edit_alarm')
 
 
-def _post_edited_alarm(request):
-    alarm_data = BaseMethods.qdict_to_dict(request.POST)
-    alarm_data.pop('next_step')
-    alarm_data.pop('cur_step')
+def _post_edited_alarm(token, alarm_data, alarm_id=None):
+    '''
+    Post edited alarm to ceilometer api
+    :param request: (Django Request Object) request
+    :return: (Dict) success or error message
+    '''
 
     if 'enabled' in alarm_data:
         alarm_data['enabled'] = False if alarm_data['enabled'] == 'false' else True
@@ -220,7 +221,32 @@ def _post_edited_alarm(request):
     kwargs = {}
     kwargs.update(alarm_data)
 
-    return openstack_api.ceilometer_api.update_threshold_alarm(request.session['token'], **kwargs)
+    # Threshold alarms
+    threshold_alarm_capabilities = BaseMethods.add_list_unique(
+        APICapabilities.ALARM_CAPABILITIES,
+        APICapabilities.THRESHOLD_ALARM_CAPABILITIES,
+        APICapabilities.QUERY_CAPABILITIES
+    )
+    kwargs = BaseMethods.sanitize_arguments(kwargs, threshold_alarm_capabilities)
+
+    query_obj = []
+    for query_para in APICapabilities.QUERY_CAPABILITIES:
+        if query_para in kwargs:
+            query_obj.append({'field': query_para, 'value': kwargs.pop(query_para)})
+    threshold_rule_obj = {'query': query_obj}
+
+    for threshold_rule_para in APICapabilities.THRESHOLD_ALARM_CAPABILITIES:
+        if threshold_rule_para in kwargs:
+            threshold_rule_obj[threshold_rule_para] = kwargs.pop(threshold_rule_para)
+    alarm_obj = {'threshold_rule': threshold_rule_obj}
+
+    for alarm_para in APICapabilities.ALARM_CAPABILITIES:
+        if alarm_para in kwargs:
+            alarm_obj[alarm_para] = kwargs.pop(alarm_para)
+
+    return openstack_api.ceilometer_api.update_threshold_alarm(token,
+                                                               alarm_id=alarm_id,
+                                                               alarm_body=alarm_obj)
 
 def alarm_detail(request, alarm_id):
     ''' Display detail of an alarm '''
@@ -248,10 +274,21 @@ def _read_alarm_data(alarm_data):
     :return:
     '''
     assert isinstance(alarm_data, dict)
-    data = alarm_data.copy()
+    if alarm_data['status'] == 'error':
+        raise Http404('Alarm does not exist')
+    data = alarm_data['data'].copy()
     data.update(data.pop('threshold_rule'))
     if len(data['query']) > 0:
         data[data['query'][0].get('field', 'no_field')] = data['query'][0].get('value', '')
-    print 'alarm_data is read as: '
-    print data
+
+    # Fetch operation string from action_list
+    # Example:
+    #   data['alarm_actions'] = ['http://addr.net/path/?op=type%3Da&detail=%3Da',
+    #                            'http://addr.net/path/?op=type%3Db&detail=%3Db']
+    # Result:
+    #   data['alarm_actions'] = ['type%3Da&detail=%3Da', 'type%3Db&detail=%3Db']
+    for actions in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
+        for action_index in range(0, len(data.get(actions, []))):
+            operation = urlparse.parse_qs(urlparse.urlparse(data[actions][action_index]).query)
+            data[actions][action_index] = urllib.quote(operation['op'][0])
     return data
