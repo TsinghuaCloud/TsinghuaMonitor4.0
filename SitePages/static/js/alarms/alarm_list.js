@@ -130,5 +130,26 @@ $(function(){
         var alarm_id = trigger.data('alarm-id');
         var alarm_name = trigger.data('alarm-name');
         $(this).find('.modal-body * strong').text(alarm_name);
-    })
+        $(this).find('.modal-body').find('input').attr('value', alarm_id);
+    });
+    $('#delete-btn').on('click', function () {
+        var btn = $(this).button('loading');
+        var alarm_id = $(this).parents('.modal-content').find('#delete-alarm-id').attr('value');
+        $.getJSON("/api/alarms/delete-alarm/"+alarm_id, function (json) {
+            var status = json.status;
+            if(status === 'success'){
+                $('#delete-alarm-modal').modal('hide');
+                reloadTableData();
+            }
+        })
+            .done(function (json) {
+                console.log("second success");
+            })
+            .fail(function (jqxhr, textStatus, error) {
+                console.log("error");
+            })
+            .always(function () {
+                btn.button('reset');
+            });
+    });
 });

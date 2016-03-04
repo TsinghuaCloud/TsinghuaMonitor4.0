@@ -97,9 +97,7 @@ $(function()
                                     + '-list');
         datatable_handle.ajax.reload();
     });
-    $(document).on("change", '#alarm-form [name="resource_id"]', function(e) {
 
-    });
 });
 
 function loadDataFromForm(){
@@ -200,3 +198,4 @@ function compareDate(a, b) {
     else
         return 0;
 }
+

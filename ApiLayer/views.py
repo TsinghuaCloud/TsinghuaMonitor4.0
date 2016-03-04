@@ -110,6 +110,10 @@ def get_PmInfo(token):
     return allInfo
 
 
+def update_alarm(request, alarm_id):
+    print alarm_id
+    pass
+
 @csrf_protect
 def post_alarm(request):
     '''
@@ -222,6 +226,12 @@ def _update_total_meters_count(request, filters):
         request.session['total_meters_count'] = 0
     return request.session['total_meters_count']
 
+
+def delete_alarm(request, alarm_id):
+    result = ceilometer_api.delete_alarm(request.session.get('token', ''), alarm_id)
+    if result['status'] == 'success':
+        result['data'] = 'Alarm ' + alarm_id + ' has been deleted.'
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 def get_samples(request):
     ''' Get samples of every meter through ceilometer_api

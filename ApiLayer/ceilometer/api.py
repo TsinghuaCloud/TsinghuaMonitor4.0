@@ -64,7 +64,7 @@ def delete_alarm(token, alarm_id):
     :param alarm_id: (string) alarm id
     :return: (Object) success or error
     '''
-    alarm_existence_status = get_alarm_detail(token, alarm_id=alarm_id)['status']
+    alarm_existence_status = get_alarm_detail(token, alarm_id)['status']
     if alarm_existence_status != 'success':
         return {'status': 'error', 'error_msg': 'Alarm [' + alarm_id + '] does not exist!'}
     request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
