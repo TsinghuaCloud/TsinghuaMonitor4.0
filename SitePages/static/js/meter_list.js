@@ -21,6 +21,9 @@ $(document).ready(function () {
         ajax: {
             "url": "http://" + window.location.host + "/api/meters/meter-list",
             "contentType": "application/json",
+            'beforeSend': function(request){
+                request.sendRequestHeader('X-CSRFToken',$('[name="csrfmiddlewaretoken"]').attr('value'))
+            },
             "type": "POST",
             "data": function (d) {
                 var query_value = document.getElementById("search-value").value.trim();

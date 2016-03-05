@@ -10,7 +10,7 @@ $(document).ready(function () {
     $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", document.getElementById("csrfmiddlewaretoken").value);
+            xhr.setRequestHeader("X-CSRFToken", $('#csrfmiddlewaretoken').value);
         }
     }
     });
@@ -23,8 +23,8 @@ $(document).ready(function () {
             "contentType": "application/json",
             "type": "POST",
             "data": function (d) {
-                var query_value = document.getElementById("search-value").value.trim();
-                var query_filter = document.getElementById("search-filter").value;
+                var query_value = $("#search-value").attr('value').trim();
+                var query_filter = $('#search-filter').attr('value');
                 if(query_value != ""){
                     d.q = [];
                     d.q[0] = {};
@@ -114,7 +114,7 @@ function reloadTableData(){
 }
 
 function clearSearchCriteria(){
-    document.getElementById("search-value").value = '';
+    $("#search-value").value = '';
     datatable_handle.ajax.reload();
 }
 
@@ -139,14 +139,19 @@ $(function(){
             var status = json.status;
             if(status === 'success'){
                 $('#delete-alarm-modal').modal('hide');
+                add_message('success', json.data);
                 reloadTableData();
+            }
+            else{
+                $('#delete-alarm-modal').modal('hide');
+                add_message('error', json.error_msg);
             }
         })
             .done(function (json) {
                 console.log("second success");
             })
             .fail(function (jqxhr, textStatus, error) {
-                console.log("error");
+                add_message('error', error);
             })
             .always(function () {
                 btn.button('reset');

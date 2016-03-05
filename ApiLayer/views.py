@@ -443,10 +443,10 @@ def _convert_action_to_action_url(action_list):
     Convert an alarm action to link for backend storage.
     Rule:
         Original: type=<email|link|...>&detail=<detail>
-        Converted: http://THIS_ADDR/notification/<type>?detail=<detail>
+        Converted: http://THIS_ADDR/notification/?type=<type>&detail=<detail>
     Example:
         Original: type=email&detail=mail@site.com
-        Converted: http://THIS_ADDR/notification/email?detail=mail@site.com
+        Converted: http://THIS_ADDR/notification/?type=email&detail=mail@site.com
     :param action_list:
     :return:
     '''
