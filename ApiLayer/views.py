@@ -13,12 +13,10 @@ from ApiLayer.ceilometer import api as ceilometer_api
 from ApiLayer.keystone import api as keystone_api
 from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this import statement
-from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict
+from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 
 # import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
-
-#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 
 
@@ -109,10 +107,6 @@ def get_PmInfo(token):
         allInfo.append(singleInfo)
     return allInfo
 
-
-def update_alarm(request, alarm_id):
-    print alarm_id
-    pass
 
 @csrf_protect
 def post_alarm(request):
@@ -226,8 +220,44 @@ def _update_total_meters_count(request, filters):
         request.session['total_meters_count'] = 0
     return request.session['total_meters_count']
 
+def update_alarm(request, alarm_id):
+    pass
+
+def update_alarm_enabled(request, alarm_id):
+    '''
+    Update the 'enabled' field of a given alarm
+    :param request: (Django request)
+    :param alarm_id: (string) id of an alarm
+    :return: HTTPResponse (application/json)
+    '''
+
+    # First fetch alarm data
+    token = request.session.get('token', '')
+    alarm_data_handler = ceilometer_api.get_alarm_detail(token, alarm_id)
+    if alarm_data_handler['status'] == 'error':
+        return _report_error('Alarm Error', alarm_data_handler['error_msg'])
+
+    # Then modify alarm data ('enabled' field specifically)
+    alarm_data = alarm_data_handler['data']
+    try:
+        alarm_data['enabled'] = string_to_bool(request.GET['enabled'])
+    except KeyError, e:
+        return _report_error('KeyError', str(e) + 'shall be provided')
+    except ValueError, e:
+        return _report_error('ValueError', e.message)
+
+    # Finally post it back to ceilometer with alarm-update api
+    result = ceilometer_api.update_threshold_alarm(token, alarm_id, alarm_data)
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
 
 def delete_alarm(request, alarm_id):
+    '''
+    Delete a given alarm
+    :param request: Django request object
+    :param alarm_id: id of an alarm
+    :return: HTTPResponse (application/json)
+    '''
     result = ceilometer_api.delete_alarm(request.session.get('token', ''), alarm_id)
     if result['status'] == 'success':
         result['data'] = 'Alarm ' + alarm_id + ' has been deleted.'

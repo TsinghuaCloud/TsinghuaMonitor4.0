@@ -18,14 +18,15 @@ import views
 urlpatterns = [
     url(r'^authentication/get-token$', views.get_token, name='Token'),
     url(r'^servers/vm-list$', views.get_vm_list, name='Server List'),
-    url(r'^servers/pm-list$', views.get_pm_list, name='Server List'),
+    url(r'^servers/pm-list$', views.get_pm_list, name='Hypervisor List'),
     url(r'^meters/meter-list$', views.get_meters, name='Meter List'),
     url(r'^meters/meter-samples$', views.get_samples, name='Sample List'),
     url(r'^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
     url(r'^alarms/alarm-detail$', views.get_alarm_detail, name='Alarm Detail'),
     url(r'^alarms/post-alarm/$', views.post_alarm, name='Create New Alarm'),
-    url(r'^alarms/update-alarm/([0-9a-f\-]+)/$', views.update_alarm, name='Edit Alarm'),
+    url(r'^alarms/edit-alarm/([0-9a-f\-]+)/$', views.update_alarm, name='Edit Alarm'),
     url(r'^alarms/delete-alarm/([0-9a-f\-]+)/$', views.delete_alarm, name='Delete Alarm'),
+    url(r'^alarms/update-alarm-enabled/([0-9a-f\-]+)/$', views.update_alarm_enabled, name='Enable/Disable Alarm'),
     url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
     url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]

@@ -87,6 +87,7 @@ def update_threshold_alarm(token, alarm_id, alarm_body):
     '''
 
     alarm_existence_status = get_alarm_detail(token, alarm_id=alarm_id)['status']
+    print alarm_body
     if alarm_existence_status != 'success':
         return {'status': 'error', 'error_msg': 'Alarm [' + alarm_id + '] does not exist!'}
     request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}

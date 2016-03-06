@@ -10,7 +10,7 @@ $(document).ready(function () {
     $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", $('#csrfmiddlewaretoken').value);
+            xhr.setRequestHeader("X-CSRFToken", $('#csrfmiddlewaretoken').attr('value'));
         }
     }
     });
@@ -155,6 +155,30 @@ $(function(){
             })
             .always(function () {
                 btn.button('reset');
+            });
+    });
+    $(document).on('click', '.material-switch label', function(){
+        var new_state = !($(this).parent('.material-switch').find('input')[0].checked);
+
+        // id of this label is parsed as switch-input-<alarm_id>
+        // The length of phrase switch-input- is 13
+        // So .slice(13) is used to cut out 'switch-input-'
+        //      in order to get alarm_id
+        var alarm_id = $(this).attr('for').slice(13);
+        $.getJSON('/api/alarms/update-alarm-enabled/' + alarm_id + '/'+
+                '?enabled=' + new_state.toString(),
+            function(json){
+                var status = json.status;
+                if(status === 'success'){
+                    add_message('success', 'Enabled of alarm ' + alarm_id + ' has been changed');
+                }
+                else{
+                    add_message('error', json.error_msg);
+                    $(this).parent('.material-switch').find('input')[0].checked = !new_state;
+                }
+            }
+        ).fail(function (jqxhr, textStatus, error) {
+                add_message('error', error);
             });
     });
 });
