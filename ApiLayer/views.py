@@ -163,6 +163,7 @@ def get_meters(request):
     elif request.method == 'POST':
         # POST method at /api/meter-list is triggered by datatables.
         # So I just deal with some special parameters in this POST request.
+        print request.body
         args = json.loads(request.body)
         filters['limit'] = 0 if 'length' not in args else args['length']
         filters['skip'] = 0 if 'start' not in args else args['start']
@@ -177,7 +178,9 @@ def get_meters(request):
                 for query_item in args['q']:
                     filters[query_item['field']] = query_item['value']
         except KeyError, e:
-            return _report_error('KeyError', e)
+            # Currently malformated query objects(q) are ignored.
+            pass
+            #return _report_error('KeyError', e)
 
     filters = sanitize_arguments(filters, capabilities.METER_LIST_CAPABILITIES)
     result = ceilometer_api.get_meters(token, **filters)

@@ -14,7 +14,7 @@ $(document).ready(function () {
         }
     }
     });
-    datatable_handle = $('#alarm-list-table').DataTable({
+    meter_table_handle = $('#alarm-list-table').DataTable({
         dom: '<"toolbar">lrtip',
         processing: true,
         paging: true,
@@ -110,12 +110,12 @@ $(document).ready(function () {
 });
 
 function reloadTableData(){
-    datatable_handle.ajax.reload();
+    meter_table_handle.ajax.reload();
 }
 
 function clearSearchCriteria(){
     $("#search-value").value = '';
-    datatable_handle.ajax.reload();
+    meter_table_handle.ajax.reload();
 }
 
 $(function(){

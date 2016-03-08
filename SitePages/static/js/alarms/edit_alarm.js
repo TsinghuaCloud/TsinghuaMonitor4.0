@@ -91,11 +91,11 @@ $(function()
         //$('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
     });
     $(document).on('click', '.machine-type-selector', function(){
-        datatable_handle.ajax.url("http://" + window.location.host
+        meter_table_handle.ajax.url("http://" + window.location.host
                                     + "/api/servers/"
                                     + this.value
                                     + '-list');
-        datatable_handle.ajax.reload();
+        meter_table_handle.ajax.reload();
     });
 
 });

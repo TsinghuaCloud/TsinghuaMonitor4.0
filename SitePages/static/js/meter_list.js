@@ -6,6 +6,16 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
+$(function(){
+    $(document).on('click', '.machine-type-selector', function(){
+        machine_table_handle.ajax.url("http://" + window.location.host
+                                    + "/api/servers/"
+                                    + this.value
+                                    + '-list');
+        machine_table_handle.ajax.reload();
+    });
+});
+
 $(document).ready(function () {
     $.ajaxSetup({
     beforeSend: function(xhr, settings) {
@@ -14,29 +24,64 @@ $(document).ready(function () {
         }
     }
     });
-    datatable_handle = $('#meter-table').DataTable({
-        dom: '<"toolbar">lrtip',
+
+    machine_table_handle = $('#machine-table').DataTable({
+        dom: "<'row'<'col-sm-7'<'machine-typebox'>><'col-sm-4 pull-right'l>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        processing: true,
+        ajax: {
+            "url": "http://" + window.location.host
+                                + "/api/servers/vm-list",
+            "contentType": "application/json",
+            "type": "GET"
+        },
+        "columns": [
+            {"data": "id"},
+            {"data": "name"},
+            {"data": "id"}
+        ],
+        "columnDefs": [
+            {
+                "targets": [0, 1, 2],
+                "width": '40%',
+                "sortable": false
+            },
+            {
+                "targets": [2],
+                "width": '30%' ,
+                "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                    $(nTd).html('<a onclick="getMeterList(\'' + oData.id + '\',\''+ oData.name + '\')" ' +
+                    'class="btn btn-sm btn-primary">选择该主机</a>')
+                }
+            }
+        ],
+        responsive: true
+    });
+    meter_table_handle = $('#meter-table').DataTable({
+        dom: "<'row'<'col-sm-5'<'meter-display'>><'col-sm-7 pull-right'<'meter-searchbox'>>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         processing: true,
         serverSide: true,
         ajax: {
             "url": "http://" + window.location.host + "/api/meters/meter-list",
             "contentType": "application/json",
-            'beforeSend': function(request){
-                request.sendRequestHeader('X-CSRFToken',$('[name="csrfmiddlewaretoken"]').attr('value'))
-            },
             "type": "POST",
             "data": function (d) {
                 var query_value = document.getElementById("search-value").value.trim();
                 var query_criteria = document.getElementById("search-criteria").value;
+                d.q = [];
                 if(query_value != ""){
-                    d.q = [];
                     d.q[0] = {};
                     d.q[0].field= query_criteria;
                     d.q[0].value = query_value;
                 }
-                // ------------- Query object test ------------
-
-                // --------- End of Query object test ---------s
+                if($('.meter-display [name="selected-machine-id"]').val() != ''){
+                    d.q.push({'field': 'resource_id_match',
+                              'value': $('.meter-display [name="selected-machine-id"]').val()
+                    });
+                }
                 return JSON.stringify(d);
             }
         },
@@ -51,7 +96,7 @@ $(document).ready(function () {
         ],
         "columnDefs": [
             {
-                "targets": [1],
+                "targets": [1, 2],
                 "visible": false,
                 "searchable": false
             },
@@ -88,7 +133,7 @@ $(document).ready(function () {
             },
             {
                 "targets": [6],
-                "width": "10%",
+                "width": '15%',
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench'></a>" +
                     "<a href='#' class='btn btn-xs btn-empty fa fa-trash-o'></a>");
@@ -102,9 +147,19 @@ $(document).ready(function () {
             }
         }
     });
-    var search_html= document.getElementById('datatables-searchbox').innerHTML;
-    $("div.toolbar").html(search_html);
+    var search_html=
+    $("div.meter-searchbox").html($('#datatables-searchbox').html());
+    $("div.machine-typebox").html($('#machine-type-box').html());
+    $("div.meter-display").html($('#selected-meter-display').html());
 });
+
+function getMeterList(resource_id, resource_name){
+    $('.meter-display [name="selected-machine-id"]').val(resource_id);
+    alert('已选主机： '+ resource_name);
+    $('.meter-display [name="selected-machine-name"]').html(resource_name);
+    meter_table_handle.ajax.reload();
+    $('#select-meter-tab').tab('show');
+}
 
 var selected_meter_list = {};
 /* selected_meter_list stores selected meter on multiple datatable pages
@@ -115,13 +170,13 @@ var selected_meter_list = {};
  * }
  */
 
-function reloadTableData(){
-    datatable_handle.ajax.reload();
+function reloadMeterTableData(){
+    meter_table_handle.ajax.reload();
 }
 
-function clearSearchCriteria(){
+function clearMeterSearchCriteria(){
     document.getElementById("search-value").value = '';
-    datatable_handle.ajax.reload();
+    meter_table_handle.ajax.reload();
 }
 
 function checkMeterList(data){
@@ -129,7 +184,7 @@ function checkMeterList(data){
     Check if the requested meter is in selected_meter_list.
     Return true if in, [false] if not.
      */
-    //var current_row_handle = datatable_handle.data()[row];
+    //var current_row_handle = meter_table_handle.data()[row];
     //var current_meter = {'meter_name': current_row_handle['meter_name'],
     //                     'resource_id': current_row_handle['resource_id']};
     var meter_name = data['name'];
@@ -150,7 +205,7 @@ function updateMeterList(row){
     Notice: This function considers there are one more same <resource_id>s
             in the meter_name array, and removes them all.
      */
-    var row_data = datatable_handle.data()[row];
+    var row_data = meter_table_handle.data()[row];
     if(checkMeterList(row_data)){
         var index = (selected_meter_list[row_data['name']]).indexOf(row_data['resource_id']);
         while (index > -1) {
