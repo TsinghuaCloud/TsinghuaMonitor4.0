@@ -23,7 +23,6 @@ def openstack_api_connection(base_url, method, header, port, version,
     # Perform API request
     status = None
     data = None
-
     # TODO(pwwp):
     # use <finally> to handle success or error data
     try:
@@ -37,6 +36,10 @@ def openstack_api_connection(base_url, method, header, port, version,
                      'error_msg': response.reason,
                      'data': ''}
             return error
+        elif response.status == 204:
+            data = {'status': 'success',
+                    'data': ''}
+            return data
         else:
             data = {'status': 'success',
                     'data': json.loads(response.read())}

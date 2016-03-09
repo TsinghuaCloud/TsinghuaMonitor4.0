@@ -101,9 +101,9 @@
                 <option value="resource_name_match">实例名称</option>
                 <!--<option value="meter_name">指标名称</option>-->
             </select>
-            <input class="form-control input-sm" id="search-value">
-            <button type="button" class="btn btn-primary btn-sm" onclick="reloadTableData()">确定</button>
-            <button type="button" class="btn btn-default btn-sm" onclick="clearSearchCriteria()">清空</button>
+            <input class="form-control input-sm" id="search-value" value="">
+            <button type="button" class="btn btn-primary btn-sm" onclick="reloadMeterTableData()">确定</button>
+            <button type="button" class="btn btn-default btn-sm" onclick="clearMeterSearchCriteria()">清空</button>
         </label>
     </div>
 </div>
@@ -119,10 +119,11 @@
             </div>
             <div class="modal-body">
                 <p>确认删除警报：<strong></strong> ?</p>
+                <input id="delete-alarm-id" value="" hidden="hidden">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary">删除</button>
+                <button id="delete-btn" type="button" class="btn btn-primary" data-loading-text="删除中...">删除</button>
             </div>
         </div>
     </div>

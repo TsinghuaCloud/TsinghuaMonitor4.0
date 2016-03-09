@@ -10,11 +10,11 @@ $(document).ready(function () {
     $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", document.getElementById("csrfmiddlewaretoken").value);
+            xhr.setRequestHeader("X-CSRFToken", $('#csrfmiddlewaretoken').attr('value'));
         }
     }
     });
-    datatable_handle = $('#alarm-list-table').DataTable({
+    meter_table_handle = $('#alarm-list-table').DataTable({
         dom: '<"toolbar">lrtip',
         processing: true,
         paging: true,
@@ -23,8 +23,8 @@ $(document).ready(function () {
             "contentType": "application/json",
             "type": "POST",
             "data": function (d) {
-                var query_value = document.getElementById("search-value").value.trim();
-                var query_filter = document.getElementById("search-filter").value;
+                var query_value = $("#search-value").attr('value').trim();
+                var query_filter = $('#search-filter').attr('value');
                 if(query_value != ""){
                     d.q = [];
                     d.q[0] = {};
@@ -110,12 +110,12 @@ $(document).ready(function () {
 });
 
 function reloadTableData(){
-    datatable_handle.ajax.reload();
+    meter_table_handle.ajax.reload();
 }
 
 function clearSearchCriteria(){
-    document.getElementById("search-value").value = '';
-    datatable_handle.ajax.reload();
+    $("#search-value").value = '';
+    meter_table_handle.ajax.reload();
 }
 
 $(function(){
@@ -130,5 +130,55 @@ $(function(){
         var alarm_id = trigger.data('alarm-id');
         var alarm_name = trigger.data('alarm-name');
         $(this).find('.modal-body * strong').text(alarm_name);
-    })
+        $(this).find('.modal-body').find('input').attr('value', alarm_id);
+    });
+    $('#delete-btn').on('click', function () {
+        var btn = $(this).button('loading');
+        var alarm_id = $(this).parents('.modal-content').find('#delete-alarm-id').attr('value');
+        $.getJSON("/api/alarms/delete-alarm/"+alarm_id, function (json) {
+            var status = json.status;
+            if(status === 'success'){
+                $('#delete-alarm-modal').modal('hide');
+                add_message('success', json.data);
+                reloadTableData();
+            }
+            else{
+                $('#delete-alarm-modal').modal('hide');
+                add_message('error', json.error_msg);
+            }
+        })
+            .done(function (json) {
+                console.log("second success");
+            })
+            .fail(function (jqxhr, textStatus, error) {
+                add_message('error', error);
+            })
+            .always(function () {
+                btn.button('reset');
+            });
+    });
+    $(document).on('click', '.material-switch label', function(){
+        var new_state = !($(this).parent('.material-switch').find('input')[0].checked);
+
+        // id of this label is parsed as switch-input-<alarm_id>
+        // The length of phrase switch-input- is 13
+        // So .slice(13) is used to cut out 'switch-input-'
+        //      in order to get alarm_id
+        var alarm_id = $(this).attr('for').slice(13);
+        $.getJSON('/api/alarms/update-alarm-enabled/' + alarm_id + '/'+
+                '?enabled=' + new_state.toString(),
+            function(json){
+                var status = json.status;
+                if(status === 'success'){
+                    add_message('success', 'Enabled of alarm ' + alarm_id + ' has been changed');
+                }
+                else{
+                    add_message('error', json.error_msg);
+                    $(this).parent('.material-switch').find('input')[0].checked = !new_state;
+                }
+            }
+        ).fail(function (jqxhr, textStatus, error) {
+                add_message('error', error);
+            });
+    });
 });

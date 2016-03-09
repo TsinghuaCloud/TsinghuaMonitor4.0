@@ -15,11 +15,12 @@ RESOURCE_LIST_CAPABILITIES = ['user_id', 'project_id', 'limit', 'skip', 'resourc
 # Some attributes of an alarm is automatically modified by ceilometer-api service,
 # including alarm_id, user_id, project_id, state_timestamp,
 # Thus, these attributed will be filtered out for modification.
-ALARM_CAPABILITIES = ['description', 'enabled', 'state', 'meter_name',
-                      'name', 'severity', 'type', 'repeat_actions', 'time_constraints',
+ALARM_CAPABILITIES = ['description', 'enabled', 'state', 'name', 'severity',
+                      'type', 'repeat_actions', 'time_constraints',
                       'alarm_actions', 'ok_actions', 'insufficient_data_actions']
 
 THRESHOLD_ALARM_CAPABILITIES = ['query', 'period', 'comparison_operator', 'threshold',
-                                'statistic', 'evaluation_periods', 'exclude_outliers']
+                                'statistic', 'evaluation_periods', 'exclude_outliers',
+                                'meter_name',]
 
 QUERY_CAPABILITIES = ['resource_id', 'resource_name']

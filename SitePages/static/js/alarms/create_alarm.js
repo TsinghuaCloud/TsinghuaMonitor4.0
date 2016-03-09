@@ -6,7 +6,7 @@ $(document).ready(function(){
         }
     }
     });
-    datatable_handle = $('#machine-table').DataTable({
+    meter_table_handle = $('#machine-table').DataTable({
         dom: "<'row'<'col-sm-7'<'typebox'>><'col-sm-4 pull-right'l>>" +
                 "<'row'<'col-sm-12'tr>>" +
                 "<'row'<'col-sm-5'i><'col-sm-7'p>>",
@@ -144,7 +144,8 @@ function submitAlarmActions(){
             if ((action_detail_list[j]).value === "") continue;
             var new_action = document.createElement('input');
             new_action.setAttribute('name', action_name);
-            var new_action_value = encodeURIComponent('type=' + action_type_list[j].value  + '&detail=' + action_detail_list[j].value);
+            var new_action_value = encodeURIComponent('type=' + action_type_list[j].value
+                                                        + '&detail=' + action_detail_list[j].value);
             new_action.setAttribute('value', new_action_value);
             submit_form_handle.appendChild(new_action);
         }
@@ -155,7 +156,7 @@ function initializeMeterSelect(){
     $("#meter-select").select2({
         ajax: {
             url: '/api/meters/meter-list?resource_id_match='
-                        + $('#alarm-form [name="resource_id"]')[0].value,
+                        + $('#alarm-form [name="resource_id"]').val(),
             dataType: 'json',
             type: 'GET',
             delay: 500,
@@ -211,11 +212,11 @@ $(function()
         $('#alarm-form [name="'+this_name+'"]')[0].value = $('#alarm-detail-wrapper [name="'+this_name+'"]')[0].value
     });
     $(document).on('click', '.machine-type-selector', function(){
-        datatable_handle.ajax.url("http://" + window.location.host
+        meter_table_handle.ajax.url("http://" + window.location.host
                                     + "/api/servers/"
                                     + this.value
                                     + '-list');
-        datatable_handle.ajax.reload();
+        meter_table_handle.ajax.reload();
     });
     $(document).on("change", '#meter-select', function(e) {
         updateMeterChart();

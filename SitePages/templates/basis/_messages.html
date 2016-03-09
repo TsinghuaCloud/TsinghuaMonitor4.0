@@ -1,4 +1,4 @@
-<div style="position: fixed; top: 2%; right: 2% ; width: 20%">
+<div id="message-div" style="position: fixed; top: 2%; right: 2% ; width: 20%">
     {% if messages %}
         {% for message in messages %}
             {% if message.tags  == 'success' %}
@@ -17,4 +17,13 @@
             </div>
         {% endfor %}
     {% endif %}
+</div>
+
+<div id="message-template" hidden="hidden">
+    <div class="alert alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        <p><strong></strong></p>
+        <p>{{ message }}</p>
+    </div>
 </div>

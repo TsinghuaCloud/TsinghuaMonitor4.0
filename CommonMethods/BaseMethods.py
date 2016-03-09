@@ -78,3 +78,14 @@ def add_list_unique(original_list, *args):
             if _item not in new_list:
                 new_list.append(_item)
     return new_list
+
+
+def string_to_bool(bool_str):
+    print bool_str
+    if bool_str in ['True','true','Y']:
+        return True
+    elif bool_str in ['False', 'false', 'F']:
+        return False
+    else:
+        error_message = '"' + bool_str + '" is not a valid boolean string'
+        raise ValueError(message=error_message)
