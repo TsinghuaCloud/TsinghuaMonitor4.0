@@ -125,7 +125,7 @@ function drawOneNode(referNode, id,type,level) {
 			if(level<=1)
 			picName = '物理交换机.png';
 			else picName = '虚拟交换机.png';
-			xoffset = 250;
+			xoffset = 450;
 			
 		} else if (allSubNode[i].type == '2') {
 			if(level<=1)

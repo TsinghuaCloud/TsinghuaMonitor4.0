@@ -136,8 +136,10 @@ EMAIL_USE_TLS = True
 #EMAIL_SUBJECT_PREFIX = u'[TsinghuaMonitor]'
 
 ##topology server
-TOPO_SERVER='166.111.143.250'
+TOPO_SERVER='166.111.143.220'
 TOPO_SERVER_USER='root'
 TOPO_SERVER_PORT =22
-TOPO_SERVER_PASSWD='tsinghuanmcloud'
-TOPO_FILE='/root/res.txt'
+TOPO_SERVER_PASSWD='tsinghuamcloud'
+TOPO_FILE='/root/wcxt/formation.txt'
+
+THIS_ADDR='166.111.143.224'

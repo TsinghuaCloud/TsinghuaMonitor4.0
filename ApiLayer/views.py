@@ -16,7 +16,7 @@ from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this 
 from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 
 
-# import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 
 
