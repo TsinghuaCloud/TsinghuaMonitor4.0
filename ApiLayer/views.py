@@ -21,6 +21,7 @@ import paramiko  # install it from the following link http://www.it165.net/pro/h
 
 
 
+
 def get_token(request, token_type=None):
     '''
     Get token through Keystone v2 api
