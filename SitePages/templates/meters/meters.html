@@ -1,12 +1,8 @@
+{% extends 'common/_base.html' %}
 {% load staticfiles %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
-    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
-    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
-
+{% block title %}指标列表{% endblock %}
+{% block before_css %}
     <!-- DataTables CSS -->
     <link href="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css' %}"
           rel="stylesheet">
@@ -14,6 +10,8 @@
     <!-- DataTables Responsive CSS -->
     <link href="{% static 'sb-admin/bower_components/datatables-responsive/css/dataTables.responsive.css' %}"
           rel="stylesheet">
+{% endblock %}
+{% block extra_css %}
 
     <style type="text/css">
         .btn-space {
@@ -30,25 +28,14 @@
         }
     </style>
 
-    {% include 'basis/_basic_static_css.html' %}
+    <!-- Tagging CSS -->
+    <link href="{% static 'css/tagging.css' %}" rel="stylesheet">
+{% endblock %}
 
-</head>
-<body>
-{% csrf_token %}
-<div id="container">
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-        {% include "basis/_topbar.html" %}
-        <div class="navbar-default sidebar" role="navigation">
-            {% block sidebar %}
-                {% include 'basis/_sidebar.html' %}
-            {% endblock %}
-        </div>
-    </nav>
-
-    <div id="page-wrapper" style="min-height: 219px;">
+{% block page_content %}
         <!-- Meter Page -->
         <div style="display:none">
-            <input type="hidden" id="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {% csrf_token %}
         </div>
         <div class="row">
             <div class="col-lg-12">
@@ -64,7 +51,7 @@
                     <!-- Default panel contents -->
                     <div class="panel-heading">选择指标</div>
                     <div class="panel-body">
-                        <ul class="nav nav-tabs">
+                        <ul class="nav nav-tabs" id="meter-tabs">
                             <li class="active">
                                 <a href="#select-machine-tab" data-toggle="tab">1.选择主机</a>
                             </li>
@@ -131,20 +118,34 @@
                     <div class="panel-heading">指标图例</div>
                     <div class="panel-body">
                         <div class="col-lg-12">
-                            <form class="form-inline" role="form">
+                            <div class="form-horizontal">
                                 <div class="form-group">
-                                    <label>开始时间</label>
-                                    <input type="date" class="form-control" id="start-time" placeholder="Click to Set">
+                                    <label class="col-sm-2 control-label"> 已选指标 </label>
+                                    <div class="col-sm-10">
+                                        <div class="tags" id="tags">
+
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label>结束时间</label>
-                                    <input type="date" class="form-control" id="end-time" placeholder="Click to Set">
-                                </div>
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-default">Submit</button>
-                                </div>
-                            </form>
+                                <!--<div class="form-group">
+                                    <label class="col-sm-2 control-label"> 时间选择 </label>
+                                    <form class="col-sm-10 form-inline" role="form">
+                                        <div class="form-group">
+                                            <label>开始时间</label>
+                                            <input type="date" class="form-control" id="start-time" placeholder="Click to Set">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>结束时间</label>
+                                            <input type="date" class="form-control" id="end-time" placeholder="Click to Set">
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-default">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>-->
+                            </div>
                         </div>
+
                         <div class="col-lg-12">
                             <div id="meter-chart" style="width: 100%; height: 600px"></div>
                         </div>
@@ -152,10 +153,10 @@
                 </div>
             </div>
         </div>
-    </div>
     <!-- END Meter Page -->
-</div>
+{% endblock %}
 
+{% block footer %}
 <div hidden="hidden">
     <div id="datatables-searchbox">
         <label>Search:
@@ -200,26 +201,24 @@
     <input name="selected-machine-id" hidden="hidden" value="">
 </div>
 
+{% endblock %}
 
-<div id="footer">
-</div>
-{% include 'basis/_basic_js.html' %}
+{% block extra_js %}
 <!-- DataTables JS -->
 <script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
-
 <!-- DataTables Bootstrap JS -->
 <script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
 <!-- AmChart JS -->
 <script src="{% static 'amcharts/amcharts.js' %}"></script>
 <script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
-
 <!-- AmChart JS Serial Chart-->
 <script src="{% static 'amcharts/serial.js' %}"></script>
 <script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
+<!-- Tagging.js -->
+<script src="{% static 'js/tagging.js' %}"></script>
 <!-- Meter-list specified js -->
 <script src="{% static 'js/translate_name.js' %}"></script>
 <script src="{% static 'js/meter_name_list.js' %}"></script>
 <script src="{% static 'js/meter_list.js' %}"></script>
-</body>
-</html>
+{% endblock %}
 

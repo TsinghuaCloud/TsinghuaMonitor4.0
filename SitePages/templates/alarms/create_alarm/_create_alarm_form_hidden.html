@@ -2,18 +2,18 @@
     {% csrf_token %}
     <input name="cur_step" value="{{ step }}">
     <input name="next_step" value="{{ step }}">
-    <input name="machine_type" value="{% if alarm_data.machine_type %}{{ alarm_data.machine_type }}{% else %}vm{% endif %}">
+    <input name="machine_type" value="{{ alarm_data.machine_type|default:'vm' }}">
     <input name="resource_id" value="{{ alarm_data.resource_id }}">
     <input name="meter_name" value="{{ alarm_data.meter_name }}">
-    <input name="name" value="{% if alarm_data.name %}{{ alarm_data.name }}{% else %}{{ alarm_data.resource_id }}-{{ alarm_data.meter_name }}{% endif %}">
-    <input name="severity" value="{% if alarm_data.severity %}{{ alarm_data.severity }}{% else %}low{% endif %}">
+    <input name="name" value="{{ alarm_data.name|default:alarm_data.meter_name }}">
+    <input name="severity" value="{{alarm_data.severity|default:'low' }}">
     <input name="description" value="{{ alarm_data.description }}">
-    <input name="enabled" value="{% if alarm_data.enabled %}{{ alarm_data.enabled }}{% else %}True{% endif %}">
-    <input name="repeat_actions" value="{% if alarm_data.repeated_actions %}{{ alarm_data.repeat_actions }}{% else %}False{% endif %}">
-    <input name="period" value="{% if alarm_data.period %}{{ alarm_data.period }}{% else %}60{% endif %}">
-    <input name="threshold" value="{% if alarm_data.threshold %}{{ alarm_data.threshold }}{% else %}60{% endif %}">
-    <input name="statistic" value="{% if alarm_data.statistic %}{{ alarm_data.statistic }}{% else %}avg{% endif %}">
-    <input name="comparison_operator" value="{% if alarm_data.comparison_operator %}{{ alarm_data.comparison_operator }}{% else %}gt{% endif %}">
+    <input name="enabled" value="{{ alarm_data.enabled|default: 'true' }}">
+    <input name="repeat_actions" value="{{ alarm_data.repeat_actions|default:'false' }}">
+    <input name="period" value="{{ alarm_data.period|default: '60' }}">
+    <input name="threshold" value="{{ alarm_data.threshold|default: '60' }}">
+    <input name="statistic" value="{{ alarm_data.statistic| default: 'avg' }}">
+    <input name="comparison_operator" value="{{ alarm_data.comparison_operator|default: 'gt' }}">
     {% for alarm_action in alarm_data.alarm_actions %}
         <input name="alarm_actions[]" value="{{ alarm_action }}">
     {% endfor %}

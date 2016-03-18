@@ -1,3 +1,4 @@
+{% block message %}
 <div id="message-div" style="position: fixed; top: 2%; right: 2% ; width: 20%">
     {% if messages %}
         {% for message in messages %}
@@ -27,3 +28,4 @@
         <p>{{ message }}</p>
     </div>
 </div>
+{% endblock %}

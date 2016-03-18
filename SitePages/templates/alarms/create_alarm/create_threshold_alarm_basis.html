@@ -1,54 +1,31 @@
+{% extends 'common/_base.html' %}
 {% load staticfiles %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
-    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
-    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
-    {% include 'basis/_basic_static_css.html' %}
+{% block title %}创建警报{% endblock %}
+{% block extra_css %}
     <!-- Select2 4.0.0-->
     <link href="{% static 'select2-4.0.0/css/select2.min.css' %}" rel="stylesheet">
     <!-- Customized css for create-alarm page -->
     <link href="{% static 'css/create-alarm.css' %}" rel="stylesheet">
-
-</head>
-<body>
-{% block content %}
-    <div id="container">
-        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-            {% include "basis/_topbar.html" %}
-            <div class="navbar-default sidebar" role="navigation">
-                {% block sidebar %}
-                    {% include 'basis/_sidebar.html' %}
-                {% endblock %}
-            </div>
-        </nav>
-        <div id="page-wrapper">
-            <!-- Create Alarm -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <h3 class="page-header">
-                        创建警报 | Create Alarms
-                    </h3>
-                </div>
-                {% include 'alarms/create_alarm/_create_alarm_form_hidden.html' %}
-                <!-- Alarm configurations -->
-                <div class="col-lg-12" id="alarm-detail-wrapper">
-                    {% include 'alarms/create_alarm/_create_threshold_alarm_step_instruction.html' %}
-                    {% include threshold_step_html %}
-                </div>
-                <!-- END col-lg-12 -->
-            </div>
-            <!-- END col-lg-12 -->
-        </div>
-        <!-- END row -->
-    </div>
-    <!-- END page-wrapper -->
-    <div id="footer">
-    </div>
 {% endblock %}
-{% include 'basis/_basic_js.html' %}
+{% block page_content %}
+   <div class="row">
+        <div class="col-lg-12">
+            <h3 class="page-header">
+                创建警报 | Create Alarms
+            </h3>
+        </div>
+        {% include 'alarms/create_alarm/_create_alarm_form_hidden.html' %}
+        <!-- Alarm configurations -->
+        <div class="col-lg-12" id="alarm-detail-wrapper">
+            {% include 'alarms/create_alarm/_create_threshold_alarm_step_instruction.html' %}
+            {% include threshold_step_html %}
+        </div>
+        <!-- END col-lg-12 -->
+   </div>
+    <!-- END col-lg-12 -->
+{% endblock %}
+{% block extra_js %}
 <!-- DataTables JS -->
 <script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
 <!-- DataTables Bootstrap JS -->
@@ -64,7 +41,4 @@
 <script src="{% static 'js/translate_name.js' %}"></script>
 <!-- Select2 4.0.0 -->
 <script src="{% static 'select2-4.0.0/js/select2.min.js' %}"></script>
-
-</body>
-</html>
-
+{% endblock %}

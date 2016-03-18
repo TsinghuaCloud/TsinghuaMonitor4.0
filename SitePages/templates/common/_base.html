@@ -1,0 +1,42 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
+    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
+    {% block before_css %}
+    {% endblock %}
+    {% include 'basis/_basic_static_css.html' %}
+    {% block extra_css %}
+    {% endblock %}
+</head>
+<body>
+<div id="container">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        {% include "basis/_topbar.html" %}
+        <div class="navbar-default sidebar" role="navigation">
+            {% block sidebar %}
+                {% include 'basis/_sidebar.html' %}
+            {% endblock %}
+        </div>
+    </nav>
+
+    <div id="page-wrapper" style="min-height: 219px;">
+        {% block page_content %}
+        {% endblock %}
+    </div>
+    <!-- END page-wrapper -->
+</div>
+<!-- END container -->
+<div id="footer">
+    {% block footer %}
+    {% endblock %}
+</div>
+{% include 'basis/_basic_js.html' %}
+{% block extra_js %}
+{% endblock %}
+</body>
+</html>
+

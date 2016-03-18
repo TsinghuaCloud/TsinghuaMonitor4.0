@@ -1,126 +1,102 @@
+{% extends 'common/_base.html' %}
 {% load staticfiles %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta content='IE=edge' http-equiv='X-UA-Compatible'/>
-    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'/>
-    <title>{% block title %}{% endblock %} - TsinghuaCloud</title>
-    {% include 'basis/_basic_static_css.html' %}
+{% block title %}警报详情|{{ alarm_data.name }{% endblock %}
+{% block extra_css %}
     <style type="text/css">
         .form-group {
             margin-bottom: 0;
         }
     </style>
-</head>
-<body>
-<div id="container">
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-        {% include "basis/_topbar.html" %}
-        <div class="navbar-default sidebar" role="navigation">
-            {% block sidebar %}
-                {% include 'basis/_sidebar.html' %}
-            {% endblock %}
-        </div>
-    </nav>
-
-    <div id="page-wrapper" style="min-height: 219px;">
-        <!-- Alarm Summary -->
-        <div class="row">
-            <div class="col-lg-12">
-                <h2 class="page-header">
-                    警报详情 | Alarm Detail
-                    <div class="pull-right">
-                        <a href="../../edit-alarm/{{ alarm_data.alarm_id }}/" class="btn btn-primary">修改警报</a>
-                        <a href="../../delete-alarm/{{ alarm_data.alarm_id }}/" class="btn btn-default">删除警报</a>
-                    </div>
-                </h2>
+{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">
+            警报详情 | Alarm Detail
+            <div class="pull-right">
+                <a href="../../edit-alarm/{{ alarm_data.alarm_id }}/" class="btn btn-primary">修改警报</a>
+                <a href="../../delete-alarm/{{ alarm_data.alarm_id }}/" class="btn btn-default">删除警报</a>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <!-- Default panel contents -->
-                    <div class="panel-heading">警报详细信息: {{ alarm_data.name }}</div>
-                    <div class="panel-body">
-                        <div class="form-horizontal">
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">名称：</label>
-                                <p class="col-md-9 form-control-static">{{ alarm_data.name }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">描述：</label>
-                                <p class="col-md-9 form-control-static"
-                                        name="description">{{ alarm_data.description }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">启用：</label>
-                                <p class="col-md-9 form-control-static detail-translate-element"
-                                        name="enabled">{{ alarm_data.enabled }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">资源名称：</label>
-                                <p class="col-md-9 form-control-static detail-translate-element"
-                                        name="resource_id">{{ alarm_data.resource_id }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">指标：</label>
-                                <p class="col-md-9 form-control-static detail-translate-element"
-                                        name="meter_name">{{ alarm_data.meter_name }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">状态：</label>
-                                <p class="col-md-9 form-control-static detail-translate-element"
-                                        name="state">{{ alarm_data.state }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">周期：</label>
-                                <p class="col-md-9 form-control-static detail-translate-element"
-                                        name="period">{{ alarm_data.period }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">统计方式：</label>
-                                <p class="col-md-9 form-control-static detail-translate-element"
-                                        name="statistic">{{ alarm_data.statistic }}</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">操作：</label>
-                                <p class="col-md-9 form-control-static">{{ alarm_data.meter_name }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- END Panel Body -->
-                </div>
-                <!-- END Panel  -->
-            </div>
-            <!-- END col-lg-12  -->
-        </div>
-        <!-- END row -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <!-- Default panel contents -->
-                    <div class="panel-heading">警报图例</div>
-                    <div class="panel-body">
-
-                    </div>
-                    <!-- END Panel Body -->
-                </div>
-                <!-- END Panel  -->
-            </div>
-            <!-- END col-lg-12  -->
-        </div>
-        <!-- END row -->
+        </h2>
     </div>
-    <!-- END page-wrapper -->
 </div>
-<!-- END container -->
-<div id="footer">
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">警报详细信息: {{ alarm_data.name }}</div>
+            <div class="panel-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">名称：</label>
+                        <p class="col-md-9 form-control-static">{{ alarm_data.name }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">描述：</label>
+                        <p class="col-md-9 form-control-static"
+                                name="description">{{ alarm_data.description }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">启用：</label>
+                        <p class="col-md-9 form-control-static detail-translate-element"
+                                name="enabled">{{ alarm_data.enabled }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">资源名称：</label>
+                        <p class="col-md-9 form-control-static detail-translate-element"
+                                name="resource_id">{{ alarm_data.resource_id }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">指标：</label>
+                        <p class="col-md-9 form-control-static detail-translate-element"
+                                name="meter_name">{{ alarm_data.meter_name }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">状态：</label>
+                        <p class="col-md-9 form-control-static detail-translate-element"
+                                name="state">{{ alarm_data.state }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">周期：</label>
+                        <p class="col-md-9 form-control-static detail-translate-element"
+                                name="period">{{ alarm_data.period }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">统计方式：</label>
+                        <p class="col-md-9 form-control-static detail-translate-element"
+                                name="statistic">{{ alarm_data.statistic }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">操作：</label>
+                        <p class="col-md-9 form-control-static">{{ alarm_data.meter_name }}</p>
+                    </div>
+                </div>
+            </div>
+            <!-- END Panel Body -->
+        </div>
+        <!-- END Panel  -->
+    </div>
+    <!-- END col-lg-12  -->
 </div>
-{% include 'basis/_basic_js.html' %}
-<!-- Alarm Detail specified js -->
+<!-- END row -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">警报图例</div>
+            <div class="panel-body">
+
+            </div>
+            <!-- END Panel Body -->
+        </div>
+        <!-- END Panel  -->
+    </div>
+    <!-- END col-lg-12  -->
+</div>
+<!-- END row -->
+{% endblock %}
+{% block extra_js %}
 <script src="{% static 'js/alarms/alarm_detail.js' %}"></script>
-<script src="{% static 'js/translate_name.js' %}"></script>
-</body>
-</html>
+{% endblock %}
 
