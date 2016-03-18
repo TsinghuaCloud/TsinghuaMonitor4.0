@@ -47,7 +47,7 @@ function Tagger() {
         tags.delegate("i", "click", function () {
             var tag = $(this).data('tag');
             self.removeTag(tag);
-            self.removeTagCallBack(tag);
+            self.removeTagRelatedElement(tag);
         })
     };
     this.init();

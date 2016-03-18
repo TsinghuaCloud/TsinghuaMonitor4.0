@@ -14,13 +14,16 @@ $(function(){
                                     + '-list');
         machine_table_handle.ajax.reload();
     });
+    tagger_handle.removeTagRelatedElement = function(tag){
+
+    }
 });
 
 $(document).ready(function () {
     $.ajaxSetup({
     beforeSend: function(xhr, settings) {
         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", document.getElementById("csrfmiddlewaretoken").value);
+            xhr.setRequestHeader("X-CSRFToken", $('[name="csrfmiddlewaretoken"]').val());
         }
     }
     });
@@ -110,7 +113,7 @@ $(document).ready(function () {
                 "width": "5%",
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     //$(nTd).html("<input type='checkbox' onclick='" + oData.meter_id + "'>");
-                    $(nTd).html("<input type='checkbox' onclick='updateMeterList(" + iRow + ")'>");
+                    $(nTd).html("<input type='checkbox' onclick='updateMeterListFromTable(" + iRow + ")'>");
                 }
             },
             {
@@ -151,6 +154,14 @@ $(document).ready(function () {
     $("div.meter-searchbox").html($('#datatables-searchbox').html());
     $("div.machine-typebox").html($('#machine-type-box').html());
     $("div.meter-display").html($('#selected-meter-display').html());
+
+    $('#meter-table').on('xhr.dt', function ( events, settings, json, xhr ) {
+        if(json.status === 'error') {
+            alert(json.error_msg);
+            json.data = [];
+        }
+        // Note no return - manipulate the data directly in the JSON object.
+    } )
 });
 
 function getMeterList(resource_id, resource_name){
@@ -158,7 +169,7 @@ function getMeterList(resource_id, resource_name){
     alert('已选主机： '+ resource_name);
     $('.meter-display [name="selected-machine-name"]').html(resource_name);
     meter_table_handle.ajax.reload();
-    $('#select-meter-tab').tab('show');
+    $('#meter-tabs a:eq(1)').tab('show');
 }
 
 var selected_meter_list = {};
@@ -179,7 +190,7 @@ function clearMeterSearchCriteria(){
     meter_table_handle.ajax.reload();
 }
 
-function checkMeterList(data){
+function checkMeterList(meter_name, resource_id){
     /*
     Check if the requested meter is in selected_meter_list.
     Return true if in, [false] if not.
@@ -187,41 +198,51 @@ function checkMeterList(data){
     //var current_row_handle = meter_table_handle.data()[row];
     //var current_meter = {'meter_name': current_row_handle['meter_name'],
     //                     'resource_id': current_row_handle['resource_id']};
-    var meter_name = data['name'];
     if (meter_name in selected_meter_list){
         for(var i = 0; i < selected_meter_list[meter_name].length; i++){
-            if(selected_meter_list[meter_name][i] == data['resource_id'])
+            if(selected_meter_list[meter_name][i] == resource_id)
                 return true;
         }
     }
     return false;
 }
 
-function updateMeterList(row){
+function updateMeterListFromTable(row){
+    var row_data = meter_table_handle.data()[row];
+    updateMeterList(row_data['name'], row_data['resource_id']);
+}
+
+function updateMeterList(meter_name, resource_id){
     /*
-    If requested meter in select row is in selected_meter_list,
+    If requested <meter in select row is in selected_meter_list,
     add this meter into selected_meter_list,
     else, remove this meter from selected_meter_list.
     Notice: This function considers there are one more same <resource_id>s
             in the meter_name array, and removes them all.
-     */
-    var row_data = meter_table_handle.data()[row];
-    if(checkMeterList(row_data)){
-        var index = (selected_meter_list[row_data['name']]).indexOf(row_data['resource_id']);
+    */
+    var meter_string = translate_name(meter_name, 'meter_name', 'CN') + '@' +
+                        translate_name(resource_id, 'resource_id', 'CN');
+
+    if(checkMeterList(meter_name, resource_id)){
+        // The <meter_id, resource_id> combination is in selected list
+        tagger_handle.removeTag(meter_string);
+        var index = (selected_meter_list[meter_name]).indexOf(resource_id);
         while (index > -1) {
-            (selected_meter_list[row_data['name']]).splice(index, 1);
-            index = (selected_meter_list[row_data['name']]).indexOf(row_data['resource_id'])
+            (selected_meter_list[meter_name]).splice(index, 1);
+            index = (selected_meter_list[meter_name]).indexOf()
         }
-        if ((selected_meter_list[row_data['name']]).length === 0){
-            delete selected_meter_list[row_data['name']];
+        if ((selected_meter_list[meter_name]).length === 0){
+            delete selected_meter_list[meter_name];
         }
     }
     else{
-        if (row_data['name'] in selected_meter_list){
-            (selected_meter_list[row_data['name']]).push(row_data['resource_id']);
+        // The <meter_id, resource_id> combination is in selected list
+        tagger_handle.addTag(meter_string);
+        if (meter_name in selected_meter_list){
+            (selected_meter_list[meter_name]).push(resource_id);
         }
         else{
-            selected_meter_list[row_data['name']] = [row_data['resource_id']]
+            selected_meter_list[meter_name] = [resource_id]
         }
     }
     updateChart();

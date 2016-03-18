@@ -120,7 +120,7 @@ def post_alarm(request):
                      Return state: 'success' or 'error'
     '''
     token = get_token(request, token_type='token')['token']
-    request.session['token'] = token
+    request.session['keystone_access_token'] = token
     if request.method == 'POST':
         kwargs = sanitize_arguments(_request_GET_to_dict(request.POST, False),
                                     capabilities.ALARM_CAPABILITIES)
@@ -155,7 +155,7 @@ def get_meters(request):
     # TODO(pwwp):
     # Apply token management method instead of requesting one each time
     token = get_token(request, token_type='token')['token']
-    request.session['token'] = token
+    request.session['keystone_access_token'] = token
     arrays = {}
     filters = {}
     if request.method == 'GET':
@@ -218,7 +218,7 @@ def _update_total_meters_count(request, filters):
 
     # TODO: Error handling for hashing meter_list
     # Resend the request purged of limit and skip to get total record number
-    meter_list_request = ceilometer_api.get_meters(request.session['token'], **filters)
+    meter_list_request = ceilometer_api.get_meters(request.session['keystone_access_token'], **filters)
     if meter_list_request['status'] == 'success':
         request.session['total_meters_count'] = len(meter_list_request['data'])
     else:
@@ -237,7 +237,7 @@ def update_alarm_enabled(request, alarm_id):
     '''
 
     # First fetch alarm data
-    token = request.session.get('token', '')
+    token = request.session.get('keystone_access_token', '')
     alarm_data_handler = ceilometer_api.get_alarm_detail(token, alarm_id)
     if alarm_data_handler['status'] == 'error':
         return _report_error('Alarm Error', alarm_data_handler['error_msg'])
@@ -263,7 +263,7 @@ def delete_alarm(request, alarm_id):
     :param alarm_id: id of an alarm
     :return: HTTPResponse (application/json)
     '''
-    result = ceilometer_api.delete_alarm(request.session.get('token', ''), alarm_id)
+    result = ceilometer_api.delete_alarm(request.session.get('keystone_access_token', ''), alarm_id)
     if result['status'] == 'success':
         result['data'] = 'Alarm ' + alarm_id + ' has been deleted.'
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -312,7 +312,7 @@ def get_alarms(request):
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
-    result = ceilometer_api.get_alarms(request.session['token'], **filters)
+    result = ceilometer_api.get_alarms(request.session['keystone_access_token'], **filters)
     if result['status'] == 'success':
         result['recordsTotal'] = len(result['data'])
         result['recordsFiltered'] = len(result['data'])
@@ -327,7 +327,7 @@ def get_alarm_detail(request):
         return _report_error('KeyError', 'alarm_id not provided')
     alarm_id = arrays['alarm_id']
     #filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
-    result = ceilometer_api.get_alarm_detail(request.session['token'], alarm_id, )
+    result = ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id, )
     if result['status'] == 'success':
         return HttpResponse(json.dumps(result), content_type='application/json')
     else:
@@ -342,7 +342,7 @@ def get_resources(request):
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
-    result = ceilometer_api.get_resources(request.session['token'], **filters)
+    result = ceilometer_api.get_resources(request.session['keystone_access_token'], **filters)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
@@ -362,7 +362,7 @@ def get_vm_list(request):
                   ],
               }
     '''
-    servers = nova_api.get_server_list(request.session['token'])
+    servers = nova_api.get_server_list(request.session['keystone_access_token'])
     if servers['status'] != 'success':
         return _report_error('', 'error')
     result = {"status": "success",
@@ -390,7 +390,7 @@ def get_pm_list(request):
                   ],
               }
     '''
-    hypervisors = nova_api.get_hypervisor_list(request.session['token'])
+    hypervisors = nova_api.get_hypervisor_list(request.session['keystone_access_token'])
     if hypervisors['status'] != 'success':
         return _report_error('', 'error')
     result = {"status": "success",

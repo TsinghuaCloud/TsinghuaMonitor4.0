@@ -26,6 +26,7 @@ def login(request, **kwargs):
     Referenced from openstack_auth.views.login
     '''
 
+    request.user
     if not request.is_ajax():
         # If the user is already authenticated, redirect them to the
         # dashboard straight away, unless the 'next' parameter is set as it
@@ -97,7 +98,7 @@ def alarm_list(request):
 
 @decorators.enforce_login_decorator
 def test_page(request):
-    request.session['token'] = openstack_api.get_token(request, 'token')['token']
+    request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
     return render(request, 'test-page.html')
 
 
@@ -107,7 +108,7 @@ def resource_page(request):
 
     # print tokenv3
     token = openstack_api.get_token(request, token_type='token')['token']
-    request.session['token'] = token
+    request.session['keystone_access_token'] = token
     pm_info_detail = openstack_api.get_PmInfo(token)
     for i in range(len(pm_info_detail)):
         pm_info_detail[i]['memory_mb_used'] = round(pm_info_detail[i]['memory_mb_used'] / 1000.0, 2)
@@ -142,7 +143,7 @@ def resource_page(request):
 def create_alarm(request):
     '''  Create new alarm through ceilometer alarm-create api  '''
     if request.method == 'GET':
-        request.session['token'] = openstack_api.get_token(request, 'token')['token']
+        request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
                           'page_type': 'create_alarm',
@@ -212,7 +213,7 @@ def _post_new_alarm(request):
         q[0] = {}
     finally:
         kwargs['q'] = q
-    return openstack_api.ceilometer_api.post_threshold_alarm(request.session['token'], **kwargs)
+    return openstack_api.ceilometer_api.post_threshold_alarm(request.session['keystone_access_token'], **kwargs)
 
 
 @decorators.enforce_login_decorator
@@ -230,7 +231,7 @@ def edit_alarm(request, alarm_id):
     '''
     alarm_data, original_data = None, {}
     try:
-        alarm_data = _read_alarm_data(openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id))
+        alarm_data = _read_alarm_data(openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id))
         original_data['alarm_id'] = alarm_data['alarm_id']
         original_data['meter_name'] = alarm_data['meter_name']
         original_data['query'] = alarm_data.get('query', [])
@@ -239,7 +240,7 @@ def edit_alarm(request, alarm_id):
         raise Http404(str(e.message) + ' is missing')
 
     if request.method == 'GET':
-        request.session['token'] = openstack_api.get_token(request, 'token')['token']
+        request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
                           'page_type': 'edit_alarm',
@@ -257,7 +258,7 @@ def edit_alarm(request, alarm_id):
         edited_data.update(original_data)                           # Overwrite keys that are not allowed to modify
 
         if step == 'post':
-            return_data = _post_edited_alarm(request.session['token'], edited_data, alarm_id)
+            return_data = _post_edited_alarm(request.session['keystone_access_token'], edited_data, alarm_id)
             new_message = [], {}
             if return_data['status'] == 'success':
                 messages.success(request, return_data['data']['name'] + " has been modified")
@@ -326,10 +327,10 @@ def _post_edited_alarm(token, alarm_data, alarm_id=None):
 @decorators.enforce_login_decorator
 def alarm_detail(request, alarm_id):
     ''' Display detail of an alarm '''
-    request.session['token'] = openstack_api.get_token(request, 'token')['token']
+    request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
     alarm_data = {}
     try:
-        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['token'], alarm_id)['data']
+        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id)['data']
     except SystemError:
         pass
     if alarm_data.get('type', '') == 'threshold':
