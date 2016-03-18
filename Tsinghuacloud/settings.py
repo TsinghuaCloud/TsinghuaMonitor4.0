@@ -16,7 +16,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0xu25b&kv!!u-=+b#r2hwnm3$=ur=us(j-%ht8&%16mt&6hmi8'
+SECRET_KEY = 'secret key'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -36,7 +36,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'SitePages'
+    'SitePages',
+    'openstack_auth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -110,34 +111,46 @@ STATIC_FINDERS = {
 BOWER_COMPONENTS_ROOT = BASE_DIR + '/components/'
 
 # Project related
-OPENSTACK_TENANT_NAME = 'admin'
-OPENSTACK_USERNAME_NAME = 'admin'
-OPENSTACK_PASSWORD = 'cloud'
+OPENSTACK_TENANT_NAME =
+OPENSTACK_USERNAME_NAME =
+OPENSTACK_PASSWORD =
 
-OPENSTACK_CONTROLLER_IP = "166.111.143.220"
+OPENSTACK_CONTROLLER_IP =
 CEILOMETER_PORT = 8777
 NOVA_PORT = 8774
-ADMIN_TENANT_ID = "56fc364c204043b98a438122568fbf14"
+ADMIN_TENANT_ID =
 KEYSTONE_PORT = 35357
 
 # ------- Email related -----------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # Host for sending e-mail.
-EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST =
 
 # Port for sending e-mail.
 EMAIL_PORT = 25
 
 # Optional SMTP authentication information for EMAIL_HOST.
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER =
+EMAIL_HOST_PASSWORD =
 EMAIL_USE_TLS = True
 #EMAIL_SUBJECT_PREFIX = u'[TsinghuaMonitor]'
 
 ##topology server
-TOPO_SERVER='166.111.143.250'
-TOPO_SERVER_USER='root'
-TOPO_SERVER_PORT =22
-TOPO_SERVER_PASSWD='tsinghuanmcloud'
+
+TOPO_SERVER=
+TOPO_SERVER_USER=
+TOPO_SERVER_PORT = 22
+TOPO_SERVER_PASSWD=
 TOPO_FILE='/root/res.txt'
+
+# Site Address or IP for this application
+THIS_ADDR =
+
+# Openstack_auth Authentication related
+AUTHENTICATION_BACKENDS = ('openstack_auth.backend.KeystoneBackend',)
+OPENSTACK_KEYSTONE_URL = 'http://%s:5000/v2.0' % OPENSTACK_CONTROLLER_IP
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = False
+LOGIN_REDIRECT_URL = '/overview/health/'
+LOGOUT_REDIRECT_URL = '/auth/login'

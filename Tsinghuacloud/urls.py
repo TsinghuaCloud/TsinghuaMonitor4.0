@@ -18,10 +18,12 @@ from django.contrib import admin
 from SitePages import urls as SitePagesUrls
 from ApiLayer import urls as ceilometer_api_interface
 from AlarmNotification import urls as NotificationUrls
+from openstack_auth import urls as openstack_auth_urls
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(ceilometer_api_interface)),
     url(r'^notification/', include(NotificationUrls)),
+    url(r'^auth/', include(openstack_auth_urls)),
     url(r'', include(SitePagesUrls)),
 ]
