@@ -17,6 +17,8 @@ from django.conf.urls import include, url
 from SitePages import views as SiteViews
 
 urlpatterns = [
+    url(r'login/$', SiteViews.login, name="Login"),
+    url(r'logout/$', SiteViews.logout, name="Login"),
     url(r'^overview/health/$', SiteViews.overview, name="Overview | Health"),
     url(r'^overview/resources/$', SiteViews.resource_page, name="Overview | Resource Overview"),
     url(r'^overview/topology/$', SiteViews.netTopo_page, name="Overview | Network Topology"),

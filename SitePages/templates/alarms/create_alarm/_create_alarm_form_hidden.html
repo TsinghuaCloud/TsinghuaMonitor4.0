@@ -5,15 +5,15 @@
     <input name="machine_type" value="{{ alarm_data.machine_type|default:'vm' }}">
     <input name="resource_id" value="{{ alarm_data.resource_id }}">
     <input name="meter_name" value="{{ alarm_data.meter_name }}">
-    <input name="name" value="{{ alarm_data.name|default:alarm_data.meter_name }}">
+    <input name="name" value="{{ alarm_data.name|default:'' }}">
     <input name="severity" value="{{alarm_data.severity|default:'low' }}">
     <input name="description" value="{{ alarm_data.description }}">
-    <input name="enabled" value="{{ alarm_data.enabled|default: 'true' }}">
+    <input name="enabled" value="{{ alarm_data.enabled|default:'true' }}">
     <input name="repeat_actions" value="{{ alarm_data.repeat_actions|default:'false' }}">
-    <input name="period" value="{{ alarm_data.period|default: '60' }}">
-    <input name="threshold" value="{{ alarm_data.threshold|default: '60' }}">
-    <input name="statistic" value="{{ alarm_data.statistic| default: 'avg' }}">
-    <input name="comparison_operator" value="{{ alarm_data.comparison_operator|default: 'gt' }}">
+    <input name="period" value="{{ alarm_data.period|default:'60' }}">
+    <input name="threshold" value="{{ alarm_data.threshold|default:'60' }}">
+    <input name="statistic" value="{{ alarm_data.statistic| default:'avg' }}">
+    <input name="comparison_operator" value="{{ alarm_data.comparison_operator|default:'gt' }}">
     {% for alarm_action in alarm_data.alarm_actions %}
         <input name="alarm_actions[]" value="{{ alarm_action }}">
     {% endfor %}

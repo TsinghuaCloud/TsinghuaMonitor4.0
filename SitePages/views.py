@@ -1,35 +1,107 @@
-import json
 import urllib
 import urlparse
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.contrib.auth import views as django_auth_views
+from django.contrib.auth import logout as django_auth_logout
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
+from django.utils import functional
 from django.views.decorators.csrf import csrf_protect
+from openstack_auth import utils as openstack_auth_utils
+from openstack_auth import user as openstack_auth_user
+from openstack_auth.forms import Login as openstack_auth_form
 
-import CommonMethods.BaseMethods as BaseMethods
 from ApiLayer import views as openstack_api
 from ApiLayer.base import capabilities as APICapabilities
+import CommonMethods.BaseMethods as BaseMethods
+from CommonMethods import decorators
+
+
+@csrf_protect
+def login(request, **kwargs):
+    '''
+    Logs a user in using the :class:`~openstack_auth.forms.Login` form.
+    Referenced from openstack_auth.views.login
+    '''
+
+    if not request.is_ajax():
+        # If the user is already authenticated, redirect them to the
+        # dashboard straight away, unless the 'next' parameter is set as it
+        # usually indicates requesting access to a page that requires different
+        # permissions.
+        if request.user.is_authenticated():
+            return HttpResponseRedirect('/')
+
+    # Get our initial region for the form.
+    initial = {}
+    current_region = request.session.get('region_endpoint', None)
+    requested_region = request.GET.get('region', None)
+    regions = dict(getattr(settings, "AVAILABLE_REGIONS", []))
+    if requested_region in regions and requested_region != current_region:
+        initial.update({'region': requested_region})
+
+    if request.method == "POST":
+            form = functional.curry(openstack_auth_form)
+    else:
+        form = functional.curry(openstack_auth_form, initial=initial)
+
+    template_name = 'auth/login.html'
+
+    res = django_auth_views.login(request,
+                                  template_name=template_name,
+                                  authentication_form=form,
+                                  **kwargs)
+    # Save the region in the cookie, this is used as the default
+    # selected region next time the Login form loads.
+    if request.method == "POST":
+        openstack_auth_utils.set_response_cookie(res, 'login_region',
+                                  request.POST.get('region', ''))
+        openstack_auth_utils.set_response_cookie(res, 'login_domain',
+                                  request.POST.get('domain', ''))
+
+    # Set the session data here because django's session key rotation
+    # will erase it if we set it earlier.
+    if request.user.is_authenticated():
+        openstack_auth_user.set_session_from_user(request, request.user)
+        regions = dict(openstack_auth_form.get_region_choices())
+        region = request.user.endpoint
+        region_name = regions.get(region)
+        request.session['region_endpoint'] = region
+        request.session['region_name'] = region_name
+    return res
+
+def logout(request):
+    request.session.delete('region_endpoint')
+    request.session.delete('region_name')
+    django_auth_logout(request)
+    return HttpResponseRedirect(settings.LOGOUT_REDIRECT_URL)
+
 
 # Create your views here.
+@decorators.enforce_login_decorator
 def overview(request):
     return render(request, 'overview.html')
 
 
+@decorators.enforce_login_decorator
 def meter_list(request):
     return render(request, 'meters/meters.html', {'title': 'Meter list'})
 
 
+@decorators.enforce_login_decorator
 def alarm_list(request):
     return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
 
 
+@decorators.enforce_login_decorator
 def test_page(request):
     request.session['token'] = openstack_api.get_token(request, 'token')['token']
     return render(request, 'test-page.html')
 
 
+@decorators.enforce_login_decorator
 def resource_page(request):
     # token = api_interface.get_V3token()['token']
 
@@ -65,6 +137,7 @@ def resource_page(request):
                                                        })
 
 
+@decorators.enforce_login_decorator
 @csrf_protect
 def create_alarm(request):
     '''  Create new alarm through ceilometer alarm-create api  '''
@@ -142,6 +215,7 @@ def _post_new_alarm(request):
     return openstack_api.ceilometer_api.post_threshold_alarm(request.session['token'], **kwargs)
 
 
+@decorators.enforce_login_decorator
 @csrf_protect
 def edit_alarm(request, alarm_id):
     '''
@@ -248,6 +322,8 @@ def _post_edited_alarm(token, alarm_data, alarm_id=None):
                                                                alarm_id=alarm_id,
                                                                alarm_body=alarm_obj)
 
+
+@decorators.enforce_login_decorator
 def alarm_detail(request, alarm_id):
     ''' Display detail of an alarm '''
     request.session['token'] = openstack_api.get_token(request, 'token')['token']
@@ -262,6 +338,7 @@ def alarm_detail(request, alarm_id):
     return render(request, 'alarms/alarm_detail.html', {'title': 'Alarm list', 'alarm_data': alarm_data})
 
 
+@decorators.enforce_login_decorator
 def netTopo_page(request):
     return render(request, 'netTopo.html', {'title': 'Create-alarm'})
 
