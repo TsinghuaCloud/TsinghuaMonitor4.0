@@ -24,6 +24,6 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(ceilometer_api_interface)),
     url(r'^notification/', include(NotificationUrls)),
-    # url(r'^auth/', include(openstack_auth_urls)),
+    url(r'^auth/', include(openstack_auth_urls)),
     url(r'', include(SitePagesUrls)),
 ]

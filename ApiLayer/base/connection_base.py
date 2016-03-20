@@ -5,6 +5,7 @@ import socket
 from django.conf import settings
 from CommonMethods import BaseMethods
 
+
 def openstack_api_connection(base_url, method, header, port, version,
                              tenant_id=None, url_parameters=None, body=None):
     '''
@@ -26,8 +27,9 @@ def openstack_api_connection(base_url, method, header, port, version,
     # TODO(pwwp):
     # use <finally> to handle success or error data
     try:
-        conn.request(method,
-                     '/%s/'%(version) + ('' if tenant_id is None else '%s/'% tenant_id) + base_url + extra_url,
+        conn.request(method, '/%s/' % version +
+                             (('%s/' % tenant_id) if tenant_id is not None else '') +
+                             base_url + extra_url,
                      headers=req_header, body=req_body)
         response = conn.getresponse()
         if response.status > 299:

@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_protect
 from openstack_auth import utils as openstack_auth_utils
 from openstack_auth import user as openstack_auth_user
 from openstack_auth.forms import Login as openstack_auth_form
+from keystoneclient import exceptions as keystone_client_exceptions
 
 from ApiLayer import views as openstack_api
 from ApiLayer.base import capabilities as APICapabilities
@@ -26,7 +27,6 @@ def login(request, **kwargs):
     Referenced from openstack_auth.views.login
     '''
 
-    request.user
     if not request.is_ajax():
         # If the user is already authenticated, redirect them to the
         # dashboard straight away, unless the 'next' parameter is set as it
@@ -36,42 +36,45 @@ def login(request, **kwargs):
             return HttpResponseRedirect('/')
 
     # Get our initial region for the form.
-    initial = {}
-    current_region = request.session.get('region_endpoint', None)
-    requested_region = request.GET.get('region', None)
-    regions = dict(getattr(settings, "AVAILABLE_REGIONS", []))
-    if requested_region in regions and requested_region != current_region:
-        initial.update({'region': requested_region})
-
-    if request.method == "POST":
-            form = functional.curry(openstack_auth_form)
-    else:
-        form = functional.curry(openstack_auth_form, initial=initial)
-
+    form = functional.curry(openstack_auth_form)
     template_name = 'auth/login.html'
-
     res = django_auth_views.login(request,
                                   template_name=template_name,
                                   authentication_form=form,
                                   **kwargs)
+
     # Save the region in the cookie, this is used as the default
     # selected region next time the Login form loads.
     if request.method == "POST":
         openstack_auth_utils.set_response_cookie(res, 'login_region',
-                                  request.POST.get('region', ''))
+                                                 request.POST.get('region', ''))
         openstack_auth_utils.set_response_cookie(res, 'login_domain',
-                                  request.POST.get('domain', ''))
+                                                 request.POST.get('domain', ''))
 
     # Set the session data here because django's session key rotation
     # will erase it if we set it earlier.
     if request.user.is_authenticated():
         openstack_auth_user.set_session_from_user(request, request.user)
-        regions = dict(openstack_auth_form.get_region_choices())
-        region = request.user.endpoint
-        region_name = regions.get(region)
-        request.session['region_endpoint'] = region
-        request.session['region_name'] = region_name
+        session = openstack_auth_utils.get_session()
+        user_endpoint = settings.OPENSTACK_KEYSTONE_URL
+        auth = openstack_auth_utils.get_token_auth_plugin(auth_url=user_endpoint,
+                                       token=request.user.unscoped_token,
+                                       project_id=settings.ADMIN_TENANT_ID)
+
+        try:
+            auth_ref = auth.get_access(session)
+        except keystone_client_exceptions.ClientException as e:
+            messages.error(request, e.message)
+            auth_ref = None
+
+        if auth_ref:
+            new_user = openstack_auth_user.create_user_from_token(request,
+                                                                  openstack_auth_user.Token(auth_ref),
+                                                                  endpoint=request.user.endpoint)
+            openstack_auth_user.set_session_from_user(request, new_user)
+
     return res
+
 
 def logout(request):
     request.session.delete('region_endpoint')
@@ -81,28 +84,28 @@ def logout(request):
 
 
 # Create your views here.
-@decorators.enforce_login_decorator
+@decorators.login_required
 def overview(request):
     return render(request, 'overview.html')
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 def meter_list(request):
     return render(request, 'meters/meters.html', {'title': 'Meter list'})
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 def alarm_list(request):
     return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 def test_page(request):
     request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
     return render(request, 'test-page.html')
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 def resource_page(request):
     # token = api_interface.get_V3token()['token']
 
@@ -138,7 +141,7 @@ def resource_page(request):
                                                        })
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 @csrf_protect
 def create_alarm(request):
     '''  Create new alarm through ceilometer alarm-create api  '''
@@ -216,7 +219,7 @@ def _post_new_alarm(request):
     return openstack_api.ceilometer_api.post_threshold_alarm(request.session['keystone_access_token'], **kwargs)
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 @csrf_protect
 def edit_alarm(request, alarm_id):
     '''
@@ -231,7 +234,8 @@ def edit_alarm(request, alarm_id):
     '''
     alarm_data, original_data = None, {}
     try:
-        alarm_data = _read_alarm_data(openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id))
+        alarm_data = _read_alarm_data(
+            openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id))
         original_data['alarm_id'] = alarm_data['alarm_id']
         original_data['meter_name'] = alarm_data['meter_name']
         original_data['query'] = alarm_data.get('query', [])
@@ -255,7 +259,7 @@ def edit_alarm(request, alarm_id):
         if step is None or step not in ['2', '3', '4', 'post']:
             raise Http404('Invalid value of "step"')
         edited_data = BaseMethods.qdict_to_dict(request.POST)
-        edited_data.update(original_data)                           # Overwrite keys that are not allowed to modify
+        edited_data.update(original_data)  # Overwrite keys that are not allowed to modify
 
         if step == 'post':
             return_data = _post_edited_alarm(request.session['keystone_access_token'], edited_data, alarm_id)
@@ -324,13 +328,14 @@ def _post_edited_alarm(token, alarm_data, alarm_id=None):
                                                                alarm_body=alarm_obj)
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 def alarm_detail(request, alarm_id):
     ''' Display detail of an alarm '''
     request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
     alarm_data = {}
     try:
-        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id)['data']
+        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id)[
+            'data']
     except SystemError:
         pass
     if alarm_data.get('type', '') == 'threshold':
@@ -339,7 +344,7 @@ def alarm_detail(request, alarm_id):
     return render(request, 'alarms/alarm_detail.html', {'title': 'Alarm list', 'alarm_data': alarm_data})
 
 
-@decorators.enforce_login_decorator
+@decorators.login_required
 def netTopo_page(request):
     return render(request, 'netTopo.html', {'title': 'Create-alarm'})
 
@@ -361,7 +366,7 @@ def _read_alarm_data(alarm_data):
 
     # Fetch operation string from action_list
     # Example:
-    #   data['alarm_actions'] = ['http://addr.net/path/?op=type%3Da&detail=%3Da',
+    # data['alarm_actions'] = ['http://addr.net/path/?op=type%3Da&detail=%3Da',
     #                            'http://addr.net/path/?op=type%3Db&detail=%3Db']
     # Result:
     #   data['alarm_actions'] = ['type%3Da&detail=%3Da', 'type%3Db&detail=%3Db']

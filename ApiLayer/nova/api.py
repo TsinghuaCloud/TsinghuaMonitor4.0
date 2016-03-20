@@ -5,9 +5,10 @@ from django.http import request
 from ApiLayer.nova.connection import nova_connection
 
 def get_server_list(token):
+    print token
     request_header = {'X-Auth-Token': token,
                       'Content-Type': 'application/json'}
-    return nova_connection('servers', 'GET', request_header)
+    return nova_connection('servers/detail', 'GET', request_header)
 
 
 def get_hypervisor_list(token):

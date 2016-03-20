@@ -47,9 +47,7 @@ def get_samples(token, meter_name, **kwargs):
                     e.g. ['meter_name': <meter_name>, 'resource_id': <resource_id>]
     :return:
     '''
-    request_header = {}
-    request_header['X-Auth-Token'] = token
-    request_header['Content-Type'] = 'application/json'
+    request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
     kwargs['limit'] = 500
     url_para_obj = kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_connection('meters/' + meter_name,

@@ -112,6 +112,8 @@ var alarm_state_CN = {
     'insufficient data': '数据不足'
 };
 
+var resource_id_CN = ''
+
 var enabled_CN = bool_CN;
 var repeat_actions_CN = bool_CN;
 
