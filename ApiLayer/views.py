@@ -14,7 +14,7 @@ from ApiLayer.keystone import api as keystone_api
 from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this import statement
 from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
-from CommonMethods.decorators import login_required
+from CommonMethods import decorators
 
 #import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
@@ -44,7 +44,7 @@ def get_token(request, token_type=None):
         return HttpResponse(json.dumps(token), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def get_allPmStatistics(token):
     request_header = {}
     request_header['X-Auth-Token'] = token
@@ -53,7 +53,7 @@ def get_allPmStatistics(token):
     return nova_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
 
 
-@login_required
+@decorators.login_required
 def get_allVMList(token):
     request_header = {}
     request_header['X-Auth-Token'] = token
@@ -110,7 +110,7 @@ def get_PmInfo(token):
     return allInfo
 
 
-@login_required
+@decorators.login_required
 @csrf_protect
 def post_alarm(request):
     '''
@@ -142,7 +142,7 @@ def post_alarm(request):
                             content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 @csrf_protect
 def get_meters(request):
     '''
@@ -226,7 +226,7 @@ def _update_total_meters_count(request, filters):
     return request.session['total_meters_count']
 
 
-@login_required
+@decorators.login_required
 def update_alarm_enabled(request, alarm_id):
     '''
     Update the 'enabled' field of a given alarm
@@ -255,7 +255,7 @@ def update_alarm_enabled(request, alarm_id):
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def delete_alarm(request, alarm_id):
     '''
     Delete a given alarm
@@ -270,7 +270,7 @@ def delete_alarm(request, alarm_id):
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def get_samples(request):
     ''' Get samples of every meter through ceilometer_api
     In a correctly constructed request, all arrays are treated as meters, while
@@ -302,7 +302,7 @@ def get_samples(request):
     return HttpResponse(json.dumps({'data': result}), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def get_alarms(request):
     '''
     Fetch alarms for a query.
@@ -326,7 +326,7 @@ def get_alarms(request):
         return _report_error(result['status'], result['error_msg'])
 
 
-@login_required
+@decorators.login_required
 def get_alarm_detail(request):
     arrays = _request_GET_to_dict(request.GET, seperate_args_and_list=False)
     if 'alarm_id' not in arrays:
@@ -341,7 +341,7 @@ def get_alarm_detail(request):
         return _report_error(result['status'], result['error_msg'])
 
 
-@login_required
+@decorators.login_required
 def get_resources(request):
     '''
     Get resource list through Ceilometer API
@@ -355,7 +355,7 @@ def get_resources(request):
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def get_vm_list(request):
     '''
     Get tenant's server list(virtual-machine list) through nova api.
@@ -385,7 +385,7 @@ def get_vm_list(request):
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def get_pm_list(request):
     '''
     Get hypervisor list(physical-machine list) through nova api.
@@ -469,7 +469,7 @@ def _report_error(error_type, error_msg):
     return HttpResponse(json.dumps(error_json), content_type='application/json')
 
 
-@login_required
+@decorators.login_required
 def getTopoInfo(request):
     # paramiko.util.log_to_file('paramiko.log')
     s = paramiko.SSHClient()

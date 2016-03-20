@@ -1,6 +1,11 @@
 /**
  * Created by pwwpcheng on 2015/12/30.
  */
+function get_para_from_url(name){
+   if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+      return decodeURIComponent(name[1]);
+}
+
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
@@ -28,14 +33,18 @@ $(document).ready(function () {
     }
     });
 
+    var current_machine_type = get_para_from_url('type') || 'vm';
+
     machine_table_handle = $('#machine-table').DataTable({
-        dom: "<'row'<'col-sm-7'<'machine-typebox'>><'col-sm-4 pull-right'l>>" +
+        dom: "<'row'<'col-sm-7'<'machine-typebox'>><'col-sm-4 pull-right'>>" +
                 "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                "<'row'<'col-sm-4'l><'col-sm-3'i><'col-sm-5'p>>",
         processing: true,
         ajax: {
             "url": "http://" + window.location.host
-                                + "/api/servers/vm-list",
+                                + "/api/servers/"
+                                + current_machine_type
+                                + "-list",
             "contentType": "application/json",
             "type": "GET"
         },
@@ -152,7 +161,7 @@ $(document).ready(function () {
     });
     var search_html=
     $("div.meter-searchbox").html($('#datatables-searchbox').html());
-    $("div.machine-typebox").html($('#machine-type-box').html());
+    //$("div.machine-typebox").html($('#machine-type-box').html());
     $("div.meter-display").html($('#selected-meter-display').html());
 
     $('#meter-table').on('xhr.dt', function ( events, settings, json, xhr ) {

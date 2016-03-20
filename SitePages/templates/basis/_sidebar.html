@@ -27,29 +27,26 @@
             </ul>
         </li>
         <li>
-            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> 监控<span class="fa arrow"></span></a>
+            <a href="/monitor/#"><i class="fa fa-bar-chart-o fa-fw"></i> 监控<span class="fa arrow"></span></a>
             <ul class="nav nav-second-level collapse">
                 <li>
-                    <a href="#">警报 <span class="fa arrow"></span></a>
+                    <a href="/monitor/alarms/#">警报 <span class="fa arrow"></span></a>
                     <ul class="nav nav-third-level collapse">
                         <li>
                             <a href="/monitor/alarms/create-alarm"><i class="fa fa-fw"></i> 创建警报</a>
                         </li>
                         <li>
-                            <a href="/monitor/alarms/"><i class="fa fa-fw"></i> 全部警报列表</a>
-                        </li>
-                        <li>
-                            <a href="/monitor/alarms/alarm"><i class="fa fa-exclamation-circle fa-fw"></i> 报警
+                            <a href="/monitor/alarms/?type=alarm"><i class="fa fa-exclamation-circle fa-fw"></i> 报警
                                 <span class="fa btn btn-danger statistics-circle">2</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/monitor/alarms/insufficient"><i class="fa fa-info-circle fa-fw"></i> 数据不足
+                            <a href="/monitor/alarms/?type=insufficient"><i class="fa fa-info-circle fa-fw"></i> 数据不足
                                 <span class="fa btn btn-warning statistics-circle">5</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/monitor/alarms/ok"><i class="fa fa-check-circle fa-fw"></i> 正常
+                            <a href="/monitor/alarms/?type=ok"><i class="fa fa-check-circle fa-fw"></i> 正常
                                 <span class="fa btn btn-success statistics-circle">12</span>
                             </a>
                         </li>
@@ -57,19 +54,36 @@
                     <!-- /.nav-third-level -->
                 </li>
                 <li>
-                    <a href="/monitor/meters"> 指标</a>
+                    <a href="/monitor/meters/#"> 指标<span class="fa arrow"></span></a>
+                    <ul class="nav nav-third-level collapse">
+                        <li>
+                            <a href="/monitor/meters/?type=vm"><i class="fa fa-fw"></i> 虚拟机</a>
+                        </li>
+                        <li>
+                            <a href="/monitor/meters/?type=pm"><i class="fa fa-fw"></i> 物理机</a>
+                        </li>
+                    </ul>
+                    <!-- /.nav-third-level -->
                 </li>
             </ul>
             <!-- /.nav-second-level -->
         </li>
         <li>
-            <a href="/analysis"><i class="fa fa-stethoscope fa-fw"></i> 分析<span class="fa arrow"></span></a>
+            <a href="/analysis/#"><i class="fa fa-stethoscope fa-fw"></i> 分析<span class="fa arrow"></span></a>
             <ul class="nav nav-second-level collapse">
                 <li>
-                    <a href="/analysis/load-forcast">负载预测</a>
+                    <a href="/analysis/load-forcast/#"> 负载预测<span class="fa arrow"></span></a>
+                    <ul class="nav nav-third-level collapse">
+                        <li>
+                            <a href="/analysis/load-forcast/virtual-machine">虚拟机</a>
+                        </li>
+                        <li>
+                            <a href="/analysis/load-forcast/physical-machine">物理机</a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
-                    <a href="#">资源分析 <span class="fa arrow"></span></a>
+                    <a href="/analysis/#">资源分析 <span class="fa arrow"></span></a>
                     <ul class="nav nav-third-level collapse">
                         <li>
                             <a href="/analysis/process">进程</a>
@@ -77,8 +91,17 @@
                         <li>
                             <a href="/analysis/network">网络</a>
                         </li>
+                        <li>
+                            <a href="/analysis/service">服务状态</a>
+                        </li>
+                        <li>
+                            <a href="/analysis/resource">资源使用</a>
+                        </li>
                     </ul>
                     <!-- /.nav-third-level -->
+                </li>
+                <li>
+                    <a href="/topology">拓扑结构</a>
                 </li>
             </ul>
             <!-- /.nav-second-level -->

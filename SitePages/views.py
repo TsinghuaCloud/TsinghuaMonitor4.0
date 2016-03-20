@@ -64,7 +64,6 @@ def login(request, **kwargs):
         try:
             auth_ref = auth.get_access(session)
         except keystone_client_exceptions.ClientException as e:
-            messages.error(request, e.message)
             auth_ref = None
 
         if auth_ref:
@@ -100,6 +99,7 @@ def alarm_list(request):
 
 
 @decorators.login_required
+@decorators.admin_perm_required
 def test_page(request):
     request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
     return render(request, 'test-page.html')
