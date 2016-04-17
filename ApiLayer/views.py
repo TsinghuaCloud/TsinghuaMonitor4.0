@@ -18,45 +18,19 @@ from CommonMethods import decorators
 
 #import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
-
-def get_token(request, token_type=None):
-    '''
-    Get token through Keystone v2 api
-    :param request:
-    :return: token_id if success, <empty> if failed
-    '''
-    # tenant_name = request.GET['tenant_name']
-    # username = request.GET['username']
-    # password = request.GET['password']
-    tenant_name = settings.OPENSTACK_TENANT_NAME
-    username = settings.OPENSTACK_USERNAME_NAME
-    password = settings.OPENSTACK_PASSWORD
-
-    token = None
-    if not (tenant_name and username and password):
-        token = {'status': 'error',
-                 'message': 'Login information not provided.'}
-    else:
-        token = keystone_api.get_token(tenant_name, username, password)
-    if token_type == 'token':
-        return token
-    else:
-        return HttpResponse(json.dumps(token), content_type='application/json')
-
-
-@decorators.login_required
 def get_allPmStatistics(token):
+    project_id = token.project['id']
     request_header = {}
-    request_header['X-Auth-Token'] = token
+    request_header['X-Auth-Token'] = token.id
     request_header['Content-Type'] = 'application/json'
     # url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
-    return nova_api.nova_connection('/os-hypervisors/statistics', method='GET', header=request_header)
+    return nova_api.nova_connection(project_id, '/os-hypervisors/statistics', method='GET', header=request_header)
 
 
-@decorators.login_required
 def get_allVMList(token):
+    project_id = token.project['id']
     request_header = {}
-    request_header['X-Auth-Token'] = token
+    request_header['X-Auth-Token'] = token.id
     request_header['Content-Type'] = 'application/json'
     PM_vmInfo = {}
     '''
@@ -66,7 +40,7 @@ def get_allVMList(token):
     
     for tenantIdinfo in tenantList['data']['tenants']:
     '''
-    serverList = nova_connection('/servers/detail', method='GET', header=request_header)
+    serverList = nova_connection(project_id, '/servers/detail', method='GET', header=request_header)
     # print tenantIdinfo['name']
     # print serverList
     if serverList['status'] == "success":
@@ -83,19 +57,19 @@ def get_allVMList(token):
     return PM_vmInfo
 
 
-
 def get_PmInfo(token):
     request_header = {}
-    request_header['X-Auth-Token'] = token
+    request_header['X-Auth-Token'] = token.id
     request_header['Content-Type'] = 'application/json'
     # url_para_obj = _kwargs_to_url_parameter_object(**kwargs)
     allInfo = []
-    serverList = nova_connection('/os-hypervisors', method='GET', header=request_header)
+    project_id = token.project['id']
+    serverList = nova_connection(project_id, '/os-hypervisors', method='GET', header=request_header)
     # print serverList
     for single in serverList['data']['hypervisors']:
         id = single['id']
         info = \
-            nova_connection('/os-hypervisors/' + str(id), method='GET', header=request_header)['data'][
+            nova_connection(project_id, '/os-hypervisors/' + str(id), method='GET', header=request_header)['data'][
                 'hypervisor']
         singleInfo = {}
         singleInfo['id'] = id
@@ -120,7 +94,7 @@ def post_alarm(request):
     :return: (JSON) Result of posting new alarm.
                      Return state: 'success' or 'error'
     '''
-    token_string = request.session['token'].id
+    token_id = request.session['token'].id
     if request.method == 'POST':
         kwargs = sanitize_arguments(_request_GET_to_dict(request.POST, False),
                                     capabilities.ALARM_CAPABILITIES)
@@ -134,7 +108,7 @@ def post_alarm(request):
             q[0] = {}
         finally:
             kwargs['q'] = q
-            return HttpResponse(json.dumps(ceilometer_api.post_threshold_alarm(token_string, **kwargs)),
+            return HttpResponse(json.dumps(ceilometer_api.post_threshold_alarm(token_id, **kwargs)),
                                 content_type='application/json')
     else:
         return HttpResponse(json.dumps({'status': 'error',
@@ -155,7 +129,7 @@ def get_meters(request):
 
     # TODO(pwwp):
     # Apply token management method instead of requesting one each time
-    token_string = request.session['token'].id
+    token_id = request.session['token'].id
     arrays = {}
     filters = {}
     if request.method == 'GET':
@@ -184,7 +158,7 @@ def get_meters(request):
             #return _report_error('KeyError', e)
 
     filters = sanitize_arguments(filters, capabilities.METER_LIST_CAPABILITIES)
-    result = ceilometer_api.get_meters(token_string, **filters)
+    result = ceilometer_api.get_meters(token_id, **filters)
     _update_total_meters_count(request, filters)
 
     if result['status'] == 'success':
@@ -217,8 +191,8 @@ def _update_total_meters_count(request, filters):
 
     # TODO: Error handling for hashing meter_list
     # Resend the request purged of limit and skip to get total record number
-    token_string = request.session['token'].id
-    meter_list_request = ceilometer_api.get_meters(token_string, **filters)
+    token_id = request.session['token'].id
+    meter_list_request = ceilometer_api.get_meters(token_id, **filters)
     if meter_list_request['status'] == 'success':
         request.session['total_meters_count'] = len(meter_list_request['data'])
     else:
@@ -236,8 +210,8 @@ def update_alarm_enabled(request, alarm_id):
     '''
 
     # First fetch alarm data
-    token_string = request.session['token'].id
-    alarm_data_handler = ceilometer_api.get_alarm_detail(token_string, alarm_id)
+    token_id = request.session['token'].id
+    alarm_data_handler = ceilometer_api.get_alarm_detail(token_id, alarm_id)
     if alarm_data_handler['status'] == 'error':
         return _report_error('Alarm Error', alarm_data_handler['error_msg'])
 
@@ -251,7 +225,7 @@ def update_alarm_enabled(request, alarm_id):
         return _report_error('ValueError', e.message)
 
     # Finally post it back to ceilometer with alarm-update api
-    result = ceilometer_api.update_threshold_alarm(token_string, alarm_id, alarm_data)
+    result = ceilometer_api.update_threshold_alarm(token_id, alarm_id, alarm_data)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
@@ -263,8 +237,8 @@ def delete_alarm(request, alarm_id):
     :param alarm_id: id of an alarm
     :return: HTTPResponse (application/json)
     '''
-    token_string = request.session['token'].id
-    result = ceilometer_api.delete_alarm(token_string, alarm_id)
+    token_id = request.session['token'].id
+    result = ceilometer_api.delete_alarm(token_id, alarm_id)
     if result['status'] == 'success':
         result['data'] = 'Alarm ' + alarm_id + ' has been deleted.'
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -286,7 +260,7 @@ def get_samples(request):
     '''
     # TODO(pwwp):
     # Apply token management method instead of requesting one each time
-    token_string = request.session['token'].id
+    token_id = request.session['token'].id
     meters, kwargs = _request_GET_to_dict(request.GET)
     result = []
     for meter_name, resource_ids in meters.iteritems():
@@ -295,7 +269,7 @@ def get_samples(request):
             result.append({
                 'meter_name': meter_name,
                 'resource_id': resource_id,
-                'data': ceilometer_api.get_samples(token_string, meter_name,
+                'data': ceilometer_api.get_samples(token_id, meter_name,
                                                    resource_id=resource_id,
                                                    **kwargs)
             })
@@ -316,8 +290,8 @@ def get_alarms(request):
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
-    token_string = request.session['token'].id
-    result = ceilometer_api.get_alarms(token_string, **filters)
+    token_id = request.session['token'].id
+    result = ceilometer_api.get_alarms(token_id, **filters)
     if result['status'] == 'success':
         result['recordsTotal'] = len(result['data'])
         result['recordsFiltered'] = len(result['data'])
@@ -333,8 +307,8 @@ def get_alarm_detail(request):
         return _report_error('KeyError', 'alarm_id not provided')
     alarm_id = arrays['alarm_id']
     #filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
-    token_string = request.session['token'].id
-    result = ceilometer_api.get_alarm_detail(token_string, alarm_id, )
+    token_id = request.session['token'].id
+    result = ceilometer_api.get_alarm_detail(token_id, alarm_id, )
     if result['status'] == 'success':
         return HttpResponse(json.dumps(result), content_type='application/json')
     else:
@@ -350,8 +324,20 @@ def get_resources(request):
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
-    token_string = request.session['token'].id
-    result = ceilometer_api.get_resources(token_string, **filters)
+    token_id = request.session['token'].id
+    result = ceilometer_api.get_resources(token_id, **filters)
+    return HttpResponse(json.dumps(result), content_type='application/json')
+
+@decorators.login_required
+def resource_detail(request, resource_id):
+    '''
+    Get resource list through Ceilometer API
+    :param request: Django request object
+    :return:
+    '''
+    arrays, filters = _request_GET_to_dict(request.GET)
+    token_id = request.session['token'].id
+    result = ceilometer_api.get_resources(token_id, resource_id=resource_id)
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
@@ -372,8 +358,8 @@ def get_vm_list(request):
                   ],
               }
     '''
-    token_string = request.session['token'].id
-    servers = nova_api.get_server_list(token_string)
+    token = request.session['token']
+    servers = nova_api.get_server_list(token)
     if servers['status'] != 'success':
         return _report_error('', 'error')
     result = {"status": "success",
@@ -402,8 +388,8 @@ def get_pm_list(request):
                   ],
               }
     '''
-    token_string = request.session['token'].id
-    hypervisors = nova_api.get_hypervisor_list(token_string)
+    token = request.session['token']
+    hypervisors = nova_api.get_hypervisor_list(token)
     if hypervisors['status'] != 'success':
         return _report_error('', 'error')
     result = {"status": "success",

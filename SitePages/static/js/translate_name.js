@@ -112,7 +112,18 @@ var alarm_state_CN = {
     'insufficient data': '数据不足'
 };
 
-var resource_id_CN = ''
+var resource_id_CN = function(name){
+    // Note: Using async behavior of ajax is a deprecated
+    //       and bad behavior.
+    //       Need to change fetching logic in the future.
+    var ajax_connection = $.ajax({
+        url: "/api/resources/resource-detail/" + name,
+        async: false
+    });
+
+    var result = JSON.parse(ajax_connection.responseText);
+    return result.data[0].metadata.name;
+};
 
 var enabled_CN = bool_CN;
 var repeat_actions_CN = bool_CN;
@@ -129,7 +140,12 @@ function translate_name(name, type){
      */
     var language = arguments[2] ? arguments[2] : 'CN';
     try {
-        return eval(type + '_' + language + '["' + name + '"]');
+        if (typeof eval(type + '_' + language) === 'object'){
+            return eval(type + '_' + language + '["' + name + '"]');
+        }
+        else {
+            return eval(type + '_' + language + '("' + name +'")');
+        }
     }catch(e){
         if (e instanceof EvalError) {
             console.info('Eval Error: In translating "'+ name+ '" of type "'+type+'"');

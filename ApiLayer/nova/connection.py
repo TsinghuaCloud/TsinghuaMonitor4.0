@@ -5,8 +5,12 @@ from django.conf import settings
 from ApiLayer.base.connection_base import openstack_api_connection
 
 
-def nova_connection(base_url, method, header, url_parameters=None, body=None):
-    return _nova_connection(base_url, method, header, url_parameters=url_parameters, body=body)
+def nova_connection(project_id, base_url, method, header, url_parameters=None, body=None):
+    if project_id is None or project_id == '':
+        raise KeyError(message='Project_id must be provided for Nova API')
+    return _nova_connection(base_url, method, header,
+                            url_parameters=url_parameters, body=body,
+                            project_id=project_id)
 
 def _nova_connection(*args, **kwargs):
     '''
@@ -15,5 +19,5 @@ def _nova_connection(*args, **kwargs):
     return openstack_api_connection(*args,
                                     port=settings.NOVA_PORT,
                                     version='v2',
-                                    tenant_id=settings.ADMIN_TENANT_ID,
+                                    tenant_id=kwargs.pop('project_id'),
                                     **kwargs)

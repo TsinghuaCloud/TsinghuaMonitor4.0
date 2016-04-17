@@ -158,6 +158,7 @@ $(function(){
             });
     });
     $(document).on('click', '.material-switch label', function(){
+        var this_element = $(this);
         var new_state = !($(this).parent('.material-switch').find('input')[0].checked);
 
         // id of this label is parsed as switch-input-<alarm_id>
@@ -174,7 +175,7 @@ $(function(){
                 }
                 else{
                     add_message('error', json.error_msg);
-                    $(this).parent('.material-switch').find('input')[0].checked = !new_state;
+                    this_element.parent('.material-switch').find('input')[0].checked = !new_state;
                 }
             }
         ).fail(function (jqxhr, textStatus, error) {

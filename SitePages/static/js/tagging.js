@@ -19,14 +19,29 @@ function Tagger() {
     var tags = $('#tags');
 
     this.addTag = function (tag) {
-        if (this.tags.indexOf(tag) > -1) {
+        if(typeof tag === 'string'){
+            if (this.tags.indexOf(tag) > -1) {
             $('#tags span[data-tag="' + tag + '"]').shake();return;
+            }
+            this.tags.push(tag);
+            tags.append('<span data-tag="' + tag + '">' + tag + '<i class="fa fa-times" data-tag="' + tag + '"></i></span>')
         }
-        this.tags.push(tag);
-        tags.append('<span data-tag="' + tag + '">' + tag + '<i class="fa fa-times" data-tag="' + tag + '"></i></span>')
+        else if(typeof tag === 'object'){
+            var tag_data = {};
+            for(var key in tag){
+                tag_data['data-' + key] = tag[key];
+            }
+            var new_span_element = $('<span>').attr(tag_data).html(tag.tag);
+            var new_i_element = $('<i />').attr('class', 'fa fa-times').attr(tag_data);
+
+            new_span_element.append(new_i_element);
+            tags.append(new_span_element);
+        }
+
     };
 
     this.removeTag = function (tag) {
+        this.removeTagCallBack(this);
         var index = this.tags.indexOf(tag);
         if (index > -1) {
             this.tags.splice(index, 1);
@@ -36,7 +51,7 @@ function Tagger() {
         tagEl.addClass('deleting');
         setTimeout(function () {
             tagEl.remove();
-        }, 500)
+        }, 500);
     };
 
     this.removeTagCallBack = function(){
@@ -47,7 +62,7 @@ function Tagger() {
         tags.delegate("i", "click", function () {
             var tag = $(this).data('tag');
             self.removeTag(tag);
-            self.removeTagRelatedElement(tag);
+            self.removeTagRelatedElement(this);
         })
     };
     this.init();

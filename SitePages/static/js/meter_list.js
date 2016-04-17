@@ -19,8 +19,10 @@ $(function(){
                                     + '-list');
         machine_table_handle.ajax.reload();
     });
-    tagger_handle.removeTagRelatedElement = function(tag){
-
+    tagger_handle.removeTagRelatedElement = function(e){
+        var meter_name = $(e).data('meter-name');
+        var resource_id = $(e).data('resource-id');
+        updateMeterList(meter_name, resource_id);
     }
 });
 
@@ -38,7 +40,7 @@ $(document).ready(function () {
     machine_table_handle = $('#machine-table').DataTable({
         dom: "<'row'<'col-sm-7'<'machine-typebox'>><'col-sm-4 pull-right'>>" +
                 "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-4'l><'col-sm-3'i><'col-sm-5'p>>",
+                "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-7'p>>",
         processing: true,
         ajax: {
             "url": "http://" + window.location.host
@@ -108,7 +110,7 @@ $(document).ready(function () {
         ],
         "columnDefs": [
             {
-                "targets": [1, 2],
+                "targets": [0, 1, 2],
                 "visible": false,
                 "searchable": false
             },
@@ -129,9 +131,7 @@ $(document).ready(function () {
                 "targets": [4],
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     //$(nTd).html("<input type='checkbox' onclick='" + oData.meter_id + "'>");
-                    if (sData in meter_name_list) {
-                        $(nTd).html(meter_name_list[sData]);
-                    }
+                    $(nTd).html(translate_name(sData, 'meter_name', 'CN'));
                 }
             },
             {
@@ -147,7 +147,7 @@ $(document).ready(function () {
                 "targets": [6],
                 "width": '15%',
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench'></a>" +
+                    $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench' onclick='updateMeterListFromTable(" + iRow + ")'></a>" +
                     "<a href='#' class='btn btn-xs btn-empty fa fa-trash-o'></a>");
                 }
             }
@@ -246,7 +246,8 @@ function updateMeterList(meter_name, resource_id){
     }
     else{
         // The <meter_id, resource_id> combination is in selected list
-        tagger_handle.addTag(meter_string);
+        var meter_tag = {'tag': meter_string, 'meter-name': meter_name, 'resource-id': resource_id};
+        tagger_handle.addTag(meter_tag);
         if (meter_name in selected_meter_list){
             (selected_meter_list[meter_name]).push(resource_id);
         }

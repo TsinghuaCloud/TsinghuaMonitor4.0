@@ -37,6 +37,12 @@ def get_resources(token, **kwargs):
     url_para_obj = kwargs_to_url_parameter_object(**kwargs)
     return ceilometer_connection('resources', method='GET', header=request_header, url_parameters=url_para_obj)
 
+def get_resource_detail(token, **kwargs):
+    request_header = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+    resource_id = kwargs.pop('resource_id', '')
+    url_para_obj = kwargs_to_url_parameter_object(**kwargs)
+    return ceilometer_connection('resources/' + resource_id, method='GET', header=request_header, url_parameters=url_para_obj)
+
 
 def get_samples(token, meter_name, **kwargs):
     '''

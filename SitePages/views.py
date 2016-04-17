@@ -76,13 +76,15 @@ def login(request, **kwargs):
 
 
 def logout(request):
+    ''' Log out of the system, clean authenticated information
+        and redirect user to login page.
+    '''
     request.session.delete('region_endpoint')
     request.session.delete('region_name')
     django_auth_logout(request)
     return HttpResponseRedirect(settings.LOGOUT_REDIRECT_URL)
 
 
-# Create your views here.
 @decorators.login_required
 def overview(request):
     return render(request, 'overview.html')
@@ -90,28 +92,33 @@ def overview(request):
 
 @decorators.login_required
 def meter_list(request):
+    '''
+        Meter list page.
+        Since this page loads meter-list through on-page jquery request,
+        it would be enough to just return a rendered page
+    '''
     return render(request, 'meters/meters.html', {'title': 'Meter list'})
 
 
 @decorators.login_required
 def alarm_list(request):
+    '''
+        Alarm list page.
+        Since this page loads alarm-list through on-page jquery request,
+        it would be enough to just return a rendered page
+    '''
     return render(request, 'alarms/alarm_list.html', {'title': 'Alarm list'})
 
 
 @decorators.login_required
-@decorators.admin_perm_required
+#@decorators.admin_perm_required
 def test_page(request):
-    request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
-    return render(request, 'test-page.html')
+    return render(request, '_template_page.html')
 
 
 @decorators.login_required
 def resource_page(request):
-    # token = api_interface.get_V3token()['token']
-
-    # print tokenv3
-    token = openstack_api.get_token(request, token_type='token')['token']
-    request.session['keystone_access_token'] = token
+    token = request.session['token']
     pm_info_detail = openstack_api.get_PmInfo(token)
     for i in range(len(pm_info_detail)):
         pm_info_detail[i]['memory_mb_used'] = round(pm_info_detail[i]['memory_mb_used'] / 1000.0, 2)
@@ -146,7 +153,6 @@ def resource_page(request):
 def create_alarm(request):
     '''  Create new alarm through ceilometer alarm-create api  '''
     if request.method == 'GET':
-        request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/create_alarm/create_threshold_alarm_basis.html',
                       {
                           'page_type': 'create_alarm',
@@ -216,7 +222,9 @@ def _post_new_alarm(request):
         q[0] = {}
     finally:
         kwargs['q'] = q
-    return openstack_api.ceilometer_api.post_threshold_alarm(request.session['keystone_access_token'], **kwargs)
+
+    token_id = request.session['token'].id
+    return openstack_api.ceilometer_api.post_threshold_alarm(token_id, **kwargs)
 
 
 @decorators.login_required
@@ -232,10 +240,11 @@ def edit_alarm(request, alarm_id):
     :param alarm_id: (string)
     :return: HTTPResponse
     '''
+    token_id = request.session['token'].id
     alarm_data, original_data = None, {}
     try:
         alarm_data = _read_alarm_data(
-            openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id))
+            openstack_api.ceilometer_api.get_alarm_detail(token_id, alarm_id))
         original_data['alarm_id'] = alarm_data['alarm_id']
         original_data['meter_name'] = alarm_data['meter_name']
         original_data['query'] = alarm_data.get('query', [])
@@ -244,7 +253,6 @@ def edit_alarm(request, alarm_id):
         raise Http404(str(e.message) + ' is missing')
 
     if request.method == 'GET':
-        request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
         return render(request, 'alarms/edit_alarm/edit_threshold_alarm_basis.html',
                       {
                           'page_type': 'edit_alarm',
@@ -262,7 +270,7 @@ def edit_alarm(request, alarm_id):
         edited_data.update(original_data)  # Overwrite keys that are not allowed to modify
 
         if step == 'post':
-            return_data = _post_edited_alarm(request.session['keystone_access_token'], edited_data, alarm_id)
+            return_data = _post_edited_alarm(token_id, edited_data, alarm_id)
             new_message = [], {}
             if return_data['status'] == 'success':
                 messages.success(request, return_data['data']['name'] + " has been modified")
@@ -331,10 +339,10 @@ def _post_edited_alarm(token, alarm_data, alarm_id=None):
 @decorators.login_required
 def alarm_detail(request, alarm_id):
     ''' Display detail of an alarm '''
-    request.session['keystone_access_token'] = openstack_api.get_token(request, 'token')['token']
+    token_id = request.session['token'].id
     alarm_data = {}
     try:
-        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(request.session['keystone_access_token'], alarm_id)[
+        alarm_data = openstack_api.ceilometer_api.get_alarm_detail(token_id, alarm_id)[
             'data']
     except SystemError:
         pass

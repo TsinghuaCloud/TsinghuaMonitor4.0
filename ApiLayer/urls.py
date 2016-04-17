@@ -16,7 +16,6 @@ Including another URLconf
 from django.conf.urls import include, url
 import views
 urlpatterns = [
-    url(r'^authentication/get-token$', views.get_token, name='Token'),
     url(r'^servers/vm-list$', views.get_vm_list, name='Server List'),
     url(r'^servers/pm-list$', views.get_pm_list, name='Hypervisor List'),
     url(r'^meters/meter-list$', views.get_meters, name='Meter List'),
@@ -27,6 +26,7 @@ urlpatterns = [
     url(r'^alarms/delete-alarm/([0-9a-f\-]+)/$', views.delete_alarm, name='Delete Alarm'),
     url(r'^alarms/update-alarm-enabled/([0-9a-f\-]+)/$', views.update_alarm_enabled, name='Enable/Disable Alarm'),
     url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
+    url(r'^resources/resource-detail/([^/]+)/$', views.resource_detail, name='Resource List'),
     url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]
 
