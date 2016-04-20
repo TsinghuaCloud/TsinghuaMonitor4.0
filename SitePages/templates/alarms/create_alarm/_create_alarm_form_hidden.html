@@ -7,9 +7,9 @@
     <input name="meter_name" value="{{ alarm_data.meter_name }}">
     <input name="name" value="{{ alarm_data.name|default:'' }}">
     <input name="severity" value="{{alarm_data.severity|default:'low' }}">
-    <input name="description" value="{{ alarm_data.description }}">
-    <input name="enabled" value="{{ alarm_data.enabled|default:'true' }}">
-    <input name="repeat_actions" value="{{ alarm_data.repeat_actions|default:'false' }}">
+    <input name="description" value="{{ alarm_data.description| default:'' }}">
+    <input name="enabled" value="{{ alarm_data.enabled|default:'True' }}">
+    <input name="repeat_actions" value="{{ alarm_data.repeat_actions|default:'False' }}">
     <input name="period" value="{{ alarm_data.period|default:'60' }}">
     <input name="threshold" value="{{ alarm_data.threshold|default:'60' }}">
     <input name="statistic" value="{{ alarm_data.statistic| default:'avg' }}">

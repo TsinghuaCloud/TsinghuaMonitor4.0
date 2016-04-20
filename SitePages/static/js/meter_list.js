@@ -121,7 +121,6 @@ $(document).ready(function () {
             {
                 "targets": [0],
                 "sortable": false,
-                "width": "5%",
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     //$(nTd).html("<input type='checkbox' onclick='" + oData.meter_id + "'>");
                     $(nTd).html("<input type='checkbox' onclick='updateMeterListFromTable(" + iRow + ")'>");
@@ -134,21 +133,19 @@ $(document).ready(function () {
                     $(nTd).html(translate_name(sData, 'meter_name', 'CN'));
                 }
             },
-            {
-                "targets": [5],
-                "width": "15%"
-//                    "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-//                        $(nTd).html("<button type='button' class='btn btn-xs btn-empty fa fa-search'></button>" +
-//                        "<button type='button' class='btn btn-xs btn-empty fa fa-wrench'></button>" +
-//                        "<button type='button' class='btn btn-xs btn-empty fa fa-trash-o'></button>");
-//                    }
-            },
+            //{
+            //    "targets": [5],
+            //    "width": "10%",
+            //        "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+            //            $(nTd).html("<button type='button' class='btn btn-xs btn-empty fa fa-search'></button>" +
+            //            "<button type='button' class='btn btn-xs btn-empty fa fa-wrench'></button>" +
+            //            "<button type='button' class='btn btn-xs btn-empty fa fa-trash-o'></button>");
+            //        }
+            //},
             {
                 "targets": [6],
-                "width": '15%',
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
-                    $(nTd).html("<a  class='btn btn-xs btn-empty fa fa-wrench' onclick='updateMeterListFromTable(" + iRow + ")'></a>" +
-                    "<a href='#' class='btn btn-xs btn-empty fa fa-trash-o'></a>");
+                    $(nTd).html("<a  class='btn btn-sm btn-default' onclick='updateMeterListFromTable(" + iRow + ")'>查看指标</a>");
                 }
             }
         ],
@@ -219,6 +216,7 @@ function checkMeterList(meter_name, resource_id){
 function updateMeterListFromTable(row){
     var row_data = meter_table_handle.data()[row];
     updateMeterList(row_data['name'], row_data['resource_id']);
+    scroll_to_id('meter-chart');
 }
 
 function updateMeterList(meter_name, resource_id){
@@ -398,3 +396,4 @@ var chart = AmCharts.makeChart("meter-chart", {
         "position": "bottom-right"
      }
 });
+

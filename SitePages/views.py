@@ -87,7 +87,14 @@ def logout(request):
 
 @decorators.login_required
 def overview(request):
-    return render(request, 'overview.html')
+    token = request.session['token']
+    hypervisor_list = None
+    try:
+        hypervisor_list = openstack_api.nova_api.get_hypervisor_list(token)['data']['hypervisors']
+
+    except KeyError, e:
+        hypervisor_list = {}
+    return render(request, 'overview.html', {'hypervisor_list': hypervisor_list})
 
 
 @decorators.login_required
@@ -202,7 +209,7 @@ def _post_new_alarm(request):
     alarm_data.pop('cur_step')
 
     if 'enabled' in alarm_data:
-        alarm_data['enabled'] = False if alarm_data['enabled'] == 'false' else True
+        alarm_data['enabled'] = False if alarm_data['enabled'] == 'False' else True
     if 'repeat_actions' in alarm_data:
         alarm_data['repeat_actions'] = False if alarm_data['repeat_actions'] == 'false' else True
     for action_type in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
@@ -297,9 +304,9 @@ def _post_edited_alarm(token, alarm_data, alarm_id=None):
     '''
 
     if 'enabled' in alarm_data:
-        alarm_data['enabled'] = False if alarm_data['enabled'] == 'false' else True
+        alarm_data['enabled'] = False if alarm_data['enabled'] == 'False' else True
     if 'repeat_actions' in alarm_data:
-        alarm_data['repeat_actions'] = False if alarm_data['repeat_actions'] == 'false' else True
+        alarm_data['repeat_actions'] = False if alarm_data['repeat_actions'] == 'False' else True
     for action_type in ['alarm_actions', 'ok_actions', 'insufficient_data_actions']:
         if action_type in alarm_data:
             for i in range(0, len(alarm_data[action_type])):

@@ -16,7 +16,7 @@ from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this 
 from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 from CommonMethods import decorators
 
-import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 def get_allPmStatistics(token):
     project_id = token.project['id']
@@ -55,6 +55,7 @@ def get_allVMList(token):
             PM_vmInfo[PM_name].append(temp)
 
     return PM_vmInfo
+
 
 
 def get_PmInfo(token):
@@ -277,6 +278,19 @@ def get_samples(request):
 
 
 @decorators.login_required
+def get_alarm_count(request):
+    alarm_count = {'alarm': 0, 'ok': 0, 'insufficient_data': 0}
+    token_string = request.session['token'].id
+    try:
+        alarm_count['alarm'] = len(ceilometer_api.get_alarms(token_string, state='alarm')['data'])
+        alarm_count['ok'] = len(ceilometer_api.get_alarms(token_string, state='ok')['data'])
+        alarm_count['insufficient_data'] = len(ceilometer_api.get_alarms(
+            token_string, state='insufficient+data')['data'])
+        return HttpResponse(json.dumps(alarm_count), content_type='application/json')
+    except KeyError, e:
+        return _report_error('KeyError', 'Alarm counting failed')
+
+@decorators.login_required
 def get_alarms(request):
     '''
     Fetch alarms for a query.
@@ -457,7 +471,7 @@ def _report_error(error_type, error_msg):
 
 @decorators.login_required
 def getTopoInfo(request):
-    paramiko.util.log_to_file('paramiko.log')
+    # paramiko.util.log_to_file('paramiko.log')
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     s.connect(hostname=settings.TOPO_SERVER, port=settings.TOPO_SERVER_PORT, username=settings.TOPO_SERVER_USER,

@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^meters/meter-list$', views.get_meters, name='Meter List'),
     url(r'^meters/meter-samples$', views.get_samples, name='Sample List'),
     url(r'^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
+    url(r'^alarms/alarm-count$', views.get_alarm_count, name='Alarm Count'),
     url(r'^alarms/alarm-detail$', views.get_alarm_detail, name='Alarm Detail'),
     url(r'^alarms/post-alarm/$', views.post_alarm, name='Create New Alarm'),
     url(r'^alarms/delete-alarm/([0-9a-f\-]+)/$', views.delete_alarm, name='Delete Alarm'),

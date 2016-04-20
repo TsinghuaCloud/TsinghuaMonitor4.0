@@ -12,8 +12,7 @@ $(document).ready(function(){
                 "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         processing: true,
         ajax: {
-            "url": "http://" + window.location.host
-                                + "/api/servers/vm-list",
+            "url": "http:///",
             "contentType": "application/json",
             "type": "GET"
         },
@@ -54,6 +53,7 @@ $(document).ready(function(){
 
 $(function () {
     initializeMeterSelect();
+
 });
 
 var chartData=[];
@@ -97,7 +97,7 @@ var chart = AmCharts.makeChart("meter-chart", {
     "dataDateFormat": "YYYY-MM-DD HH:NN:SS",
     "categoryAxis": {
         "parseDates": true,
-        "minPeriod": "SS",
+        "minPeriod": "ss",
         "axisColor": "#DADADA",
         "dashLength": 1,
         "minorGridEnabled": true
@@ -155,7 +155,7 @@ function submitAlarmActions(){
 function initializeMeterSelect(){
     $("#meter-select").select2({
         ajax: {
-            url: '/api/meters/meter-list?resource_id_match='
+            url: '/api/meters/meter-list?resource_id='
                         + $('#alarm-form [name="resource_id"]').val(),
             dataType: 'json',
             type: 'GET',
@@ -182,6 +182,7 @@ function initializeMeterSelect(){
 
 $(function()
 {
+
     $(document).on('click', '.btn-add', function(e)
     {
         e.preventDefault();
@@ -219,7 +220,13 @@ $(function()
         meter_table_handle.ajax.reload();
     });
     $(document).on("change", '#meter-select', function(e) {
-        updateMeterChart();
+        if(e.currentTarget.value != '')
+        {
+            updateMeterChart();
+            $('#meter-chart').removeAttr('hidden');
+        }
+        else
+            $('#meter-chart').attr('hidden', 'hidden');
     });
     $(document).on("change", '#alarm-form [name="resource_id"]', function(e) {
 
@@ -231,6 +238,7 @@ function getMeterList(resource_id, resource_name){
     alert('已选主机： '+ resource_name);
     $('#machine-name')[0].innerHTML = resource_name;
     $("#meter-select")[0].value = "";
+    scroll_to_id("meter-select");
     initializeMeterSelect();
 }
 
@@ -261,7 +269,7 @@ function updateMeterChart(){
             }
         }
 
-        // Add data into dataprovider
+        // Add data to data-provider
         chartData = [];
         for (var key in chart_data_object) {
             if (chart_data_object.hasOwnProperty(key)) {

@@ -28,7 +28,7 @@
         </li>
         <li>
             <a href="/monitor/#"><i class="fa fa-bar-chart-o fa-fw"></i> 监控<span class="fa arrow"></span></a>
-            <ul class="nav nav-second-level collapse">
+            <ul class="nav nav-second-level collapse" name="alarm-operations">
                 <li>
                     <a href="/monitor/alarms/#">警报 <span class="fa arrow"></span></a>
                     <ul class="nav nav-third-level collapse">
@@ -37,17 +37,17 @@
                         </li>
                         <li>
                             <a href="/monitor/alarms/?type=alarm"><i class="fa fa-exclamation-circle fa-fw"></i> 报警
-                                <span class="fa btn btn-danger statistics-circle">2</span>
+                                <span class="fa btn btn-danger statistics-circle" name="alarm">2</span>
                             </a>
                         </li>
                         <li>
                             <a href="/monitor/alarms/?type=insufficient"><i class="fa fa-info-circle fa-fw"></i> 数据不足
-                                <span class="fa btn btn-warning statistics-circle">5</span>
+                                <span class="fa btn btn-warning statistics-circle" name="insufficient_data">5</span>
                             </a>
                         </li>
                         <li>
                             <a href="/monitor/alarms/?type=ok"><i class="fa fa-check-circle fa-fw"></i> 正常
-                                <span class="fa btn btn-success statistics-circle">12</span>
+                                <span class="fa btn btn-success statistics-circle" name="ok">12</span>
                             </a>
                         </li>
                     </ul>

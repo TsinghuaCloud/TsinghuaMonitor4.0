@@ -30,7 +30,7 @@
                     </h3>
                 </div>
                 <div>
-                    <p class="col-lg-11 col-lg-push-1">您目前共有 2 个指标正在报警。</p>
+                    <p class="col-lg-11 col-lg-push-1">您目前共有 <b name="alarm-count-alarm">0</b> 个指标正在报警。</p>
                 </div>
                 <!-- /.col-lg-12 -->
                 <div class="row placeholders center-block">
@@ -42,7 +42,7 @@
                                         <i class="fa fa-exclamation-circle fa-5x"></i>
                                     </div>
                                     <div class="col-xs-9 text-right">
-                                        <div class="huge">2</div>
+                                        <div class="huge" name="alarm-count-alarm">0</div>
                                         <div>报警中</div>
                                     </div>
                                 </div>
@@ -65,7 +65,7 @@
                                         <i class="fa fa-info-circle fa-5x"></i>
                                     </div>
                                     <div class="col-xs-9 text-right">
-                                        <div class="huge">5</div>
+                                        <div class="huge" name="alarm-count-insufficient-data">0</div>
                                         <div>数据不足</div>
                                     </div>
                                 </div>
@@ -88,7 +88,7 @@
                                         <i class="fa fa-check-circle fa-5x"></i>
                                     </div>
                                     <div class="col-xs-9 text-right">
-                                        <div class="huge">12</div>
+                                        <div class="huge" name="alarm-count-ok">0</div>
                                         <div>正常</div>
                                     </div>
                                 </div>
@@ -157,16 +157,13 @@
                             </tr>
                             </thead>
                             <tbody>
+                            {% for hypervisor in hypervisor_list %}
                             <tr>
-                                <th scope="row">1</th>
-                                <td>Computer 220</td>
+                                <th scope="row">{{ hypervisor.id }}</th>
+                                <td>{{ hypervisor.hypervisor_hostname }}</td>
                                 <td>正常</td>
                             </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>Computer 221</td>
-                                <td>正常</td>
-                            </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
