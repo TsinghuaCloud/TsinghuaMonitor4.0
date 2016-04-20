@@ -26,15 +26,12 @@ def login(request, **kwargs):
     Logs a user in using the :class:`~openstack_auth.forms.Login` form.
     Referenced from openstack_auth.views.login
     '''
-    print 'start_login'
     if not request.is_ajax():
         # If the user is already authenticated, redirect them to the
         # dashboard straight away, unless the 'next' parameter is set as it
         # usually indicates requesting access to a page that requires different
         # permissions.
-        print "initial: is_authenticated" + str(request.user.is_authenticated())
         if request.user.is_authenticated():
-            print 'initial yes'
             return HttpResponseRedirect('/')
 
     # Get our initial region for the form.
@@ -57,7 +54,6 @@ def login(request, **kwargs):
     # will erase it if we set it earlier.
     print request.user.is_authenticated()
     if request.user.is_authenticated():
-        print "is_authenticated"
         openstack_auth_user.set_session_from_user(request, request.user)
         session = openstack_auth_utils.get_session()
         user_endpoint = settings.OPENSTACK_KEYSTONE_URL
