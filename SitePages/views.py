@@ -364,6 +364,10 @@ def netTopo_page(request):
     return render(request, 'netTopo.html', {'title': 'Create-alarm'})
 
 
+@decorators.login_required
+def vm_process_list(request, instance_id):
+    return render(request, 'analysis/vm_process_monitor.html', {'instance_id': instance_id})
+
 def _read_alarm_data(alarm_data):
     '''
     Flatten alarm dictionary to a two-level dict.

@@ -4,6 +4,7 @@ import time
 import re
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
 
@@ -121,7 +122,6 @@ def post_alarm(request):
 @csrf_protect
 def get_meters(request):
     '''
-
     :param request:
     :return:
     '''
@@ -169,6 +169,38 @@ def get_meters(request):
     else:
         return HttpResponse(json.dumps(result), content_type='application/json')
 
+
+@decorators.login_required
+def get_predict_meters(request):
+    '''
+    Get desired meters for prediction page.
+    Desired meter_name are listed in capabilities.PREDICT_DESIRED_METERS
+    :param request: Django request
+    :return: Json response
+    '''
+    token_id = request.session['token'].id
+    arrays, filters = _request_GET_to_dict(request.GET)
+    try:
+        machine_id = filters.pop('resource_id')
+    except KeyError, e:
+        return _report_error('KeyError', 'machine_id must be provided')
+
+    # Filtering meters, store result in desired
+    result = {}
+    desired_meters = []
+    try:
+        meter_list = ceilometer_api.get_meters(token_id, resource_id=machine_id)['data']
+        for meter in meter_list:
+            if meter['name'] in capabilities.PREDICT_DESIRED_METERS:
+                desired_meters.append(meter)
+    except KeyError, e:
+        return _report_error('KeyError', 'Get prediction data failed')
+
+    result['status'] = 'success'
+    result['recordsTotal'] = len(desired_meters)
+    result['recordsFiltered'] = len(desired_meters)
+    result['data'] = desired_meters
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 def _update_total_meters_count(request, filters):
     '''
@@ -228,6 +260,35 @@ def update_alarm_enabled(request, alarm_id):
     # Finally post it back to ceilometer with alarm-update api
     result = ceilometer_api.update_threshold_alarm(token_id, alarm_id, alarm_data)
     return HttpResponse(json.dumps(result), content_type='application/json')
+
+@decorators.login_required
+def copy_alarm_to_resources(request):
+    # Fetch alarm data
+    token_id = request.session['token'].id
+
+    if 'alarm_id' not in request.GET:
+        return _report_error('KeyError', '"alarm_id" should be provided.')
+    alarm_id = request.GET['alarm_id']
+    alarm_data_handler = ceilometer_api.get_alarm_detail(token_id, alarm_id)
+    if alarm_data_handler['status'] == 'error':
+        return _report_error('Alarm Error', alarm_data_handler['error_msg'])
+    alarm_data = alarm_data_handler['data']
+
+    args = _request_GET_to_dict(request.GET, False)
+    resource_list = args['resource_id']
+    try:
+        for resource in resource_list:
+            alarm_data['q'] = {'field': 'resource_id', 'value': resource}
+        result = ceilometer_api.post_threshold_alarm(token_id, **alarm_data)
+        if result['status'] == 'error':
+            return _report_error('ServerError', result['error_msg'])
+    except Exception, e:
+        return _report_error('Unknown Error', 'Unknown')
+
+    messages.success(request, 'Alarm ID: "' + alarm_id + '" has been copied')
+    return HttpResponse(json.dumps({'status': 'success', 'data': []}),
+                        content_type='application/json')
+
 
 
 @decorators.login_required
@@ -289,6 +350,7 @@ def get_alarm_count(request):
         return HttpResponse(json.dumps(alarm_count), content_type='application/json')
     except KeyError, e:
         return _report_error('KeyError', 'Alarm counting failed')
+
 
 @decorators.login_required
 def get_alarms(request):

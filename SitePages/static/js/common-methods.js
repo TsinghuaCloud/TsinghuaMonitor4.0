@@ -16,7 +16,6 @@ function scroll_to_id(id) {
 function refresh_alarm_count()
 {
     $.getJSON('/api/alarms/alarm-count', function(data){
-        console.info(data);
         $("[name=alarm-count-ok]").html(data.ok);
         $("[name=alarm-count-alarm]").html(data.alarm);
         $("[name=alarm-count-insufficient-data]").html(data.insufficient_data);

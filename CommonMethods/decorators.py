@@ -7,7 +7,8 @@ from django.shortcuts import redirect
 def login_required(view_func):
     def check_login(request, *args,  **kwargs):
         if not request.user.is_authenticated():
-            return redirect(settings.LOGIN_URL)
+            from_path = request.path
+            return redirect(settings.LOGIN_URL + '?next=' + from_path)
         return view_func(request, *args, **kwargs)
     return check_login
 

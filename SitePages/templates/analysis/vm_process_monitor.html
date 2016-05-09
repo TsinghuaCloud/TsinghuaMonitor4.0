@@ -1,0 +1,107 @@
+{% extends 'common/_base.html' %}
+{% load staticfiles %}
+
+{% block title %}虚拟机进程监控{% endblock %}
+{% block before_css %}
+    <!-- DataTables CSS -->
+    <link href="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css' %}"
+          rel="stylesheet">
+    <!-- DataTables Responsive CSS -->
+    <link href="{% static 'sb-admin/bower_components/datatables-responsive/css/dataTables.responsive.css' %}"
+          rel="stylesheet">
+{% endblock %}
+{% block extra_css %}
+    <style type="text/css">
+        .btn-space {
+            margin-top: 4px;
+        }
+        .btn-empty {
+            background-color: transparent;
+            color: #854bb6;
+        }
+        .toolbar {
+            float: right;
+        }
+        td .td-align-center{
+            text-align: center;
+        }
+    </style>
+
+    <!-- DataTables Responsive CSS -->
+    <link href="{% static 'css/switch.css' %}"
+          rel="stylesheet">
+{% endblock %}
+
+{% block page_content %}
+<!-- Meter Page -->
+<div style="display:none">
+    <input type="hidden" id="csrfmiddlewaretoken" value="{{ csrf_token }}">
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">
+            虚拟机进程监控 | VM Process Monitor
+        </h2>
+    </div>
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">进程列表</div>
+            <div class="panel-body">
+                <!-- Table -->
+                <div class="dataTable_wrapper ">
+                    <table class="table table-striped table-hover fixed-layout-table"
+                           id="process-list-table">
+                        <thead>
+                        <tr>
+                            <th>PID</th>
+                            <th>名称</th>
+                            <th>当前状态</th>
+                            <th>物理内存</th>
+                            <th>虚拟内存</th>
+                            <th>CPU%</th>
+                            <th>内存%</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- END Table -->
+    </div>
+    <!-- END Panel -->
+</div>
+{% endblock %}
+
+{% block footer %}
+
+<div hidden="hidden">
+    <div id="alarm-table-searchbox">
+        <label>Search:
+            <select class="form-control input-sm" id="search-filter">
+                <option value="resource_id_match">实例ID</option>
+                <option value="resource_name_match">实例名称</option>
+                <!--<option value="meter_name">指标名称</option>-->
+            </select>
+            <input class="form-control input-sm" id="search-value" value="">
+            <button type="button" class="btn btn-primary btn-sm" onclick="">确定</button>
+            <button type="button" class="btn btn-default btn-sm" onclick="">清空</button>
+        </label>
+    </div>
+    <input name="instance-id" value="{{ instance_id }}">
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables JS -->
+<script src="{% static 'sb-admin/bower_components/datatables/media/js/jquery.dataTables.min.js' %}"></script>
+<!-- DataTables Bootstrap JS -->
+<script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
+<!-- Alarm-list specified js -->
+<script src="{% static 'js/analysis/process-monitor.js' %}"></script>
+<script src="{% static 'js/translate_name.js' %}"></script>
+{% endblock %}
+

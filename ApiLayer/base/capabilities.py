@@ -6,7 +6,7 @@ __author__ = 'pwwpcheng'
 ALARM_LIST_CAPABILITIES = ['name', 'user_id', 'project_id', 'meter_name', 'enabled',
                            'state', 'alarm_id', 'alarm_type', 'resource_id']
 
-METER_LIST_CAPABILITIES = ['user_id', 'project_id', 'meter_id', 'source', 'resource_id',
+METER_LIST_CAPABILITIES = ['meter_name', 'user_id', 'project_id', 'meter_id', 'source', 'resource_id',
                            'limit', 'skip', 'resource_id_match', 'resource_name_match']
 
 RESOURCE_LIST_CAPABILITIES = ['user_id', 'project_id', 'limit', 'skip', 'resource_id_match',
@@ -24,3 +24,5 @@ THRESHOLD_ALARM_CAPABILITIES = ['query', 'period', 'comparison_operator', 'thres
                                 'meter_name',]
 
 QUERY_CAPABILITIES = ['resource_id', 'resource_name']
+
+PREDICT_DESIRED_METERS = ['cpu_util', 'memory.usage', 'disk.usage']

@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^servers/vm-list$', views.get_vm_list, name='Server List'),
     url(r'^servers/pm-list$', views.get_pm_list, name='Hypervisor List'),
     url(r'^meters/meter-list$', views.get_meters, name='Meter List'),
+    url(r'^meters/predict-related-meters$', views.get_predict_meters, name='Prediction Meter List'),
     url(r'^meters/meter-samples$', views.get_samples, name='Sample List'),
     url(r'^alarms/alarm-list$', views.get_alarms, name='Alarm List'),
     url(r'^alarms/alarm-count$', views.get_alarm_count, name='Alarm Count'),

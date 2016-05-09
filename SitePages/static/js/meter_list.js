@@ -253,6 +253,15 @@ function updateMeterList(meter_name, resource_id){
             selected_meter_list[meter_name] = [resource_id]
         }
     }
+
+    /* Hide meter-chart when no meter is selected. Show it otherwise. */
+    if($("#tags").children().length === 0)
+        $('#meter-chart').attr('hidden', 'hidden');
+    else
+        $('#meter-chart').removeAttr('hidden');
+
+    console.log('called');
+
     updateChart();
 }
 
@@ -299,6 +308,7 @@ function updateChart(){
             valueAxis.gridAlpha = 0;
             valueAxis.position = (k % 2) ? 'left': 'right';
             valueAxis.offset = Math.floor(k/2) * 50;
+            valueAxis.minimum = 0;
 
             var graph = new AmCharts.AmGraph();
 

@@ -22,6 +22,7 @@
             <p id="profile-name" class="profile-name-card"></p>
             <form class="form-signin" method="POST">{% csrf_token %}
                 <span id="reauth-email" class="reauth-email"></span>
+{#                <input name="region" value="http://166.111.143.220:5000/v2.0" hidden="hidden">#}
                 <input type="text" id="inputUsername" class="form-control"
                        name="username" placeholder="用户名" required autofocus>
                 <input type="password" id="inputPassword" class="form-control"
