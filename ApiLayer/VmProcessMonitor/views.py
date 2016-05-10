@@ -14,7 +14,11 @@ def get_process_list(request, instance_id):
 
     try:
         data = monitor_conn.get_data()
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        result = {}
+        result['data'] = data
+        result['length'] = len(data)
+        result['status'] = 'success'
+        return HttpResponse(json.dumps(result), content_type='application/json')
     except (err.ClientSideError, err.ServerSideError), e:
         return HttpResponse(json.dumps(_report_error(e)),
                             content_type='application/json')

@@ -366,6 +366,7 @@ def netTopo_page(request):
 
 @decorators.login_required
 def vm_process_list(request, instance_id):
+    # instance_name = openstack_api.nova_api.
     return render(request, 'analysis/vm_process_monitor.html', {'instance_id': instance_id})
 
 def _read_alarm_data(alarm_data):

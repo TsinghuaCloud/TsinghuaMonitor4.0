@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^alarms/update-alarm-enabled/([0-9a-f\-]+)/$', views.update_alarm_enabled, name='Enable/Disable Alarm'),
     url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
     url(r'^resources/resource-detail/([^/]+)/$', views.resource_detail, name='Resource List'),
-    url(r'^monitor/', include(process_monitor_urls)),
+    url(r'^analysis/', include(process_monitor_urls)),
     url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]
 

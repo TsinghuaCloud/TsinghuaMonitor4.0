@@ -17,5 +17,5 @@ from django.conf.urls import include, url
 import views
 
 urlpatterns = [
-    url(r'^instance/([0-9a-f\-]+)/process$', views.get_process_list, name='VM Process List'),
+    url(r'^instance/([0-9a-f\-]+)/process/$', views.get_process_list, name='VM Process List'),
 ]

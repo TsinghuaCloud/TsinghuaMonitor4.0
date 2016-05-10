@@ -66,6 +66,7 @@ class urllib_connection(object):
         self.url = url
         self.headers = {} if headers is None else headers
         self.body = body
+        print url
         self.urllib_request = urllib2.Request(url=self.url, data=self.body,
                                               headers=self.headers)
 
