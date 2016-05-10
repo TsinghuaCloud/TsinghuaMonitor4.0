@@ -1,10 +1,11 @@
 import httplib
 import json
 import socket
+import urllib2
 
 from django.conf import settings
-from CommonMethods import BaseMethods
-
+from Common import BaseMethods
+from ApiLayer.base import api_errors as err
 
 def openstack_api_connection(base_url, method, header, port, version,
                              tenant_id=None, url_parameters=None, body=None):
@@ -54,4 +55,34 @@ def openstack_api_connection(base_url, method, header, port, version,
         return {'status': 'error',
                 'error_msg': e.message
                 }
+
+class urllib_connection(object):
+    url = None
+    headers = None
+    body = None
+    urllib_request = None
+
+    def __init__(self, url, headers=None, body=None):
+        self.url = url
+        self.headers = {} if headers is None else headers
+        self.body = body
+        self.urllib_request = urllib2.Request(url=self.url, data=self.body,
+                                              headers=self.headers)
+
+    def get_data(self):
+        '''
+        Convert returned data into python dict if data is json string.
+        Directly return data  if data is not json string.
+        '''
+        resp = urllib2.urlopen(self.urllib_request)
+        data = resp.read()
+
+        try:
+            return json.loads(data)
+        except TypeError, e:
+            return None
+        except ValueError, e:
+            return data
+        except socket.error, e:
+            raise err.ClientSocketError(self.url)
 

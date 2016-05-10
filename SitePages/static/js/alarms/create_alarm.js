@@ -68,7 +68,8 @@ var chart = AmCharts.makeChart("meter-chart", {
     "valueAxes": [{
         "axisAlpha": 0.2,
         "dashLength": 1,
-        "position": "left"
+        "position": "left",
+        "minimum": 0
     }],
     "mouseWheelZoomEnabled": true,
     "graphs": [{

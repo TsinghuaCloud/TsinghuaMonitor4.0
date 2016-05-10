@@ -14,8 +14,8 @@ from ApiLayer.ceilometer import api as ceilometer_api
 from ApiLayer.keystone import api as keystone_api
 from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this import statement
-from CommonMethods.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
-from CommonMethods import decorators
+from Common.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
+from Common import decorators
 
 #import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
@@ -567,3 +567,4 @@ def _convert_action_to_action_url(action_list):
         reg_match = action_regex.match(action)
         action_type, action_detail = reg_match.group(1), reg_match.group(2)
         action_url.append('http://' + settings.THIS_ADDR + '/notification/')
+

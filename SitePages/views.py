@@ -16,8 +16,8 @@ from keystoneclient import exceptions as keystone_client_exceptions
 
 from ApiLayer import views as openstack_api
 from ApiLayer.base import capabilities as APICapabilities
-import CommonMethods.BaseMethods as BaseMethods
-from CommonMethods import decorators
+import Common.BaseMethods as BaseMethods
+from Common import decorators
 
 
 @csrf_protect

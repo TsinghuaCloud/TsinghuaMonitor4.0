@@ -14,6 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 from django.conf.urls import include, url
+
+from ApiLayer.VmProcessMonitor import urls as process_monitor_urls
 import views
 urlpatterns = [
     url(r'^servers/vm-list$', views.get_vm_list, name='Server List'),
@@ -29,6 +31,7 @@ urlpatterns = [
     url(r'^alarms/update-alarm-enabled/([0-9a-f\-]+)/$', views.update_alarm_enabled, name='Enable/Disable Alarm'),
     url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
     url(r'^resources/resource-detail/([^/]+)/$', views.resource_detail, name='Resource List'),
+    url(r'^monitor/', include(process_monitor_urls)),
     url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
 ]
 

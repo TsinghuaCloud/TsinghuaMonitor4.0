@@ -1,6 +1,6 @@
 __author__ = 'pwwpcheng'
 
-from CommonMethods.BaseMethods import kwargs_to_url_parameter_object, \
+from Common.BaseMethods import kwargs_to_url_parameter_object, \
                                         sanitize_arguments, \
                                         add_list_unique
 from ApiLayer.ceilometer.connection import ceilometer_connection
