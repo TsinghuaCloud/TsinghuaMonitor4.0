@@ -32,6 +32,8 @@ urlpatterns = [
     url(r'^resources/resource-list$', views.get_resources, name='Resource List'),
     url(r'^resources/resource-detail/([^/]+)/$', views.resource_detail, name='Resource List'),
     url(r'^analysis/', include(process_monitor_urls)),
-    url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo')
+    url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo'),
+    url(r'^predict/get-data$', views.get_predict_data, name='PredictData List')
+
 ]
 

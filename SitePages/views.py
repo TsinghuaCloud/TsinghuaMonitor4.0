@@ -19,6 +19,8 @@ from ApiLayer.base import capabilities as APICapabilities
 import Common.BaseMethods as BaseMethods
 from Common import decorators
 
+import pymongo
+from pymongo import MongoClient
 
 @csrf_protect
 def login(request, **kwargs):
@@ -401,3 +403,8 @@ def _read_alarm_data(alarm_data):
             operation = urlparse.parse_qs(urlparse.urlparse(data[actions][action_index]).query)
             data[actions][action_index] = urllib.quote(operation['op'][0])
     return data
+
+@decorators.login_required
+def prediction_page(request):
+    return render(request, 'prediction/prediction_VM.html', {'title': 'workload prediction'})
+

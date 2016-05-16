@@ -18,6 +18,8 @@ from Common.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 from Common import decorators
 from Common import error_base as err
 
+from ApiLayer.prediction import api as prediction_api
+from SitePages.models import VM
 # Below is still in test phase
 from ApiLayer.ceilometer.new_api import CeilometerApi
 
@@ -192,12 +194,16 @@ def get_predict_meters(request):
     :return: Json response
     '''
     token_id = request.session['token'].id
-    arrays, filters = _request_GET_to_dict(request.GET)
+    print request.body
+    print 0
+    filters = json.loads(request.body)
+    print 111111
+    print filters
     try:
-        machine_id = filters.pop('resource_id')
+        machine_id = filters.pop('resource_id','')
     except KeyError, e:
-        return _report_error('machine_id must be provided')
-
+        return _report_error('KeyError', 'machine_id must be provided')
+    print 1
     # Filtering meters, store result in desired
     result = {}
     desired_meters = []
@@ -207,8 +213,8 @@ def get_predict_meters(request):
             if meter['name'] in capabilities.PREDICT_DESIRED_METERS:
                 desired_meters.append(meter)
     except KeyError, e:
-        return _report_error('Get prediction data failed')
-
+        return _report_error('KeyError', 'Get prediction data failed')
+    print 2
     result['status'] = 'success'
     result['recordsTotal'] = len(desired_meters)
     result['recordsFiltered'] = len(desired_meters)
@@ -579,7 +585,6 @@ def _report_error(error_msg, code=None):
     :return: HTTPResponse Object(application/json response)
     '''
     _code = 404 if code is None else code
-    print 'error'
     return HttpResponseBadRequest(content=error_msg)
 
 
@@ -599,6 +604,28 @@ def getTopoInfo(request):
     s.close()
     return HttpResponse(json.dumps({'data': res.replace('\n', '').replace(' ', '')}), content_type='application/json')
     #return HttpResponse(json.dumps({'data': error_json}), content_type='application/json')
+
+@decorators.login_required
+def get_predict_data(request):
+    arrays, filters = _request_GET_to_dict(request.GET)
+    _name = filters.get("name","")
+    _meter = filters.get("meter","")
+    
+    vms = prediction_api.get_prediction_data(_name,_meter)
+    
+    
+    array = {}
+    n = 0
+    for d in vms[0].data:
+        array.setdefault("data_date"+str(n),d.date)
+        array.setdefault("data_pre_value"+str(n),d.predicted_value)
+        array.setdefault("data_ac_value"+str(n),d.actual_value)
+        n = n+1
+    
+    return HttpResponse(json.dumps(array), content_type='application/json')
+
+
+
 
 
 def _convert_action_to_action_url(action_list):
