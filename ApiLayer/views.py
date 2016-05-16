@@ -5,7 +5,7 @@ import re
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_protect
 
 from AlarmNotification.capabilities import NOTIFICATION_CAPABILITIES as NOTIFICATION_CAPABILITIES
@@ -16,8 +16,12 @@ from ApiLayer.nova import api as nova_api
 from ApiLayer.nova.connection import nova_connection  # TODO(pwwp): remove this import statement
 from Common.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 from Common import decorators
+from Common import error_base as err
 
-#import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+# Below is still in test phase
+from ApiLayer.ceilometer.new_api import CeilometerApi
+
+# import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 def get_allPmStatistics(token):
     project_id = token.project['id']
@@ -58,7 +62,6 @@ def get_allVMList(token):
     return PM_vmInfo
 
 
-
 def get_PmInfo(token):
     request_header = {}
     request_header['X-Auth-Token'] = token.id
@@ -97,6 +100,8 @@ def post_alarm(request):
                      Return state: 'success' or 'error'
     '''
     token_id = request.session['token'].id
+    new_ceilometer_api = CeilometerApi(token_id)
+
     if request.method == 'POST':
         kwargs = sanitize_arguments(_request_GET_to_dict(request.POST, False),
                                     capabilities.ALARM_CAPABILITIES)
@@ -110,8 +115,13 @@ def post_alarm(request):
             q[0] = {}
         finally:
             kwargs['q'] = q
-            return HttpResponse(json.dumps(ceilometer_api.post_threshold_alarm(token_id, **kwargs)),
-                                content_type='application/json')
+            result = {}
+            try:
+                new_ceilometer_api.post_threshold_alarm(**kwargs)
+                result['status'] = 'success'
+                return HttpResponse(json.dumps(result), content_type='application/json')
+            except (err.ClientSideError, err.ServerSideError), e:
+                return _report_error(e.message)
     else:
         return HttpResponse(json.dumps({'status': 'error',
                                         'error_msg': 'Request method should be POST.'}),
@@ -131,6 +141,7 @@ def get_meters(request):
     # TODO(pwwp):
     # Apply token management method instead of requesting one each time
     token_id = request.session['token'].id
+    new_ceilometer_api = CeilometerApi(token_id)
     arrays = {}
     filters = {}
     if request.method == 'GET':
@@ -159,15 +170,17 @@ def get_meters(request):
             #return _report_error('KeyError', e)
 
     filters = sanitize_arguments(filters, capabilities.METER_LIST_CAPABILITIES)
-    result = ceilometer_api.get_meters(token_id, **filters)
+    result = {}
+    try:
+        result['data'] = new_ceilometer_api.get_meters(**filters)
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
+
     _update_total_meters_count(request, filters)
 
-    if result['status'] == 'success':
-        result['recordsTotal'] = request.session['total_meters_count']
-        result['recordsFiltered'] = request.session['total_meters_count']
-        return HttpResponse(json.dumps(result), content_type='application/json')
-    else:
-        return HttpResponse(json.dumps(result), content_type='application/json')
+    result['recordsTotal'] = request.session['total_meters_count']
+    result['recordsFiltered'] = request.session['total_meters_count']
+    return HttpResponse(json.dumps(result), content_type='application/json')
 
 
 @decorators.login_required
@@ -183,7 +196,7 @@ def get_predict_meters(request):
     try:
         machine_id = filters.pop('resource_id')
     except KeyError, e:
-        return _report_error('KeyError', 'machine_id must be provided')
+        return _report_error('machine_id must be provided')
 
     # Filtering meters, store result in desired
     result = {}
@@ -194,13 +207,14 @@ def get_predict_meters(request):
             if meter['name'] in capabilities.PREDICT_DESIRED_METERS:
                 desired_meters.append(meter)
     except KeyError, e:
-        return _report_error('KeyError', 'Get prediction data failed')
+        return _report_error('Get prediction data failed')
 
     result['status'] = 'success'
     result['recordsTotal'] = len(desired_meters)
     result['recordsFiltered'] = len(desired_meters)
     result['data'] = desired_meters
     return HttpResponse(json.dumps(result), content_type='application/json')
+
 
 def _update_total_meters_count(request, filters):
     '''
@@ -225,12 +239,14 @@ def _update_total_meters_count(request, filters):
     # TODO: Error handling for hashing meter_list
     # Resend the request purged of limit and skip to get total record number
     token_id = request.session['token'].id
-    meter_list_request = ceilometer_api.get_meters(token_id, **filters)
-    if meter_list_request['status'] == 'success':
-        request.session['total_meters_count'] = len(meter_list_request['data'])
-    else:
+    new_ceilometer_api = CeilometerApi(token_id)
+
+    try:
+        meter_list = new_ceilometer_api.get_meters(**filters)
+        request.session['total_meters_count'] = len(meter_list)
+    except (err.ClientSideError, err.ServerSideError), e:
         request.session['total_meters_count'] = 0
-    return request.session['total_meters_count']
+        return _report_error(e.message)
 
 
 @decorators.login_required
@@ -244,51 +260,58 @@ def update_alarm_enabled(request, alarm_id):
 
     # First fetch alarm data
     token_id = request.session['token'].id
-    alarm_data_handler = ceilometer_api.get_alarm_detail(token_id, alarm_id)
-    if alarm_data_handler['status'] == 'error':
-        return _report_error('Alarm Error', alarm_data_handler['error_msg'])
+    new_ceilometer_api = CeilometerApi(token_id)
 
-    # Then modify alarm data ('enabled' field specifically)
-    alarm_data = alarm_data_handler['data']
     try:
+        alarm_data = new_ceilometer_api.get_alarm_detail(alarm_id)
         alarm_data['enabled'] = string_to_bool(request.GET['enabled'])
+        result = new_ceilometer_api.update_threshold_alarm(alarm_id, alarm_data)
+        return HttpResponse(json.dumps(result), content_type='application/json')
     except KeyError, e:
-        return _report_error('KeyError', str(e) + 'shall be provided')
+        return _report_error(str(e) + 'shall be provided')
     except ValueError, e:
-        return _report_error('ValueError', e.message)
+        return _report_error(e.message)
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
-    # Finally post it back to ceilometer with alarm-update api
-    result = ceilometer_api.update_threshold_alarm(token_id, alarm_id, alarm_data)
-    return HttpResponse(json.dumps(result), content_type='application/json')
 
 @decorators.login_required
 def copy_alarm_to_resources(request):
+    '''
+    # TODO:(pwwp)
+    Not yet finished!
+    :param request:
+    :return:
+    '''
     # Fetch alarm data
     token_id = request.session['token'].id
+    new_ceilometer_api = CeilometerApi(token_id)
 
     if 'alarm_id' not in request.GET:
-        return _report_error('KeyError', '"alarm_id" should be provided.')
+        return _report_error('"alarm_id" should be provided.')
     alarm_id = request.GET['alarm_id']
-    alarm_data_handler = ceilometer_api.get_alarm_detail(token_id, alarm_id)
-    if alarm_data_handler['status'] == 'error':
-        return _report_error('Alarm Error', alarm_data_handler['error_msg'])
-    alarm_data = alarm_data_handler['data']
+    alarm_data = None
+    try:
+        alarm_data = new_ceilometer_api.get_alarm_detail(alarm_id)
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
     args = _request_GET_to_dict(request.GET, False)
     resource_list = args['resource_id']
     try:
         for resource in resource_list:
             alarm_data['q'] = {'field': 'resource_id', 'value': resource}
-        result = ceilometer_api.post_threshold_alarm(token_id, **alarm_data)
+        result = new_ceilometer_api.post_threshold_alarm(**alarm_data)
         if result['status'] == 'error':
-            return _report_error('ServerError', result['error_msg'])
+            return _report_error(result['error_msg'])
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
     except Exception, e:
-        return _report_error('Unknown Error', 'Unknown')
+        return _report_error('Unknown Error')
 
     messages.success(request, 'Alarm ID: "' + alarm_id + '" has been copied')
     return HttpResponse(json.dumps({'status': 'success', 'data': []}),
                         content_type='application/json')
-
 
 
 @decorators.login_required
@@ -300,10 +323,13 @@ def delete_alarm(request, alarm_id):
     :return: HTTPResponse (application/json)
     '''
     token_id = request.session['token'].id
-    result = ceilometer_api.delete_alarm(token_id, alarm_id)
-    if result['status'] == 'success':
-        result['data'] = 'Alarm ' + alarm_id + ' has been deleted.'
-    return HttpResponse(json.dumps(result), content_type='application/json')
+    new_ceilometer_api = CeilometerApi(token_id)
+    try:
+        new_ceilometer_api.delete_alarm(alarm_id)
+        result = {'data': 'Alarm ' + alarm_id + ' has been deleted.'}
+        return HttpResponse(json.dumps(result), content_type='application/json')
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
 
 @decorators.login_required
@@ -323,35 +349,45 @@ def get_samples(request):
     # TODO(pwwp):
     # Apply token management method instead of requesting one each time
     token_id = request.session['token'].id
+    new_ceilometer_api = CeilometerApi(token_id)
+
     meters, kwargs = _request_GET_to_dict(request.GET)
     result = []
-    for meter_name, resource_ids in meters.iteritems():
-        for i in range(len(resource_ids)):
-            resource_id = resource_ids[i]
-            result.append({
-                'meter_name': meter_name,
-                'resource_id': resource_id,
-                'data': ceilometer_api.get_samples(token_id, meter_name,
-                                                   resource_id=resource_id,
-                                                   **kwargs)
-            })
-    return HttpResponse(json.dumps({'data': result}), content_type='application/json')
+    try:
+        for meter_name, resource_ids in meters.iteritems():
+            for i in range(len(resource_ids)):
+                resource_id = resource_ids[i]
+                result.append({
+                    'meter_name': meter_name,
+                    'resource_id': resource_id,
+                    'data': new_ceilometer_api.get_samples(meter_name,
+                                                           resource_id=resource_id,
+                                                           **kwargs)
+                })
+        return HttpResponse(json.dumps({'data': result}), content_type='application/json')
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
 
 @decorators.login_required
 def get_alarm_count(request):
     alarm_count = {'alarm': 0, 'ok': 0, 'insufficient_data': 0}
-    token_string = request.session['token'].id
+    token_id = request.session['token'].id
+    new_ceilometer_api = CeilometerApi(token_id)
+
     try:
-        alarm_count['alarm'] = len(ceilometer_api.get_alarms(token_string, state='alarm')['data'])
-        alarm_count['ok'] = len(ceilometer_api.get_alarms(token_string, state='ok')['data'])
-        alarm_count['insufficient_data'] = len(ceilometer_api.get_alarms(
-            token_string, state='insufficient+data')['data'])
+        alarm_count['alarm'] = len(new_ceilometer_api.get_alarms(state='alarm'))
+        alarm_count['ok'] = len(new_ceilometer_api.get_alarms(state='ok'))
+        alarm_count['insufficient_data'] = len(new_ceilometer_api.get_alarms(
+            state='insufficient+data'))
         return HttpResponse(json.dumps(alarm_count), content_type='application/json')
     except KeyError, e:
-        return _report_error('KeyError', 'Alarm counting failed')
+        return _report_error('ServerSideError: Alarm counting failed')
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
 
+@csrf_protect
 @decorators.login_required
 def get_alarms(request):
     '''
@@ -367,28 +403,36 @@ def get_alarms(request):
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
     token_id = request.session['token'].id
-    result = ceilometer_api.get_alarms(token_id, **filters)
-    if result['status'] == 'success':
+    new_ceilometer_api = CeilometerApi(token_id)
+
+    try:
+        result = {}
+        result['status'] = 'success'
+        result['data'] = new_ceilometer_api.get_alarms(**filters)
         result['recordsTotal'] = len(result['data'])
         result['recordsFiltered'] = len(result['data'])
+        print 'success'
         return HttpResponse(json.dumps(result), content_type='application/json')
-    else:
-        return _report_error(result['status'], result['error_msg'])
+    except (err.ClientSideError, err.ServerSideError), e:
+        print 'fail'
+        return _report_error(e.message)
 
 
 @decorators.login_required
 def get_alarm_detail(request):
     arrays = _request_GET_to_dict(request.GET, seperate_args_and_list=False)
     if 'alarm_id' not in arrays:
-        return _report_error('KeyError', 'alarm_id not provided')
+        return _report_error('KeyError: alarm_id not provided')
     alarm_id = arrays['alarm_id']
     #filters = sanitize_arguments(filters, capabilities.ALARM_LIST_CAPABILITIES)
     token_id = request.session['token'].id
-    result = ceilometer_api.get_alarm_detail(token_id, alarm_id, )
-    if result['status'] == 'success':
+    new_ceilometer_api = CeilometerApi(token_id)
+
+    try:
+        result = new_ceilometer_api.get_alarm_detail(alarm_id)
         return HttpResponse(json.dumps(result), content_type='application/json')
-    else:
-        return _report_error(result['status'], result['error_msg'])
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
 
 @decorators.login_required
@@ -401,8 +445,13 @@ def get_resources(request):
     arrays, filters = _request_GET_to_dict(request.GET)
     filters = sanitize_arguments(filters, capabilities.RESOURCE_LIST_CAPABILITIES)
     token_id = request.session['token'].id
-    result = ceilometer_api.get_resources(token_id, **filters)
-    return HttpResponse(json.dumps(result), content_type='application/json')
+    new_ceilometer_api = CeilometerApi(token_id)
+    try:
+        result = ceilometer_api.get_resources(token_id, **filters)
+        return HttpResponse(json.dumps(result), content_type='application/json')
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
+
 
 @decorators.login_required
 def resource_detail(request, resource_id):
@@ -413,8 +462,13 @@ def resource_detail(request, resource_id):
     '''
     arrays, filters = _request_GET_to_dict(request.GET)
     token_id = request.session['token'].id
-    result = ceilometer_api.get_resources(token_id, resource_id=resource_id)
-    return HttpResponse(json.dumps(result), content_type='application/json')
+    new_ceilometer_api = CeilometerApi(token_id)
+
+    try:
+        result = new_ceilometer_api.get_resources(resource_id=resource_id)
+        return HttpResponse(json.dumps(result), content_type='application/json')
+    except (err.ClientSideError, err.ServerSideError), e:
+        return _report_error(e.message)
 
 
 @decorators.login_required
@@ -437,7 +491,7 @@ def get_vm_list(request):
     token = request.session['token']
     servers = nova_api.get_server_list(token)
     if servers['status'] != 'success':
-        return _report_error('', 'error')
+        return _report_error('error')
     result = {"status": "success",
               "recordsTotal": len(servers['data']['servers']),
               "recordsFiltered": len(servers['data']['servers']),
@@ -467,7 +521,7 @@ def get_pm_list(request):
     token = request.session['token']
     hypervisors = nova_api.get_hypervisor_list(token)
     if hypervisors['status'] != 'success':
-        return _report_error('', 'error')
+        return _report_error('error')
     result = {"status": "success",
               "recordsTotal": len(hypervisors['data']['hypervisors']),
               "recordsFiltered": len(hypervisors['data']['hypervisors']),
@@ -517,18 +571,16 @@ def _request_GET_to_dict(qdict, seperate_args_and_list=True):
     return arrays, url_variables
 
 
-def _report_error(error_type, error_msg):
+def _report_error(error_msg, code=None):
     '''
     Report error data
     :param error_type: (string) Error type
     :param error_msg: (string) Error message
     :return: HTTPResponse Object(application/json response)
     '''
-    error_json = {'status': 'error',
-                  'error_type': error_type,
-                  'error_msg': error_msg
-                  }
-    return HttpResponse(json.dumps(error_json), content_type='application/json')
+    _code = 404 if code is None else code
+    print 'error'
+    return HttpResponseBadRequest(content=error_msg)
 
 
 @decorators.login_required

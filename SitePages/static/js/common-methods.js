@@ -28,5 +28,5 @@ function refresh_alarm_count()
 }
 
 refresh_alarm_count();
-setInterval("refresh_alarm_count()", 10000);
+setInterval("refresh_alarm_count()", 100000);
 

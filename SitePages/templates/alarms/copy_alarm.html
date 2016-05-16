@@ -1,0 +1,102 @@
+{% extends 'common/_base.html' %}
+{% load staticfiles %}
+
+{% block title %}复制警报{% endblock %}
+{% block before_css %}
+
+{% endblock %}
+{% block extra_css %}
+
+{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="page-header">
+                复制警报 | Copy Alarms
+            </h2>
+        </div>
+        <div class="col-lg-12">
+            <div class="col-lg-8">
+                <div class="dataTable_wrapper" style="padding-bottom: 10px; padding-top: 10px">
+                    <table class="table table-striped table-hover fixed-layout-table"
+                           id="machine-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="well">
+                    <b>已选设备列表</b>
+
+                    <div class="row">
+                        <div class="tags" id="tags">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        原始警报数据
+                    </div>
+                    <div class="panel-body">
+                        <p>文字</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <div class="row" hidden="hidden">
+        <form id="alarm-form">
+            {% csrf_token %}
+            <input name="cur_step" value="{{ step }}">
+            <input name="next_step" value="{{ step }}">
+            <input name="machine_type" value="{{ alarm_data.machine_type|default:'vm' }}">
+            <input name="resource_id" value="{{ alarm_data.resource_id }}">
+            <input name="meter_name" value="{{ alarm_data.meter_name }}">
+            <input name="name" value="{{ alarm_data.name|default:'' }}">
+            <input name="severity" value="{{ alarm_data.severity|default:'low' }}">
+            <input name="description" value="{{ alarm_data.description| default:'' }}">
+            <input name="enabled" value="{{ alarm_data.enabled|default:'True' }}">
+            <input name="repeat_actions" value="{{ alarm_data.repeat_actions|default:'False' }}">
+            <input name="period" value="{{ alarm_data.period|default:'60' }}">
+            <input name="threshold" value="{{ alarm_data.threshold|default:'60' }}">
+            <input name="statistic" value="{{ alarm_data.statistic| default:'avg' }}">
+            <input name="comparison_operator" value="{{ alarm_data.comparison_operator|default:'gt' }}">
+            {% for alarm_action in alarm_data.alarm_actions %}
+                <input name="alarm_actions[]" value="{{ alarm_action }}">
+            {% endfor %}
+
+            {% for insufficient_data_action in alarm_data.insufficient_data_actions %}
+                <input name="insufficient_data_actions[]" value="{{ insufficient_data_action }}">
+            {% endfor %}
+
+            {% for ok_action in alarm_data.ok_actions %}
+                <input name="ok_actions[]" value="{{ ok_action }}">
+            {% endfor %}
+
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Tagging.js -->
+    <script src="{% static 'js/tagging.js' %}"></script>
+
+    <!-- Copy Alarm specified js -->
+    <script src="{% static 'js/translate_name.js' %}"></script>
+    <script src="{% static 'js/alarms/copy_alarm.js' %}"></script>
+
+{% endblock %}
+

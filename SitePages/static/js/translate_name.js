@@ -122,7 +122,7 @@ var resource_id_CN = function(name){
     });
 
     var result = JSON.parse(ajax_connection.responseText);
-    return result.data[0].metadata.name;
+    return result[0].metadata.name;
 };
 
 var enabled_CN = bool_CN;

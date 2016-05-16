@@ -4,6 +4,7 @@ from Common.BaseMethods import kwargs_to_url_parameter_object, \
                                         sanitize_arguments, \
                                         add_list_unique
 from ApiLayer.ceilometer.connection import ceilometer_connection
+from ApiLayer.ceilometer.connection import CeilometerConnection
 from ApiLayer.base import capabilities
 
 
@@ -143,3 +144,4 @@ def get_alarm_detail(token, alarm_id, **kwargs):
     request_header = {'X-Auth-Token': token,
                       'Content-Type': 'application/json'}
     return ceilometer_connection('alarms/' + alarm_id, method='GET', header=request_header)
+

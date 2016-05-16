@@ -233,6 +233,12 @@ def _post_new_alarm(request):
     token_id = request.session['token'].id
     return openstack_api.ceilometer_api.post_threshold_alarm(token_id, **kwargs)
 
+@decorators.login_required
+def copy_alarm(request, alarm_id):
+    token_id = request.session['token'].id
+    _alarm_detail = openstack_api.ceilometer_api.get_alarm_detail(token=token_id, alarm_id=alarm_id)['data']
+
+    return render(request, 'alarms/copy_alarm.html', _alarm_detail)
 
 @decorators.login_required
 @csrf_protect

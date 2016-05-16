@@ -7,6 +7,7 @@ from django.conf import settings
 from Common import BaseMethods
 from ApiLayer.base import api_errors as err
 
+
 def openstack_api_connection(base_url, method, header, port, version,
                              tenant_id=None, url_parameters=None, body=None):
     '''
@@ -22,15 +23,12 @@ def openstack_api_connection(base_url, method, header, port, version,
     req_header = header
     req_body = None if body is None else json.dumps(body)
 
-    # Perform API request
-    status = None
-    data = None
     # TODO(pwwp):
     # use <finally> to handle success or error data
     try:
         conn.request(method, '/%s/' % version +
-                             (('%s/' % tenant_id) if tenant_id is not None else '') +
-                             base_url + extra_url,
+                     (('%s/' % tenant_id) if tenant_id is not None else '') +
+                     base_url + extra_url,
                      headers=req_header, body=req_body)
         response = conn.getresponse()
         if response.status > 299:
@@ -56,7 +54,8 @@ def openstack_api_connection(base_url, method, header, port, version,
                 'error_msg': e.message
                 }
 
-class urllib_connection(object):
+
+class UrllibConnection(object):
     url = None
     headers = None
     body = None
@@ -87,3 +86,83 @@ class urllib_connection(object):
         except socket.error, e:
             raise err.ClientSocketError(self.url)
 
+
+class OpenStackConnection(httplib.HTTPConnection):
+    """ header of current request """
+    header = None
+
+    """ body of current request """
+    body = None
+
+    """ request method, could be GET/POST/PUT/DELETE """
+    method = None
+
+    """ host:port combination of current request """
+    host_port = None
+
+    """ url of current request """
+    url = None
+
+    """ version of project api """
+    version = None
+
+    def __init__(self, port):
+        """
+        Initialize OpenStack request
+        :param port: (string) port of current service
+        """
+        self.host_port = '%s:%s' % (settings.OPENSTACK_CONTROLLER_IP, port)
+        httplib.HTTPConnection.__init__(self, self.host_port)
+
+    def get_data(self, base_url, method, header=None,
+                 tenant_id=None, url_parameters=None, body=None):
+        """
+        Get the result of current request.
+        :param base_url: (string)
+        :param method: (string) HTTP request method, GET/POST/PUT/DELETE
+        :param header: (dict) request header
+        :param version: (string) API version
+        :param tenant_id: (string) OpenStack project id
+        :param url_parameters: (dict) query parameters
+        :param body: (dict) request body
+        :return: (dict)
+        """
+        extra_url = BaseMethods.url_para_to_url(**url_parameters) \
+            if url_parameters else ''
+        if header is not None:
+            self.header = header
+        if body is not None:
+            self.body = json.dumps(body)
+        else:
+            self.body = None
+        self.method = method
+        self.url = '/%s/' % self.version + (('%s/' % tenant_id)
+                                       if tenant_id is not None else '') \
+                   + base_url + extra_url
+
+        # Execute http request
+        self.request(self.method, url=self.url, headers=self.header, body=self.body)
+        response = None
+        data = None
+        try:
+            response = self.getresponse()
+        except httplib.NotConnected, e:
+            raise err.ServerAddressError(self.host_port)
+        except httplib.HTTPException, e:
+            raise err.HttpLibError(e.__class__.__name__, self.url, e.message)
+        except socket.error, e:
+            raise err.ClientSocketError(self.url)
+
+        if response.status == 404:
+            raise err.ResourceNotFound(self.url)
+
+        # Read http response. Try to convert data to python dict.
+        try:
+            data = json.loads(response.read())
+            return data
+        except TypeError, e:
+            # Encountered empty data
+            return {}
+        except ValueError, e:
+            # Data cannot be jsonified. Return raw data string instead.
+            return data

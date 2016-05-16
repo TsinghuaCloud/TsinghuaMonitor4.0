@@ -87,11 +87,11 @@ $(document).ready(function () {
                 "width": "18%",
                 "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
                     $(nTd).html('<a class="btn btn-xs btn-empty fa fa-search" ' +
-                                'href="/monitor/alarms/alarm-detail/' + oData.alarm_id +
-                                '"></a>' +
+                                'href="/monitor/alarms/' + oData.alarm_id + '/detail/"></a>' +
                                 '<a class="btn btn-xs btn-empty fa fa-gear" ' +
-                                'href="/monitor/alarms/edit-alarm/' + oData.alarm_id +
-                                '"></a>' +
+                                'href="/monitor/alarms/' + oData.alarm_id + '/edit/"></a>' +
+                                '<a class="btn btn-xs btn-empty fa fa-copy" ' +
+                                'href="/monitor/alarms/' + oData.alarm_id + '/copy/"></a>' +
                                 '<a class="btn btn-xs btn-empty fa fa-trash-o" data-toggle="modal" ' +
                                 'data-target="#delete-alarm-modal" data-alarm-name="'+oData.name+'" ' +
                                 'data-alarm-id="'+ oData.alarm_id +'"></a>');
@@ -136,21 +136,15 @@ $(function(){
         var btn = $(this).button('loading');
         var alarm_id = $(this).parents('.modal-content').find('#delete-alarm-id').attr('value');
         $.getJSON("/api/alarms/delete-alarm/"+alarm_id, function (json) {
-            var status = json.status;
-            if(status === 'success'){
-                $('#delete-alarm-modal').modal('hide');
-                add_message('success', json.data);
-                reloadTableData();
-            }
-            else{
-                $('#delete-alarm-modal').modal('hide');
-                add_message('error', json.error_msg);
-            }
+            $('#delete-alarm-modal').modal('hide');
+            add_message('success', json.data);
+            reloadTableData();
         })
             .done(function (json) {
                 console.log("second success");
             })
             .fail(function (jqxhr, textStatus, error) {
+                $('#delete-alarm-modal').modal('hide');
                 add_message('error', error);
             })
             .always(function () {
@@ -169,17 +163,11 @@ $(function(){
         $.getJSON('/api/alarms/update-alarm-enabled/' + alarm_id + '/'+
                 '?enabled=' + new_state.toString(),
             function(json){
-                var status = json.status;
-                if(status === 'success'){
                     add_message('success', 'Enabled of alarm ' + alarm_id + ' has been changed');
-                }
-                else{
-                    add_message('error', json.error_msg);
-                    this_element.parent('.material-switch').find('input')[0].checked = !new_state;
-                }
             }
         ).fail(function (jqxhr, textStatus, error) {
                 add_message('error', error);
+                this_element.parent('.material-switch').find('input')[0].checked = !new_state;
             });
     });
 });

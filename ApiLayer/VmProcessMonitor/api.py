@@ -2,7 +2,7 @@ __author__ = 'pwwpcheng'
 
 from django.conf import settings
 
-from ApiLayer.base.connection_base import urllib_connection
+from ApiLayer.base.connection_base import UrllibConnection
 from ApiLayer.base import api_errors as err
 
 class VMProcessMonitor(object):
@@ -25,7 +25,7 @@ class VMProcessMonitor(object):
         url = 'http://%(addr)s:%(port)s/process_list?'\
             'openstack_token=%(token)s&tenant_id=%(tenant)s&'\
             'instance_id=%(instance)s' % params
-        self.conn = urllib_connection(url=url)
+        self.conn = UrllibConnection(url=url)
 
     def get_data(self):
         data = self.conn.get_data()
