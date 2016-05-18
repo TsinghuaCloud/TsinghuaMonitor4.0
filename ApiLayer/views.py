@@ -18,12 +18,12 @@ from Common.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 from Common import decorators
 from Common import error_base as err
 
-from ApiLayer.prediction import api as prediction_api
+#from ApiLayer.prediction import api as prediction_api
 from SitePages.models import VM
 # Below is still in test phase
 from ApiLayer.ceilometer.new_api import CeilometerApi
 
-# import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
+import paramiko  # install it from the following link http://www.it165.net/pro/html/201503/36363.html
 
 def get_allPmStatistics(token):
     project_id = token.project['id']
@@ -501,7 +501,10 @@ def get_vm_list(request):
     result = {"status": "success",
               "recordsTotal": len(servers['data']['servers']),
               "recordsFiltered": len(servers['data']['servers']),
-              "data": [{'name': server['name'], 'id': server['id']}
+              "data": [{'name': server['name'],
+                        'id': server['id'],
+                        'hypervisor': server['OS-EXT-SRV-ATTR:host'],
+                        'status': server['status']}
                        for server in servers['data']['servers']]
               }
     return HttpResponse(json.dumps(result), content_type='application/json')
