@@ -549,7 +549,10 @@ def get_vm_list(request):
     result = {"status": "success",
               "recordsTotal": len(servers['data']['servers']),
               "recordsFiltered": len(servers['data']['servers']),
-              "data": [{'name': server['name'], 'id': server['id']}
+              "data": [{'name': server['name'],
+                        'id': server['id'],
+                        'hypervisor': server['OS-EXT-SRV-ATTR:host'],
+                        'status': server['status']}
                        for server in servers['data']['servers']]
               }
     return HttpResponse(json.dumps(result), content_type='application/json')
