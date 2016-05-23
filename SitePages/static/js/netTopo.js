@@ -60,7 +60,7 @@ function node(x, y, img,text) {
 function linkNode(nodeA, nodeZ,linktext) {
 	var link;
 
-		link = new JTopo.FoldLink(nodeA, nodeZ);
+		link = new JTopo.Link(nodeA, nodeZ);
 	
 	//link.strokeColor="105,71,135";
 	link.strokeColor=JTopo.util.randomColor();
@@ -121,6 +121,7 @@ function drawOneNode(referNode, id,type,level) {
 	for ( var i = 0; i < allSubNode.length; i++) {
 		var picName = '';
 		var xoffset = 0;
+		var yoffset = 100;
 		if (allSubNode[i].type == '1') {
 			if(level<=1)
 			picName = '物理交换机.png';
@@ -131,8 +132,8 @@ function drawOneNode(referNode, id,type,level) {
 			if(level<=1)
 				picName = '物理机.png';
 			else
-				
-			picName = '虚拟机.png';
+				{picName = '虚拟机.png';
+				yoffset=100+i*10;}
 			xoffset = 150;
 			
 		}
@@ -140,7 +141,7 @@ function drawOneNode(referNode, id,type,level) {
 		if(type=='1'&&allSubNode[i].type == '1'){
 			index=2;
 		}
-		var node_temp = createMyNode(referNode, i + index, xoffset, 100,picName,allSubNode[i].toMac,allSubNode[i].frominOctets+","+allSubNode[i].fromoutOctets);
+		var node_temp = createMyNode(referNode, i + index, xoffset, yoffset,picName,allSubNode[i].toIp,allSubNode[i].frominOctets+","+allSubNode[i].fromoutOctets);
 		if (topoInfo[allSubNode[i].toId] != null) {
 			drawOneNode(node_temp, allSubNode[i].toId,allSubNode[i].type,level+1);
 		}

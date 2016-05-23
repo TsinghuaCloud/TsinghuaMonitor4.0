@@ -18,7 +18,7 @@ from Common.BaseMethods import sanitize_arguments, qdict_to_dict, string_to_bool
 from Common import decorators
 from Common import error_base as err
 
-#from ApiLayer.prediction import api as prediction_api
+from ApiLayer.prediction import api as prediction_api
 from SitePages.models import VM
 # Below is still in test phase
 from ApiLayer.ceilometer.new_api import CeilometerApi
@@ -62,6 +62,54 @@ def get_allVMList(token):
             PM_vmInfo[PM_name].append(temp)
 
     return PM_vmInfo
+
+
+def get_VMonPM(token):
+    project_id = token.project['id']
+    request_header = {}
+    request_header['X-Auth-Token'] = token.id
+    request_header['Content-Type'] = 'application/json'
+    vm_opInfo = {}
+    pmList = nova_connection(project_id, '/servers/detail', method='GET', header=request_header)
+    #print pmList
+    if pmList['status'] == "success":
+        for single in pmList['data']['servers']:
+            pm_name = single['OS-EXT-SRV-ATTR:hypervisor_hostname']
+            if vm_opInfo.has_key(pm_name) == False:
+                vm_opInfo[pm_name] = []
+            temp = {}
+            temp['name'] = single['name']
+            temp['id'] = single['id']
+            if (single['addresses']=={}):
+                temp['ip']=""
+                vm_opInfo[pm_name].append(temp)
+                continue
+            temp1 = single['addresses']['tenant-net']
+            temp['ip'] = temp1[0]['addr']
+            vm_opInfo[pm_name].append(temp)
+            #print pm_name
+            #print vm_opInfo[pm_name]
+    allInfo = {}
+    serList = nova_connection(project_id, '/os-hypervisors', method='GET', header=request_header)
+    #print serList
+    for single in serList['data']['hypervisors']:
+        id = single['id']
+        info = \
+            nova_connection(project_id, '/os-hypervisors/' + str(id), method='GET', header=request_header)['data'][
+                'hypervisor']
+        host_name = info['hypervisor_hostname']
+        host_ip = info['host_ip']
+        ip_end = host_ip.split('.')[3]
+        #print ip_end
+        if vm_opInfo.has_key(host_name)==False:
+            continue
+        if allInfo.has_key(ip_end) == False:
+            allInfo[ip_end] = []
+        allInfo[ip_end].append(vm_opInfo[host_name])
+        #print host_ip
+        #print allInfo[host_ip]
+    # return allInfo for append in the formation.txt for VM info
+    return allInfo
 
 
 def get_PmInfo(token):
@@ -501,10 +549,7 @@ def get_vm_list(request):
     result = {"status": "success",
               "recordsTotal": len(servers['data']['servers']),
               "recordsFiltered": len(servers['data']['servers']),
-              "data": [{'name': server['name'],
-                        'id': server['id'],
-                        'hypervisor': server['OS-EXT-SRV-ATTR:host'],
-                        'status': server['status']}
+              "data": [{'name': server['name'], 'id': server['id']}
                        for server in servers['data']['servers']]
               }
     return HttpResponse(json.dumps(result), content_type='application/json')
@@ -593,7 +638,7 @@ def _report_error(error_msg, code=None):
 
 @decorators.login_required
 def getTopoInfo(request):
-    # paramiko.util.log_to_file('paramiko.log')
+    paramiko.util.log_to_file('paramiko.log')
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     s.connect(hostname=settings.TOPO_SERVER, port=settings.TOPO_SERVER_PORT, username=settings.TOPO_SERVER_USER,
@@ -605,8 +650,100 @@ def getTopoInfo(request):
                   'error_msg': 'error_msg'
                   }
     s.close()
-    return HttpResponse(json.dumps({'data': res.replace('\n', '').replace(' ', '')}), content_type='application/json')
+    str(res)
+    l=len(res)
+    str1=res[0:l-4]
+    str1+=","
+    #print str1
+    str3=""
+    token = request.session['token']
+    vm_list = get_VMonPM(token)
+    for k in vm_list:
+        str3+="'"+k+"'"
+        str3+=":["
+        #print str3
+        for n in vm_list[k]:
+            count=len(n)
+            m=0
+            for i in n:
+                str3+="{'type':'2','fromPort':'','frominOctets':'','fromoutOctets':'','toId':'','toMac':'',"
+                str3+="'toIp':'"+i['ip']+"',"
+                str3+="'Name':'"+i['name']+"',"
+                str3+="'Id':'"+i['id']+"'}"
+                m+=1
+                if m!=count:
+                    str3+=","
+        str3+="],"
+    le=len(str3)
+    str2=str3[0:le-1]
+    #print str2
+    str1+=str2
+    str1+="}"
+    #print str1
+    #for now is right
+    return HttpResponse(json.dumps({'data': str1.replace('\n', '').replace(' ', '')}), content_type='application/json')
     #return HttpResponse(json.dumps({'data': error_json}), content_type='application/json')
+
+@decorators.login_required
+def getVM_TopoInfo(request):
+    token = request.session['token']
+    project_id = token.project['id']
+    request_header = {}
+    request_header['X-Auth-Token'] = token.id
+    request_header['Content-Type'] = 'application/json'
+
+    vm_topo = []
+    vm_ip = []
+    pmList = nova_connection(project_id, '/servers/detail', method='GET', header=request_header)
+    if pmList['status'] == "success":
+        for single in pmList['data']['servers']:
+            if (single['addresses']=={}):
+                continue
+            temp1 = single['addresses']['tenant-net']
+            ip = temp1[0]['addr']
+            vm_ip.append(ip)
+    #print vm_ip
+    #for i in vm_ip:
+    #    print i
+    #print
+    #SSH files
+    paramiko.util.log_to_file('paramiko.log')
+    s = paramiko.SSHClient()
+    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    for pm in range(len(settings.VM_TOPO_SERVER)) :
+        s.connect(hostname=settings.VM_TOPO_SERVER[pm], port=settings.VM_TOPO_SERVER_PORT, username=settings.VM_TOPO_SERVER_USER[pm],
+              password=settings.VM_TOPO_SERVER_PASSWD[pm])
+        stdin, stdout, stderr = s.exec_command('cat ' + settings.VM_TOPO_FILE)
+        res = stdout.read()
+        to = res.split('\n')
+        vm_topo.extend(to)
+
+    while '' in vm_topo :
+        vm_topo.remove('')
+    #for single in vm_topo :
+    #    print single
+    #print "#####################"
+
+    #print len(vm_topo)
+    for vm in range(len(vm_topo)) :
+        ip = []
+        ip = vm_topo[vm].split()
+        for i in range(len(ip)) :
+            if ip[i] not in vm_ip :
+                ip[i] = 'externNet'
+        temp = ip[0]+' '+ip[1]+','
+        vm_topo[vm] = temp
+
+    #delete the repeat item there has 10 21 or 21 10 can not be deleted
+    vm_topo = list(set(vm_topo))
+    for i in range(len(vm_topo)) :
+        if vm_topo[i] == 'externNet externNet,' :
+            del vm_topo[i]
+
+    for single in vm_topo :
+        print single
+    return HttpResponse(vm_topo)
+
 
 @decorators.login_required
 def get_predict_data(request):

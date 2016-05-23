@@ -112,11 +112,6 @@ var alarm_state_CN = {
     'insufficient data': '数据不足'
 };
 
-var hypervisor_status_CN = {
-    'ACTIVE': '开启',
-    'SHUTOFF': '关闭'
-};
-
 var resource_id_CN = function(name){
     // Note: Using async behavior of ajax is a deprecated
     //       and bad behavior.

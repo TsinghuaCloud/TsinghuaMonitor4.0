@@ -255,10 +255,10 @@ function updateMeterList(meter_name, resource_id){
     }
 
     /* Hide meter-chart when no meter is selected. Show it otherwise. */
-    if($("#tags").children().length == 0)
-        $('#chart-panel').attr('hidden', 'hidden');
+    if($("#tags").children().length === 0)
+        $('#meter-chart').attr('hidden', 'hidden');
     else
-        $('#chart-panel').removeAttr('hidden');
+        $('#meter-chart').removeAttr('hidden');
 
     console.log('called');
 

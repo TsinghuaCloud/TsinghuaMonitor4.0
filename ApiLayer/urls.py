@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^resources/resource-detail/([^/]+)/$', views.resource_detail, name='Resource List'),
     url(r'^analysis/', include(process_monitor_urls)),
     url(r'^getTopoInfo$', views.getTopoInfo, name='getTopoInfo'),
+    url(r'^getVM_TopoInfo$', views.getVM_TopoInfo, name='getVM_TopoInfo'),
     url(r'^predict/get-data$', views.get_predict_data, name='PredictData List')
 
 ]

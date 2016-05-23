@@ -371,11 +371,9 @@ def alarm_detail(request, alarm_id):
 def netTopo_page(request):
     return render(request, 'netTopo.html', {'title': 'Create-alarm'})
 
-
 @decorators.login_required
-def process_monitor_vm_list(request):
-    return render(request, 'analysis/vm_list.html')
-
+def VMTopo_page(request):
+    return render(request, 'VMTopo.html', {'title': 'Create-alarm'})
 
 @decorators.login_required
 def vm_process_list(request, instance_id):
