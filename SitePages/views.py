@@ -376,6 +376,10 @@ def VMTopo_page(request):
     return render(request, 'VMTopo.html', {'title': 'Create-alarm'})
 
 @decorators.login_required
+def process_monitor_vm_list(request):
+    return render(request, 'analysis/vm_list.html')
+
+@decorators.login_required
 def vm_process_list(request, instance_id):
     # instance_name = openstack_api.nova_api.
     return render(request, 'analysis/vm_process_monitor.html', {'instance_id': instance_id})

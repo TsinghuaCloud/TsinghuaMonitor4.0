@@ -1,7 +1,7 @@
 {% extends 'common/_base.html' %}
 {% load staticfiles %}
 
-{% block title %}指标列表{% endblock %}
+{% block title %}负载预测{% endblock %}
 {% block before_css %}
     <!-- DataTables CSS -->
     <link href="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css' %}"
@@ -40,14 +40,13 @@
         <div class="row">
             <div class="col-lg-12">
                 <h2 class="page-header">
-                    指标列表 | Meter List
-                    <div class="pull-right">
-                        <a class="btn btn-primary">暂时放在这里</a>
-                    </div>
+                    负载预测 | Workload Prediction
                 </h2>
             </div>
             <div class="col-lg-12">
                 <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">选择指标</div>
                     <div class="panel-body">
                         <ul class="nav nav-tabs" id="meter-tabs">
                             <li class="active">
@@ -111,7 +110,7 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div class="panel panel-default" id="chart-panel" hidden="hidden">
+                <div class="panel panel-default">
                     <!-- Default panel contents -->
                     <div class="panel-heading">指标图例</div>
                     <div class="panel-body">
@@ -208,19 +207,15 @@
 <script src="{% static 'sb-admin/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js' %}"></script>
 <!-- AmChart JS -->
 <script src="{% static 'amcharts/amcharts.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/themes/light.js' %}"></script>
 <!-- AmChart JS Serial Chart-->
 <script src="{% static 'amcharts/serial.js' %}"></script>
-<script src="{% static 'amcharts/themes/light.js' %}"></script>
-
-{#    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>#}
-{#<script src="https://www.amcharts.com/lib/3/serial.js"></script>#}
-{#<script src="https://www.amcharts.com/lib/3/themes/light.js"></script>#}
-
-<script src="{% static 'amcharts/plugins/dataloader/dataloader.js' %}"></script>
+<script src="{% static 'amcharts/amcharts/plugins/dataloader/dataloader.js' %}"></script>
 <!-- Tagging.js -->
 <script src="{% static 'js/tagging.js' %}"></script>
 <!-- Meter-list specified js -->
 <script src="{% static 'js/translate_name.js' %}"></script>
-<script src="{% static 'js/meter_list.js' %}"></script>
+<script src="{% static 'js/meter_name_list.js' %}"></script>
+<script src="{% static 'js/predictable_meter_list.js' %}"></script>
 {% endblock %}
 

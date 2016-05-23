@@ -30,8 +30,9 @@ urlpatterns = [
     url(r'^monitor/alarms/([a-z0-9\-]+)/edit/$', SiteViews.edit_alarm, name="Monitor | Alarms | Edit Alarm"),
     url(r'^monitor/alarms/([a-z0-9\-]+)/copy/$', SiteViews.copy_alarm, name="Monitor | Alarms | Copy Alarm"),
     url(r'^monitor/alarms/create-alarm/$', SiteViews.create_alarm, name="Monitor | Alarms | Create New Alarm"),
-    url(r'^analysis/resources/([a-z0-9\-]+)/process$', SiteViews.vm_process_list, name="Analysis | Process | VM Process Monitor"),
-    url(r'^analysis/load-forcast/virtual-machine$', SiteViews.prediction_page, name="Analysis | Prediction"),
+    url(r'^analysis/resources/process/$', SiteViews.process_monitor_vm_list, name="Analysis | Resources | VM List"),
+    url(r'^analysis/resources/([a-z0-9\-]+)/process/$', SiteViews.vm_process_list, name="Analysis | Resources | VM Process Monitor"),
+        url(r'^analysis/load-forcast/virtual-machine$', SiteViews.prediction_page, name="Analysis | Prediction"),
     url(r'^test/$', SiteViews.test_page, name="Test Page"),
     url(r'^$', SiteViews.overview, name="Overview Page"),
 ]

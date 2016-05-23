@@ -66,6 +66,9 @@ $(document).ready(function(){
             $('#refreshed-time').html(now_time.toLocaleTimeString());
         }
     });
+    var instance_name = translate_name($('[name="instance-name"]').html(), 'resource_id');
+    $('[name="instance-name"]').html(instance_name);
+
 });
 
 
